@@ -13,5 +13,6 @@ public class Flight {
 	private int duration;
 	
 	int deneme;
+	int deneme2;
 
 }
