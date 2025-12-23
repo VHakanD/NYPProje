@@ -12,7 +12,6 @@ public class Flight {
 	private int hour;
 	private int duration;
 	
-	int deneme;
-	int deneme2;
+	
 
 }
