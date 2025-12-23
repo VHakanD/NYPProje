@@ -1,5 +1,6 @@
 package flightManagement;
 
+
 import java.util.Date;
 
 public class Flight {
