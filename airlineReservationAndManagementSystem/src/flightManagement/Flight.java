@@ -12,6 +12,66 @@ public class Flight {
 	private int hour;
 	private int duration;
 	
+	public Flight(int flightNum, String departurePlace, String arrivalPlace, Date date, int hour, int duration) {
+		super();
+		this.flightNum = flightNum;
+		this.departurePlace = departurePlace;
+		this.arrivalPlace = arrivalPlace;
+		this.date = date;
+		this.hour = hour;
+		this.duration = duration;
+	}
+
+	public int getFlightNum() {
+		return flightNum;
+	}
+
+	public void setFlightNum(int flightNum) {
+		this.flightNum = flightNum;
+	}
+
+	public String getDeparturePlace() {
+		return departurePlace;
+	}
+
+	public void setDeparturePlace(String departurePlace) {
+		this.departurePlace = departurePlace;
+	}
+
+	public String getArrivalPlace() {
+		return arrivalPlace;
+	}
+
+	public void setArrivalPlace(String arrivalPlace) {
+		this.arrivalPlace = arrivalPlace;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public int getHour() {
+		return hour;
+	}
+
+	public void setHour(int hour) {
+		this.hour = hour;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+	
+	
+	
 	
 
 }
