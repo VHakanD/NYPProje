@@ -46,7 +46,6 @@ public class Plane {
 	
 	public void addSeat(Seat seat) {
 		this.seatMatrix.put(seat.getSeatNum(), seat);
-		for(Seat seat: seatMatrix.keySet())
 	}
 	
 	
