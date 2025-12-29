@@ -1,19 +1,19 @@
 package flightManagement;
 
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class Flight {
 	//flightNum, departurePlace, arrivalPlace, date, hour, duration
 	private int flightNum;
 	private String departurePlace;
 	private String arrivalPlace;
-	private Date date;
+	private LocalDateTime date;
 	private int hour;
 	private int duration;
 	//private Route route eklmemek mantıklı mı??
 	
-	public Flight(int flightNum, String departurePlace, String arrivalPlace, Date date, int hour, int duration) {
+	public Flight(int flightNum, String departurePlace, String arrivalPlace, LocalDateTime date, int hour, int duration) {
 		super();
 		this.flightNum = flightNum;
 		this.departurePlace = departurePlace;
@@ -43,11 +43,11 @@ public class Flight {
 		this.arrivalPlace = arrivalPlace;
 	}
 
-	public Date getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 
