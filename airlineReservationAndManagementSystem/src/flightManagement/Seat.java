@@ -20,10 +20,6 @@ public class Seat {
 		return seatNum;
 	}
 
-	public void setSeatNum(String seatNum) {
-		this.seatNum = seatNum;
-	}
-
 	public boolean isReserveStatus() {
 		return reserveStatus;
 	}
@@ -42,10 +38,6 @@ public class Seat {
 
 	public SeatType getSeatType() {
 		return seatType;
-	}
-
-	public void setSeatType(SeatType seatType) {
-		this.seatType = seatType;
 	}
 
 	

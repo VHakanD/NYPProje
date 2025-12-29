@@ -26,10 +26,6 @@ public class Flight {
 		return flightNum;
 	}
 
-	public void setFlightNum(int flightNum) {
-		this.flightNum = flightNum;
-	}
-
 	public String getDeparturePlace() {
 		return departurePlace;
 	}
