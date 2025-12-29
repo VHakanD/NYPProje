@@ -1,29 +1,42 @@
 package flightManagement;
 
-
 public class Seat {
-
-	public enum SeatType {
-    	ECONOMY,
-    	BUSINESS
-	}
-	/*seatNum (String, exp. "15A"), Class (Enum: ECONOMY, BUSINESS), price, reserveStatus (boolean).
-	private String seatNum;
-		enum için inner class mı kullanmamız gerekiyor?
-	private boolean reserveStatus;
-	*/
-	private String seatNum;
-	private SeatType type;
-	private double price;
-	private boolean reserveStatus;
 	
-	public Seat(String seatNum, SeatType type, double price) {
-		
-        this.seatNum = seatNum;
-        this.type = type;
-        this.price = price;
-        this.reserveStatus = false;
-        
+	public enum SeatType{ ECONOMY, BUSINESS} 
+	private String seatNum;
+	private boolean reserveStatus;
+	private double price;
+	private SeatType seatType;
+	
+	public Seat(String seatNum, double price, SeatType seatType) {
+		this.seatNum = seatNum;
+		this.reserveStatus = false;
+		this.price = price;
+		this.seatType = seatType;
+	}
+
+	public String getSeatNum() {
+		return seatNum;
+	}
+
+	public boolean isReserveStatus() {
+		return reserveStatus;
+	}
+
+	public void setReserveStatus(boolean reserveStatus) {
+		this.reserveStatus = reserveStatus;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public SeatType getSeatType() {
+		return seatType;
 	}
 	
 	public void reserved() {
@@ -48,19 +61,9 @@ public class Seat {
         }
     }
 	
-	public boolean isReserved() {
-        return reserveStatus;
-    }
-
-    public String getSeatNum() {
-        return seatNum;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-    
-    public SeatType getType() {
-        return type;
-    }
+	public String toString() {
+		String info = "Koltuk Türü: " + this.seatType + "\nKoltuk Numarası: " + this.seatNum +
+				 "\nÜcret:" + this.price + "\nRezervasyon Durumu: " + this.reserveStatus;
+		return info;
+	}
 }
