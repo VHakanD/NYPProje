@@ -11,7 +11,6 @@ public class Plane {
 	//hashmap mi kullansak daha iyi array mi?
 	
 	public Plane(String planeID, String planeModel, int capacity) {
-		super();
 		this.planeID = planeID;
 		this.planeModel = planeModel;
 		this.capacity = capacity;
@@ -47,6 +46,7 @@ public class Plane {
 	
 	public void addSeat(Seat seat) {
 		this.seatMatrix.put(seat.getSeatNum(), seat);
+		for(Seat seat: seatMatrix.keySet())
 	}
 	
 	
