@@ -4,11 +4,11 @@ import java.util.*;
 
 public class Plane {
 	//planeID, planeModel, capacity (int), seatMatrix (2D array or Map structure)
-	private String planeID;
-	private String planeModel;
-	private int capacity;
-	private HashMap<String, Seat> seatMatrix = new HashMap<>(); 
-	//hashmap mi kullansak daha iyi array mi?
+		private String planeID;
+		private String planeModel;
+		private int capacity;
+		private HashMap<String, Seat> seatMatrix = new HashMap<>(); 
+		//hashmap mi kullansak daha iyi array mi? 
 	
 	public Plane(String planeID, String planeModel, int capacity) {
 		this.planeID = planeID;

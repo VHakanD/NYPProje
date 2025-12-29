@@ -1,7 +1,7 @@
 package flightManagement;
 
 public class Seat {
-	//seatNum (String, exp. "15A"), Class (Enum: ECONOMY, BUSINESS), price, reserveStatus (boolean).
+	
 	public enum SeatType{ ECONOMY, BUSINESS} 
 	private String seatNum;
 	private boolean reserveStatus;
@@ -66,10 +66,4 @@ public class Seat {
 				 "\nÜcret:" + this.price + "\nRezervasyon Durumu: " + this.reserveStatus;
 		return info;
 	}
-
-	
-	
-	
-	
-
 }

@@ -1,7 +1,6 @@
 package flightManagement;
 
 public class Route {
-	//Departure/Arrival information
 	private String departureCity;
 	private String arrivalCity;
 	
