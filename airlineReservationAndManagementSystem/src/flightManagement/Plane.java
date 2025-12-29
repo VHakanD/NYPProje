@@ -50,5 +50,12 @@ public class Plane {
 	}
 	
 	
+	public String toString() {
+		String info = "Uçak Numarası: " + this.planeID + "\nUçak Modeli: " + this.planeModel
+				+ "\nKapasite: " + this.capacity + "\nUçağın Doluluk Durumu: " + this.seatMatrix.size() + "/" + this.capacity;
+		return info;
+	}
+	
+	
 
 }

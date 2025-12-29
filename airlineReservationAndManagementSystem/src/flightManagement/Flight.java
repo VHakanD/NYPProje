@@ -11,6 +11,7 @@ public class Flight {
 	private Date date;
 	private int hour;
 	private int duration;
+	//private Route route eklmemek mantıklı mı??
 	
 	public Flight(int flightNum, String departurePlace, String arrivalPlace, Date date, int hour, int duration) {
 		super();
@@ -66,6 +67,12 @@ public class Flight {
 		this.duration = duration;
 	}
 	
+	public String toString() {
+		String info = "Uçuş Numarası: " + this.flightNum + "\nKalkış Şehri: " + this.departurePlace
+				+ "\nVarış Şehri: " + this.arrivalPlace + "\nUçuş Tarihi - Saati: " + this.date + " - "
+				+ this.hour + "\nUçuş Süresi: " + this.duration;
+		return info;
+	}
 	
 	
 	
