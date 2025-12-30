@@ -1,52 +1,70 @@
 package flightManagement;
 
-public class Route {
-	private String departureCity;
-	private String arrivalCity;
-	private double distanceKm;
+public class Seat {
 	
-	public Route(String departureCity, String arrivalCity, double distanceKm) {
-		if (departureCity.equalsIgnoreCase(arrivalCity)) {
-            throw new IllegalArgumentException("Kalkış ve varış şehirleri aynı olamaz!");
+	public enum SeatType{ ECONOMY, BUSINESS} 
+	
+	private String seatNum;
+	private boolean reserveStatus;
+	private double price;
+	private SeatType seatType;
+	
+	public Seat(String seatNum, double price, SeatType seatType) {
+		this.seatNum = seatNum;
+		this.reserveStatus = false;
+		this.price = price;
+		this.seatType = seatType;
+	}
+
+	public String getSeatNum() {
+		return seatNum;
+	}
+
+	public boolean isReserveStatus() {
+		return reserveStatus;
+	}
+
+	public void setReserveStatus(boolean reserveStatus) {
+		this.reserveStatus = reserveStatus;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public SeatType getSeatType() {
+		return seatType;
+	}
+	
+	public void reserved() {
+        if (!this.reserveStatus) {
+        	
+            setReserveStatus(true);
+            System.out.println(seatNum + " numaralı koltuk rezerve edildi.");
+            
         }
-        
-        this.departureCity = departureCity;
-        this.arrivalCity = arrivalCity;
-        this.distanceKm = distanceKm;
-	}
-
-	public String getDepartureCity() {
-		return departureCity;
-	}
-
-	public String getArrivalCity() {
-		return arrivalCity;
-	}
+        else
+        {
+            System.out.println(seatNum + " dolu! işlem başarısız.");
+        }
+    }
 	
-	public double getDistanceKm() {
-		return distanceKm;
-	}
+	public void cancelReservation() {
+        if (this.reserveStatus) {
+        	
+            setReserveStatus(false);
+            System.out.println("Rezervasyon iptal edildi.");
+            
+        }
+    }
 	
 	public String toString() {
-		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity + " - Mesafe" + this.distanceKm; 
+		String info = "Koltuk Türü: " + this.seatType + "\nKoltuk Numarası: " + this.seatNum +
+				 "\nKoltuk Ücreti:" + this.price + "\nRezervasyon Durumu: " + this.reserveStatus;
+		return info;
 	}
-	
-	public boolean equals(Object comparedObject) {
-		if(this == comparedObject) {
-			return true;
-		}
-		
-		if(!(comparedObject instanceof Route)) {
-			return false;
-		}
-		
-		Route comparedRoute = (Route) comparedObject;
-		
-		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity) && this.distanceKm == comparedRoute.distanceKm) {
-			return true;
-		}
-		
-		return false;
-	}
-
 }
