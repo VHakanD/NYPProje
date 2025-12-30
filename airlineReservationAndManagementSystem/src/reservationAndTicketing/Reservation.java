@@ -1,6 +1,7 @@
 package reservationAndTicketing;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import flightManagement.Flight;
 import flightManagement.Seat;
@@ -39,6 +40,10 @@ public class Reservation {
 
 	public LocalDateTime getDateOfReservation() {
 		return dateOfReservation;
+	}
+	
+	public String generatePNR() {
+		return UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
 	}
 	
 	public String toString() {
