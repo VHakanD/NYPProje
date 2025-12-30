@@ -1,6 +1,6 @@
 package reservationAndTicketing;
 
-
+import flightManagement.Seat;
 
 public class Ticket {
 	//ticketID, Reservation object, price, baggageAllowance
@@ -16,7 +16,7 @@ public class Ticket {
 		this.price = price;
 		this.passengerBaggage = null;
 		
-		if(aReservation.getSeat().getSeatType().equals("BUSINESS")) {
+		if(aReservation.getSeat().getSeatType().equals(Seat.SeatType.BUSINESS)) {
 			this.baggageAllowance= 30;
 		}
 		else
