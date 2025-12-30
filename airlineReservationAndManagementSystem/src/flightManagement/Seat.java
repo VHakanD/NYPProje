@@ -64,7 +64,7 @@ public class Seat {
 	
 	public String toString() {
 		String info = "Koltuk Türü: " + this.seatType + "\nKoltuk Numarası: " + this.seatNum +
-				 "\nÜcret:" + this.price + "\nRezervasyon Durumu: " + this.reserveStatus;
+				 "\nKoltuk Ücreti:" + this.price + "\nRezervasyon Durumu: " + this.reserveStatus;
 		return info;
 	}
 }

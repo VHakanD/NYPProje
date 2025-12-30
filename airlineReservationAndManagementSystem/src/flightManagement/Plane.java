@@ -47,11 +47,59 @@ public class Plane {
 	public void addSeat(Seat seat) {
 		this.seatMatrix.put(seat.getSeatNum(), seat);
 	}
+
+	public boolean isValidSeat(String seatNum) {
+		if(seatMatrix.containsKey(seatNum)) {
+			return true;
+		}
+		
+		return false;
+	}
 	
+	public ArrayList<Seat> getSeatsByStatus(boolean status) {
+		ArrayList<Seat> filteredSeats = new ArrayList<>();
+		
+		for(Seat seat: seatMatrix.values()) {
+			if(seat.isReserveStatus() == status) {
+				filteredSeats.add(seat);
+			}
+		}
+		
+		return filteredSeats;
+	}
+	
+	public void printSeatMapToConsole() {
+	    char[] columns = {'A', 'B', 'C', 'D', 'E', 'F'};
+	    int totalRows = capacity / 6;
+
+	    for (int row = 1; row <= totalRows; row++) {
+	        System.out.print("Sıra " + String.format("%2d", row) + ": "); 
+
+	        for (char col : columns) {
+	            String seatKey = row + String.valueOf(col);
+
+	            
+	            Seat seat = seatMatrix.get(seatKey);
+
+	            
+	            if (seat != null) {
+	                String statusMark = seat.isReserveStatus() ? "[X]" : "[_]";
+	                
+	                System.out.print(seatKey + statusMark + " ");
+	            } else {
+	                System.out.print("HATA "); 
+	            }
+	        }
+	        
+	        System.out.println();
+	    }
+	}
 	
 	public String toString() {
-		String info = "Uçak Numarası: " + this.planeID + "\nUçak Modeli: " + this.planeModel
-				+ "\nKapasite: " + this.capacity + "\nUçağın Doluluk Durumu: " + this.seatMatrix.size() + "/" + this.capacity;
+		String info = "Uçak Numarası: " + this.planeID 
+				+ "\nUçak Modeli: " + this.planeModel
+				+ "\nKapasite: " + this.capacity 
+				+ "\nUçağın Doluluk Durumu: " + this.seatMatrix.size() + "/" + this.capacity;
 		return info;
 	}
 	

@@ -1,5 +1,6 @@
 package flightManagement;
 
+
 public class Route {
 	private String departureCity;
 	private String arrivalCity;
@@ -41,6 +42,19 @@ public class Route {
 		}
 		
 		return false;
+	}
+	
+	public boolean matches(String from, String to) {
+		if (from == null || to == null) 
+			return false;
+		
+		boolean isDepartureMatch = this.departureCity.toUpperCase()
+	            .contains(from.trim().toUpperCase());
+
+	    boolean isArrivalMatch = this.arrivalCity.toUpperCase()
+	            .contains(to.trim().toUpperCase());
+
+	    return isDepartureMatch && isArrivalMatch;
 	}
 
 }

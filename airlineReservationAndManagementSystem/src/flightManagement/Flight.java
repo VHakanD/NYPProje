@@ -15,7 +15,6 @@ public class Flight {
 	//private Route route eklemek mantıklı mı?? 
 	
 	public Flight(int flightNum, Route route, LocalDateTime date, int hour, int duration) {
-		super();
 		this.flightNum = flightNum;
 		//this.departurePlace = departurePlace;
 		//this.arrivalPlace = arrivalPlace;
