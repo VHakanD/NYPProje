@@ -24,5 +24,23 @@ public class Route {
 	public String toString() {
 		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity; 
 	}
+	
+	public boolean equals(Object comparedObject) {
+		if(this == comparedObject) {
+			return true;
+		}
+		
+		if(!(comparedObject instanceof Route)) {
+			return false;
+		}
+		
+		Route comparedRoute = (Route) comparedObject;
+		
+		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity)) {
+			return true;
+		}
+		
+		return false;
+	}
 
 }
