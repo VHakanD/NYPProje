@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public class Flight {
 	//flightNum, departurePlace, arrivalPlace, date, hour, duration
-	private int flightNum;
+	private String flightNum;
 	//private String departurePlace;
 	//private String arrivalPlace;
 	private LocalDateTime date;
@@ -14,7 +14,7 @@ public class Flight {
 	private Route route;
 	//private Route route eklemek mantıklı mı?? 
 	
-	public Flight(int flightNum, Route route, LocalDateTime date, int hour, int duration) {
+	public Flight(String flightNum, Route route, LocalDateTime date, int hour, int duration) {
 		this.flightNum = flightNum;
 		//this.departurePlace = departurePlace;
 		//this.arrivalPlace = arrivalPlace;
@@ -24,7 +24,7 @@ public class Flight {
 		this.duration = duration;
 	}
 
-	public int getFlightNum() {
+	public String getFlightNum() {
 		return flightNum;
 	}
 
