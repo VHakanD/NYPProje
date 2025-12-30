@@ -1,6 +1,6 @@
 package reservationAndTicketing;
 
-
+import flightManagement.Seat;
 
 public class Ticket {
 	//ticketID, Reservation object, price, baggageAllowance
