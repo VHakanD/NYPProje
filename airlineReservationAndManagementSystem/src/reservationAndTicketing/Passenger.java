@@ -34,6 +34,13 @@ public class Passenger {
 		return surname;
 	}
 	
+	public boolean isValidNumber() {
+		if(contactInfo.length() == 11 && contactInfo.contains("05")) {
+			return true;
+		}
+		return false;
+	}
+	
 	public String toString() {
 		String info = "İsim: " + this.name + " " + this.surname + "YolcuID: " + this.passengerID + "Telefon Numarası: " + this.contactInfo;
 		return info;

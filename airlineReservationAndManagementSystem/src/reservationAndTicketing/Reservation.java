@@ -41,6 +41,9 @@ public class Reservation {
 		return dateOfReservation;
 	}
 	
-	
+	public String toString() {
+		String info = "PNR: " + this.reservationCode + "Uçuş: " + this.flight.toString() + "Yolcu: " + this.passenger.toString() + "Koltuk: " + this.seat.toString() + "Uçuş Saati: " + dateOfReservation;
+		return info;
+	}
 
 }

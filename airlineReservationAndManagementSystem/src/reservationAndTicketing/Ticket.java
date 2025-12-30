@@ -72,8 +72,18 @@ public class Ticket {
 		{
 			return 0.0;	
 		}
-		
 	}
+	public double calculateExcessFee() {
+		if(passengerBaggage == null) {
+			return 0.0;
+		}
+		double extraWeight = this.excessWeight() ;
+		if(extraWeight > 0) {
+			return extraWeight * 50.0 ;
+		}
+		return 0.0;
+	}
+	
 	public String toString() {
 		String info = "Bilet Numarası: " + this.ticketId + " " + this.aReservation.toString() 
 					+ "Bilet Ücreti: " + this.price + "Bagaj Ekstrası: " + excessWeight() ;
