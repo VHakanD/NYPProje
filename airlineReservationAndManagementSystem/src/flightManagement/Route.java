@@ -51,10 +51,10 @@ public class Route {
 		boolean isDepartureMatch = this.departureCity.toUpperCase()
 	            .contains(from.trim().toUpperCase());
 
+
 	    boolean isArrivalMatch = this.arrivalCity.toUpperCase()
 	            .contains(to.trim().toUpperCase());
 
 	    return isDepartureMatch && isArrivalMatch;
 	}
-
 }
