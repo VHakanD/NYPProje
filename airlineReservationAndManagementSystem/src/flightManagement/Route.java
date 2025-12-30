@@ -4,6 +4,7 @@ package flightManagement;
 public class Route {
 	private String departureCity;
 	private String arrivalCity;
+	private double distanceKm;
 	
 	public Route(String departureCity, String arrivalCity) {
 		if (departureCity.equalsIgnoreCase(arrivalCity)) {
