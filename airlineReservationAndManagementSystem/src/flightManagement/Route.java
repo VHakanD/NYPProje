@@ -42,11 +42,23 @@ public class Route {
 		
 		Route comparedRoute = (Route) comparedObject;
 		
-		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity) && this.distanceKm == comparedRoute.distanceKm) {
+		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity)) {
 			return true;
 		}
 		
 		return false;
 	}
+	
+	public boolean matches(String from, String to) {
+		if (from == null || to == null) 
+			return false;
+		
+		boolean isDepartureMatch = this.departureCity.toUpperCase()
+	            .contains(from.trim().toUpperCase());
 
+	    boolean isArrivalMatch = this.arrivalCity.toUpperCase()
+	            .contains(to.trim().toUpperCase());
+
+	    return isDepartureMatch && isArrivalMatch;
+	}
 }
