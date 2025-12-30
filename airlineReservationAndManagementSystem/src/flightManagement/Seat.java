@@ -43,7 +43,7 @@ public class Seat {
 	public void reserved() {
         if (!this.reserveStatus) {
         	
-            this.reserveStatus = true;
+            setReserveStatus(true);
             System.out.println(seatNum + " numaralı koltuk rezerve edildi.");
             
         }
@@ -56,7 +56,7 @@ public class Seat {
 	public void cancelReservation() {
         if (this.reserveStatus) {
         	
-            this.reserveStatus = false;
+            setReserveStatus(false);
             System.out.println("Rezervasyon iptal edildi.");
             
         }

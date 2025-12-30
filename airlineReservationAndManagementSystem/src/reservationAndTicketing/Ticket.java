@@ -8,8 +8,7 @@ public class Ticket {
 	private double baggageAllowance;
 	private Baggage passengerBaggage;
 	
-	public Ticket(String ticketId, Reservation aReservation, double price, double baggageAllowance,
-			Baggage passengerBaggage) {
+	public Ticket(String ticketId, Reservation aReservation, double price, double baggageAllowance, Baggage passengerBaggage) {
 		this.ticketId = ticketId;
 		this.aReservation = aReservation;
 		this.price = price;

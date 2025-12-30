@@ -6,18 +6,20 @@ import java.time.LocalDateTime;
 public class Flight {
 	//flightNum, departurePlace, arrivalPlace, date, hour, duration
 	private int flightNum;
-	private String departurePlace;
-	private String arrivalPlace;
+	//private String departurePlace;
+	//private String arrivalPlace;
 	private LocalDateTime date;
 	private int hour;
 	private int duration;
-	//private Route route eklmemek mantıklı mı??
+	private Route route;
+	//private Route route eklemek mantıklı mı?? 
 	
-	public Flight(int flightNum, String departurePlace, String arrivalPlace, LocalDateTime date, int hour, int duration) {
+	public Flight(int flightNum, Route route, LocalDateTime date, int hour, int duration) {
 		super();
 		this.flightNum = flightNum;
-		this.departurePlace = departurePlace;
-		this.arrivalPlace = arrivalPlace;
+		//this.departurePlace = departurePlace;
+		//this.arrivalPlace = arrivalPlace;
+		this.route = route;
 		this.date = date;
 		this.hour = hour;
 		this.duration = duration;
@@ -27,20 +29,8 @@ public class Flight {
 		return flightNum;
 	}
 
-	public String getDeparturePlace() {
-		return departurePlace;
-	}
-
-	public void setDeparturePlace(String departurePlace) {
-		this.departurePlace = departurePlace;
-	}
-
-	public String getArrivalPlace() {
-		return arrivalPlace;
-	}
-
-	public void setArrivalPlace(String arrivalPlace) {
-		this.arrivalPlace = arrivalPlace;
+	public Route getRoute() {
+		return route;
 	}
 
 	public LocalDateTime getDate() {
@@ -68,8 +58,7 @@ public class Flight {
 	}
 	
 	public String toString() {
-		String info = "Uçuş Numarası: " + this.flightNum + "\nKalkış Şehri: " + this.departurePlace
-				+ "\nVarış Şehri: " + this.arrivalPlace + "\nUçuş Tarihi - Saati: " + this.date + " - "
+		String info = "Uçuş Numarası: " + this.flightNum + "\nRota: " + this.route.toString()  + "\nUçuş Tarihi - Saati: " + this.date + " - "
 				+ this.hour + "\nUçuş Süresi: " + this.duration;
 		return info;
 	}
