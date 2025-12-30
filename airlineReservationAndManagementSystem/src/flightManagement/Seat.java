@@ -3,7 +3,7 @@ package flightManagement;
 public class Seat {
 	
 	public enum SeatType{ ECONOMY, BUSINESS} 
-	
+	//%10 business olacak şekilde ayarla
 	private String seatNum;
 	private boolean reserveStatus;
 	private double price;
@@ -12,8 +12,8 @@ public class Seat {
 	public Seat(String seatNum, double price, SeatType seatType) {
 		this.seatNum = seatNum;
 		this.reserveStatus = false;
-		this.price = price;
 		this.seatType = seatType;
+		price = 1000;
 	}
 
 	public String getSeatNum() {

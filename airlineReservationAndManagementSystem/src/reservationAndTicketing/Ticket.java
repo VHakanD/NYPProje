@@ -74,5 +74,10 @@ public class Ticket {
 		}
 		
 	}
+	public String toString() {
+		String info = "Bilet Numarası: " + this.ticketId + " " + this.aReservation.toString() 
+					+ "Bilet Ücreti: " + this.price + "Bagaj Ekstrası: " + excessWeight() ;
+		
+	}
 
 }

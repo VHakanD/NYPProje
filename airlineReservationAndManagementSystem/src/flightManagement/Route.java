@@ -3,14 +3,16 @@ package flightManagement;
 public class Route {
 	private String departureCity;
 	private String arrivalCity;
+	private double distanceKm;
 	
-	public Route(String departureCity, String arrivalCity) {
+	public Route(String departureCity, String arrivalCity, double distanceKm) {
 		if (departureCity.equalsIgnoreCase(arrivalCity)) {
             throw new IllegalArgumentException("Kalkış ve varış şehirleri aynı olamaz!");
         }
         
         this.departureCity = departureCity;
         this.arrivalCity = arrivalCity;
+        this.distanceKm = distanceKm;
 	}
 
 	public String getDepartureCity() {
@@ -21,8 +23,12 @@ public class Route {
 		return arrivalCity;
 	}
 	
+	public double getDistanceKm() {
+		return distanceKm;
+	}
+	
 	public String toString() {
-		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity; 
+		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity + " - Mesafe" + this.distanceKm; 
 	}
 	
 	public boolean equals(Object comparedObject) {
@@ -36,7 +42,7 @@ public class Route {
 		
 		Route comparedRoute = (Route) comparedObject;
 		
-		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity)) {
+		if(this.arrivalCity.equalsIgnoreCase(comparedRoute.arrivalCity) && this.departureCity.equalsIgnoreCase(comparedRoute.departureCity) && this.distanceKm == comparedRoute.distanceKm) {
 			return true;
 		}
 		

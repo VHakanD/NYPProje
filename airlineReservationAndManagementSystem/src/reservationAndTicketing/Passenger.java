@@ -34,5 +34,8 @@ public class Passenger {
 		return surname;
 	}
 	
-
+	public String toString() {
+		String info = "İsim: " + this.name + " " + this.surname + "YolcuID: " + this.passengerID + "Telefon Numarası: " + this.contactInfo;
+		return info;
+	}
 }

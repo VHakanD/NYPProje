@@ -12,5 +12,9 @@ public class Baggage {
 	public double getWeight() {
 		return weight;
 	}
+	
+	public String toString() {
+		return "Bagaj Ağırlığı: " + this.weight;
+	}
 
 }
