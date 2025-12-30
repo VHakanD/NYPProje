@@ -1,5 +1,7 @@
 package reservationAndTicketing;
 
+
+
 public class Ticket {
 	//ticketID, Reservation object, price, baggageAllowance
 	private String ticketId;
@@ -8,13 +10,19 @@ public class Ticket {
 	private double baggageAllowance;
 	private Baggage passengerBaggage;
 	
-	public Ticket(String ticketId, Reservation aReservation, double price, double baggageAllowance,
-			Baggage passengerBaggage) {
+	public Ticket(String ticketId, Reservation aReservation, double price) {
 		this.ticketId = ticketId;
 		this.aReservation = aReservation;
 		this.price = price;
-		this.baggageAllowance = baggageAllowance;
-		this.passengerBaggage = passengerBaggage;
+		this.passengerBaggage = null;
+		
+		if(aReservation.getSeat().getSeatType().equals("BUSINESS")) {
+			this.baggageAllowance= 30;
+		}
+		else
+		{
+			this.baggageAllowance = 15;
+		}
 	}
 
 	public String getTicketId() {
@@ -53,6 +61,18 @@ public class Ticket {
 		this.passengerBaggage = passengerBaggage;
 	}
 	
-	
+	public double excessWeight() {
+		if(this.passengerBaggage == null) {
+			return 0.0;
+		}
+		if(this.passengerBaggage.getWeight()> this.baggageAllowance) {
+			return this.passengerBaggage.getWeight() - baggageAllowance;
+		}
+		else
+		{
+			return 0.0;	
+		}
+		
+	}
 
 }
