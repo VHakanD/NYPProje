@@ -1,5 +1,6 @@
 package servicesAndManagers;
 
+import java.io.*;
 import java.util.ArrayList;
 
 import flightManagement.Flight;
@@ -7,10 +8,42 @@ import flightManagement.Flight;
 public class FlightManager {
 	//Creating new flights, updating/deleting existing flights.
 	private ArrayList<Flight> flights;
+	private final String FILE_NAME = "flights.txt";
 	
 	public FlightManager() {
 		this.flights = new ArrayList<>();
+		loadFlights();
 	}
+	
+	private void loadFlights() {
+		File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if(!line.trim().isEmpty()) {
+                    Flight f = Flight.fromFileFormat(line);
+                    flights.add(f);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Dosya okuma hatası: " + e.getMessage());
+        }
+	}
+	
+	private void saveFlights() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (Flight f : flights) {
+                writer.write(f.toFileFormat());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Dosya yazma hatası: " + e.getMessage());
+        }
+    }
 	
 	public void addFlight(Flight flight) {
 		if(!(flights.contains(flight))) {
@@ -20,6 +53,7 @@ public class FlightManager {
 			System.out.println(flight.getFlightNum()
 					+ " numaralı uçuş zaten var, ekleme yapılmadı!");
 		}
+		saveFlights();
 	}
 	
 	public void deleteFlight(Flight flight) {
@@ -29,6 +63,7 @@ public class FlightManager {
 		}else {
 			System.out.println(flight.getFlightNum() + " numaralı uçuş bulunamadı!");
 		}
+		saveFlights();
 	}
 	
 	public void listAllFlights() {
@@ -58,7 +93,7 @@ public class FlightManager {
 			if(aFlight != null && aFlight.getFlightNum().equals(flight.getFlightNum())) {
 				aFlight.setDate(flight.getDate());
 				aFlight.setDuration(flight.getDuration());
-				aFlight.setHour(flight.getHour());
+				saveFlights();
 				return true;
 			}
 		}

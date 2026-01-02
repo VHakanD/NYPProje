@@ -19,9 +19,17 @@ public class Route {
 	public String getDepartureCity() {
 		return departureCity;
 	}
+	
+	public void setDepartureCity(String departureCity) {
+		this.departureCity = departureCity;
+	}
 
 	public String getArrivalCity() {
 		return arrivalCity;
+	}
+	
+	public void setArrivalCity(String arrivalCity) {
+		this.arrivalCity = arrivalCity;
 	}
 	
 	public double getDistanceKm() {
