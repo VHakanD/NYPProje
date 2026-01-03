@@ -1,5 +1,6 @@
 package flightManagement;
 
+
 import java.util.*;
 
 public class Plane {
@@ -60,7 +61,7 @@ public class Plane {
 		ArrayList<Seat> filteredSeats = new ArrayList<>();
 		
 		for(Seat seat: seatMatrix.values()) {
-			if(seat.isReserveStatus() == status) {
+			if(seat.isReserved() == status) {
 				filteredSeats.add(seat);
 			}
 		}
@@ -83,7 +84,7 @@ public class Plane {
 
 	            
 	            if (seat != null) {
-	                String statusMark = seat.isReserveStatus() ? "[X]" : "[_]";
+	                String statusMark = seat.isReserved() ? "[X]" : "[_]";
 	                
 	                System.out.print(seatKey + statusMark + " ");
 	            } else {

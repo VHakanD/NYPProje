@@ -9,7 +9,7 @@ public class Seat {
 	private double price;
 	private SeatType seatType;
 	
-	public Seat(String seatNum, double price, SeatType seatType) {
+	public Seat(String seatNum, SeatType seatType) {
 		this.seatNum = seatNum;
 		this.reserveStatus = false;
 		this.seatType = seatType;
@@ -20,7 +20,7 @@ public class Seat {
 		return seatNum;
 	}
 
-	public boolean isReserveStatus() {
+	public boolean isReserved() {
 		return reserveStatus;
 	}
 
