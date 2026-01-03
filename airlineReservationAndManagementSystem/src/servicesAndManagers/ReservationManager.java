@@ -17,12 +17,14 @@ public class ReservationManager {
 	private List<Reservation> reservations;
     private FlightManager flightManager; 
     private List<Passenger> passengers;
+    private CalculatePrice priceCalculator;
     private final String FILE_NAME = "reservations.txt";
     
     public ReservationManager(FlightManager flightManager, List<Passenger> passengers) {
         this.flightManager = flightManager;
         this.passengers = passengers;
         this.reservations = new ArrayList<>();
+        this.priceCalculator = new CalculatePrice();
         loadReservations();
     }
     
@@ -199,9 +201,12 @@ public class ReservationManager {
     
     public Ticket generateTicket(Reservation res) {
 
-        double price = CalculatePrice.calculateTotalPayment(res.getSeat(), res.getPassenger());
+    	double basePrice = priceCalculator.calculateTicketPrice(res);
 
-        Ticket ticket = new Ticket(res, price);
+        Ticket ticket = new Ticket(res, basePrice);
+        
+        double totalPayment = priceCalculator.calculateTotalPayment(ticket);
+        ticket.setPrice(totalPayment);
 
         saveTicketToFile(ticket);
 
