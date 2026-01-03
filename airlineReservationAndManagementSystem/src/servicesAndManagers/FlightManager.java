@@ -15,6 +15,10 @@ public class FlightManager {
 		loadFlights();
 	}
 	
+	public ArrayList<Flight> getFlights() {
+		return flights;
+	}
+
 	private void loadFlights() {
 		File file = new File(FILE_NAME);
         if (!file.exists()) {

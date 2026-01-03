@@ -20,6 +20,10 @@ public class Plane {
 	public String getPlaneID() {
 		return planeID;
 	}
+	
+	public void setPlaneID(String planeID) {
+		this.planeID = planeID;
+	}
 
 	public String getPlaneModel() {
 		return planeModel;
