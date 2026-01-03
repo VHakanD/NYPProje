@@ -13,7 +13,7 @@ public class Seat {
 		this.seatNum = seatNum;
 		this.reserveStatus = false;
 		this.seatType = seatType;
-		price = 1000;
+		price = 1;
 	}
 
 	public String getSeatNum() {
@@ -30,10 +30,6 @@ public class Seat {
 
 	public double getPrice() {
 		return price;
-	}
-
-	public void setPrice(double price) {
-		this.price = price;
 	}
 
 	public SeatType getSeatType() {

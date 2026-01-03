@@ -42,14 +42,10 @@ public class SeatManager {
 		return availableSeats.size();
 	}
 	
-	public boolean isValidSeat(Plane plane, String seatNum) {
-		if (seatNum == null || seatNum.isEmpty()) {
-            return false;
-        }
-		
-		return plane.hasSeat(seatNum);
+	public void checkExistingSeats(Plane plane, String seatNum) throws IllegalArgumentException {
+		if(seatNum == null || seatNum.isEmpty() || !plane.hasSeat(seatNum)) {
+			throw new IllegalArgumentException("Hata: " + seatNum + " numaralı koltuk uçakta bulunamadı!");
+		}
 	}
-	
-	
 
 }
