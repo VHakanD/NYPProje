@@ -11,17 +11,16 @@ public class Flight {
 	private String hour;
 	private int duration;
 	private Route route;
-	private String planeID;
+	private Plane plane;
 	
 	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     private static final DateTimeFormatter TIME_ONLY_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 	
-	public Flight(String flightNum, Route route, LocalDateTime date, int duration, String planeID) {
+	public Flight(String flightNum, Route route, LocalDateTime date, int duration) {
 		this.flightNum = flightNum;
 		this.route = route;
 		this.setDate(date);
 		this.duration = duration;
-		this.planeID = planeID;
 	}
 	
 	public Flight() {
@@ -70,13 +69,10 @@ public class Flight {
 		this.route = route;
 	}
 	
-	public String getPlaneID() {
-		return this.planeID;
-	}
-	
-	public void setPlaneID(String planeID) {
-		this.planeID = planeID;
-	}
+	public Plane getPlane() { return plane; }
+    public void setPlane(Plane plane) {
+    	this.plane = plane;
+    }
 
 	
 	public String toFileFormat() {
@@ -84,7 +80,7 @@ public class Flight {
 		
 		return this.flightNum + "," + this.route.getDepartureCity() + "," +
 				this.route.getArrivalCity() + "," + dateStr + "," + this.hour + "," + 
-				this.duration + "," + this.planeID;
+				this.duration + "," + this.plane.getPlaneID();
 	}
 	
 	public static Flight fromFileFormat(String line) {
@@ -101,7 +97,7 @@ public class Flight {
         }
 		
 		flight.setDuration(Integer.parseInt(data[5]));
-		flight.setPlaneID(data[6]);
+		flight.plane.setPlaneID(data[6]);
 		
 		return flight;
 	}

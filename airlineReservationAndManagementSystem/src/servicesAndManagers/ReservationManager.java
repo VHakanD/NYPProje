@@ -1,6 +1,212 @@
 package servicesAndManagers;
 
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+import flightManagement.Flight;
+import flightManagement.Plane;
+import flightManagement.Seat;
+import reservationAndTicketing.Passenger;
+import reservationAndTicketing.Reservation;
+import reservationAndTicketing.Ticket;
+
 public class ReservationManager {
 	//Making and canceling reservations. Concurrency will apply here.
+	private List<Reservation> reservations;
+    private FlightManager flightManager; 
+    private List<Passenger> passengers;
+    private final String FILE_NAME = "reservations.txt";
+    
+    public ReservationManager(FlightManager flightManager, List<Passenger> passengers) {
+        this.flightManager = flightManager;
+        this.passengers = passengers;
+        this.reservations = new ArrayList<>();
+        loadReservations();
+    }
+    
+    private void loadReservations() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                   
+                    Reservation r = Reservation.fromFileFormat(line, flightManager, passengers);
+                    
+                    if (r != null) {
+                        reservations.add(r);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Okuma hatası: " + e.getMessage());
+        }   
+        
+    }
+    
+    private void saveReservations() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            
+            for (Reservation r : reservations) {
+                String line = r.toFileFormat();
+                
+                writer.write(line);
+                
+                writer.newLine();
+            }
+            
+        } catch (IOException e) {
+            System.out.println("Dosya yazma hatası oluştu: " + e.getMessage());
+        }
+    }
+    
+    private void saveTicketToFile(Ticket ticket) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("tickets.txt", true))) { 
+            writer.write(ticket.toFileFormat());
+            writer.newLine();
+        } catch (IOException e) {
+            System.out.println("Bilet kaydedilemedi: " + e.getMessage());
+        }
+    }
+    
+    public Reservation findReservationByCode(String reservationCode) {
+    	int i = 0;
+        boolean found = false;
+        Reservation foundRes = null;
+        
+        while(i < reservations.size() && !found) {
+        	if(reservations.get(i) != null && reservations.get(i).getReservationCode().equals(reservationCode)) {
+        		foundRes = reservations.get(i);
+        		found = true;
+        	}
+        	i++;
+        }
+        
+        return foundRes;
+    }
+    
+    public ArrayList<Reservation> getReservationsByPassenger(String passengerID){
+    	ArrayList<Reservation> passengersReservations = new ArrayList<>();
+    	
+    	for(Reservation res: reservations) {
+    		if(res != null && res.getPassenger().getPassengerID().equals(passengerID)) {
+    			passengersReservations.add(res);
+    		}
+    	}
+    	
+    	return passengersReservations;
+    }
+    
+    public ArrayList<Reservation> getReservationsByFlight(String flightNum){
+    	ArrayList<Reservation> flightsReservations = new ArrayList<>();
+    	
+    	for(Reservation res: reservations) {
+    		if(res != null && res.getFlight().getFlightNum().equals(flightNum)) {
+    			flightsReservations.add(res);
+    		}
+    	}
+    	
+    	return flightsReservations;
+    }
+    
+    public double calculateOccupancyRate(Flight flight) {
+    	return 0.0;
+    }
+    
+    public boolean hasPassengerAlreadyBooked(String flightNum, String passengerID) {
+    	boolean found = false;
+        int i = 0;
+        
+        while(i < reservations.size() && !found) {
+        	if(reservations.get(i) != null && 
+        			reservations.get(i).getFlight().getFlightNum().equals(flightNum) &&
+        			reservations.get(i).getPassenger().getPassengerID().equals(passengerID)) {
+        		found = true;
+        	}
+        	i++;
+        }
+    	
+    	return found;
+    }
+    
+    public synchronized boolean makeReservation(Flight flight, Passenger passenger, String seatNum) {
+    	
+    	saveReservations();
+    	return false;
+    }
+    
+    public boolean changeSeat(String resCode, String newSeatNum) {
+    	Reservation res = findReservationByCode(resCode);
+        if (res == null) return false;
+        
+        Plane plane = res.getFlight().getPlane();
+        Seat newSeat = plane.getSeatMatrix().get(newSeatNum);
+
+        if (newSeat == null || newSeat.isReserved()) {
+            System.out.println("Yeni koltuk müsait değil.");
+            return false;
+        }
+
+        res.getSeat().setReserveStatus(false);
+        
+        newSeat.setReserveStatus(true);
+        
+        res.setSeat(newSeat);
+
+        saveReservations();
+        return true;
+    }
+    
+    public boolean cancelReservation(String reservationCode) {
+    	Reservation targetRes = this.findReservationByCode(reservationCode);
+    	
+        if (targetRes == null) {
+            System.out.println("Hata: Rezervasyon bulunamadı.");
+            return false;
+        }
+        
+        LocalDateTime flightDate = targetRes.getFlight().getDate(); 
+        LocalDateTime now = LocalDateTime.now();
+        
+        long hoursUntilFlight = ChronoUnit.HOURS.between(now, flightDate);
+        
+        if(hoursUntilFlight < 0) {
+        	System.out.println("Hata: Uçuş zaten gerçekleşmiş!" +
+                    "İptal işlemi yapılamaz.");
+        	return false;
+        }
+        
+        if (hoursUntilFlight < 24) {
+            System.out.println("Hata: Uçuşa " + hoursUntilFlight + " saat kaldı. " +
+                               "Son 24 saat kala iptal işlemi yapılamaz.");
+            return false;
+        }
+        
+        Seat seat = targetRes.getSeat();
+        if (seat != null) {
+            seat.setReserveStatus(false);
+        }
+        
+        reservations.remove(targetRes);
+        
+        saveReservations();
+        
+        System.out.println("Başarılı: Rezervasyon iptal edildi. Ücret iadesi başlatılıyor...");
+        return true;
+    }
+    
+    
+    public Ticket generateTicket(Reservation res) {
+
+        double price = CalculatePrice.calculateTotalPayment(res.getSeat(), res.getPassenger());
+
+        Ticket ticket = new Ticket(res, price);
+
+        saveTicketToFile(ticket);
+
+        return ticket;
+
+    } 
 
 }

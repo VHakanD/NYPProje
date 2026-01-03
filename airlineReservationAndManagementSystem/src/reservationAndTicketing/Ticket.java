@@ -1,17 +1,19 @@
 package reservationAndTicketing;
 
+import java.util.UUID;
+
 import flightManagement.Seat;
 
 public class Ticket {
 	//ticketID, Reservation object, price, baggageAllowance
-	private String ticketId;
+	private String ticketID;
 	private Reservation aReservation;
 	private double price;
 	private double baggageAllowance;
 	private Baggage passengerBaggage;
 	
-	public Ticket(String ticketId, Reservation aReservation, double price) {
-		this.ticketId = ticketId;
+	public Ticket(Reservation aReservation, double price) {
+		this.ticketID = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 		this.aReservation = aReservation;
 		this.price = price;
 		this.passengerBaggage = null;
@@ -24,9 +26,16 @@ public class Ticket {
 			this.baggageAllowance = 15;
 		}
 	}
+	
+	public String toFileFormat() {
+        return ticketID + "," + 
+               aReservation.getReservationCode() + "," + 
+               price + "," + 
+               baggageAllowance;
+    }
 
-	public String getTicketId() {
-		return ticketId;
+	public String getTicketID() {
+		return ticketID;
 	}
 
 	public Reservation getaReservation() {
@@ -85,7 +94,7 @@ public class Ticket {
 	}
 	
 	public String toString() {
-		String info = "Bilet Numarası: " + this.ticketId + " " + this.aReservation.toString() 
+		String info = "Bilet Numarası: " + this.ticketID + " " + this.aReservation.toString() 
 					+ "Bilet Ücreti: " + this.price + "Bagaj Ekstrası: " + excessWeight() ;
 		return info;
 	}
