@@ -7,13 +7,11 @@ import flightManagement.Seat;
 
 public class SeatManager {
 	//It creates the seating arrangements on the plane and calculates the number of available seats.
-	private Plane plane;
 	
-	public SeatManager(Plane plane) {
-		this.plane = plane;
+	public SeatManager() {
 	}
 	
-	public void seatingArrangements() {
+	public void seatingArrangements(Plane plane) {
 		if (!plane.getSeatMatrix().isEmpty()) return;
 		
 		char[] columns = {'A', 'B', 'C', 'D', 'E', 'F'};
@@ -38,14 +36,18 @@ public class SeatManager {
 		}
 	}
 	
-	public int availableSeats() {
+	public int availableSeatCount(Plane plane) {
 		ArrayList<Seat> availableSeats = new ArrayList<>();
 		availableSeats = plane.getSeatsByStatus(false);
 		return availableSeats.size();
 	}
 	
-	public boolean bookSeat(String flightNum, String seatNum, String passengerName) {
-		return false;
+	public boolean isValidSeat(Plane plane, String seatNum) {
+		if (seatNum == null || seatNum.isEmpty()) {
+            return false;
+        }
+		
+		return plane.hasSeat(seatNum);
 	}
 	
 	

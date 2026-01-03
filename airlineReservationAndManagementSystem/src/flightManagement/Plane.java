@@ -49,12 +49,8 @@ public class Plane {
 		this.seatMatrix.put(seat.getSeatNum(), seat);
 	}
 
-	public boolean isValidSeat(String seatNum) {
-		if(seatMatrix.containsKey(seatNum)) {
-			return true;
-		}
-		
-		return false;
+	public boolean hasSeat(String seatNum) {
+		return seatMatrix.containsKey(seatNum);
 	}
 	
 	public ArrayList<Seat> getSeatsByStatus(boolean status) {
