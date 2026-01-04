@@ -106,7 +106,7 @@ public class SeatSelectionView {
 
         if (result.isPresent()) {
             // Geçici Yolcu Oluştur (Sizin Passenger constructor'a uygun)
-            Passenger passenger = new Passenger("12345678901", result.get(), "Yilmaz", "05554443322");
+            //Passenger passenger = new Passenger("12345678901", result.get(), "Yilmaz", "05554443322");
             
             
             //plane'in içini doldurmamız lazım

@@ -111,10 +111,12 @@ public class MainApp extends Application{
         primaryStage.centerOnScreen();
     }
 
-    public void showUserSearchScreen() {
+    public void showUserSearchScreen(String username) {
         UserSearchView userView = new UserSearchView(this, flightManager, reservationManager);
         Scene scene = new Scene(userView.getView(), 1000, 700);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Yolcu Uçuş Arama");
+        primaryStage.centerOnScreen();
     }
 
     

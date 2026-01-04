@@ -106,7 +106,7 @@ public class LoginView {
             // Gerçek senaryoda passengerList içinde ID kontrolü yapılabilir.
             // Şimdilik herkesi kabul ediyoruz.
             System.out.println("Yolcu girişi: " + username);
-            mainApp.showUserSearchScreen(); // Yolcu ekranına geç
+            mainApp.showUserSearchScreen(username); // Yolcu ekranına geç
         }
     }
 

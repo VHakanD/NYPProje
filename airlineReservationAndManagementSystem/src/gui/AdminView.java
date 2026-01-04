@@ -75,60 +75,18 @@ public class AdminView {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
+        Label lblUser = new Label("Aktif Yönetici: " + adminUsername.toUpperCase());
+        lblUser.setStyle("-fx-text-fill: #555; -fx-font-style: italic; -fx-font-weight: bold;");
+        
         Button btnBack = new Button("← Ana Menüye Dön");
+        btnBack.setStyle("-fx-base: #f0f0f0;");
         btnBack.setOnAction(e -> mainApp.showAdminDashboard(adminUsername));
         
         HBox topMenu = new HBox(15, lblTitle, spacer, btnBack);
         topMenu.setAlignment(Pos.CENTER_LEFT);
-        topMenu.setPadding(new Insets(0, 0, 10, 0));
+        topMenu.setPadding(new Insets(0, 0, 15, 0));
         return topMenu;
     }
-    
-
-    /*public Parent getView() {
-        BorderPane layout = new BorderPane();
-        layout.setPadding(new Insets(20));
-
-        
-        Label lblTitle = new Label("Yönetici Paneli");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-
-        // 2. Araya Esnek Boşluk (Spacer)
-        // Bu eleman, sol ve sağ arasındaki tüm boşluğu kaplar ve diğerlerini iter.
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // 3. Sağ Taraf: Kullanıcı Bilgisi ve Çıkış Butonu
-        Label lblUser = new Label("Aktif Kullanıcı: " + adminUsername.toUpperCase());
-        lblUser.setStyle("-fx-text-fill: #555; -fx-font-style: italic;");
-        
-        
-        Button btnLogout = new Button("Çıkış Yap");
-        btnLogout.setOnAction(e -> mainApp.showLoginScreen());
-        
-        HBox topMenu = new HBox(15, lblTitle, spacer, lblUser, btnLogout);
-        topMenu.setAlignment(Pos.CENTER_LEFT);
-        topMenu.setPadding(new Insets(0, 0, 20, 0));
-        
-        layout.setTop(topMenu);
-        
-        
-        
-        TabPane tabPane = new TabPane();
-
-        Tab flightTab = new Tab("Uçuş İşlemleri");
-        flightTab.setContent(createFlightContent()); 
-        flightTab.setClosable(false);
-
-        Tab staffTab = new Tab("Personel İşlemleri");
-        staffTab.setContent(createStaffContent()); // Güncellenen metod çağrılıyor
-        staffTab.setClosable(false);
-
-        tabPane.getTabs().addAll(flightTab, staffTab);
-        layout.setCenter(tabPane);
-
-        return layout;
-    }*/
     
     private VBox createStaffContent() {
         VBox layout = new VBox(10);
@@ -155,7 +113,11 @@ public class AdminView {
         TableColumn<Staff, String> colPass = new TableColumn<>("Şifre");
         colPass.setCellValueFactory(new PropertyValueFactory<>("password"));
 
-        staffTable.getColumns().addAll(colName, colSurname, colContact, colRole, colPass);
+        staffTable.getColumns().add(colName);
+        staffTable.getColumns().add(colSurname);
+        staffTable.getColumns().add(colContact);
+        staffTable.getColumns().add(colRole);
+        staffTable.getColumns().add(colPass);
 
         // 2. Form Alanları (Yeni Staff Constructor yapısına uygun)
         HBox formBox = new HBox(10);
@@ -228,9 +190,6 @@ public class AdminView {
         }
     }
     
-    
-    
-    
     private BorderPane createFlightContent() {
         BorderPane innerLayout = new BorderPane();
         
@@ -253,7 +212,11 @@ public class AdminView {
         TableColumn<Flight, String> timeColumn = new TableColumn<>("Saat");
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("hour"));
 
-        flightTable.getColumns().addAll(colNum, colRoute, colDist, dateColumn, timeColumn);
+        flightTable.getColumns().add(colNum);
+        flightTable.getColumns().add(colRoute);
+        flightTable.getColumns().add(colDist);
+        flightTable.getColumns().add(dateColumn);
+        flightTable.getColumns().add(timeColumn);
         updateFlightTable();
         
         flightTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -437,129 +400,3 @@ public class AdminView {
     }
 
 }
-
-/*
-  		table = new TableView<>();
-        updateTable();
-
-        TableColumn<Flight, String> colNum = new TableColumn<>("Uçuş No");
-        colNum.setCellValueFactory(new PropertyValueFactory<>("flightNum"));
-
-        
-        TableColumn<Flight, String> colRoute = new TableColumn<>("Rota");
-        colRoute.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getRoute().toString()));
-
-        TableColumn<Flight, Double> colDist = new TableColumn<>("Mesafe (KM)");
-        // Mesafe, Flight içinde değil, Flight -> Route -> DistanceKm içinde olduğu için özel bağlama yapıyoruz:
-        colDist.setCellValueFactory(cellData -> 
-        	new javafx.beans.property.SimpleObjectProperty<Double>(cellData.getValue().getRoute().getDistanceKm()));
-        
-        TableColumn<Flight, String> dateColumn = new TableColumn<>("Tarih");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDate"));
-        
-        TableColumn<Flight, String> timeColumn = new TableColumn<>("Saat");
-        timeColumn.setCellValueFactory(new PropertyValueFactory<>("hour"));
-
-        table.getColumns().addAll(colNum, colRoute, colDist);
-        table.getColumns().add(dateColumn);
-        table.getColumns().add(timeColumn);
-        layout.setCenter(table);
-
-        
-        VBox form = new VBox(10);
-        form.setPadding(new Insets(10));
-        form.setStyle("-fx-border-color: gray; -fx-border-width: 1px;");
-
-        txtNum = new TextField(); txtNum.setPromptText("Uçuş No (Örn: TK101)");
-        txtDep = new TextField(); txtDep.setPromptText("Kalkış (İl)");
-        txtArr = new TextField(); txtArr.setPromptText("Varış (İl)");
-        txtDist = new TextField(); txtDist.setPromptText("Mesafe (KM)");
-        txtDur = new TextField(); txtDur.setPromptText("Süre (Dk)");
-        txtPlaneId = new TextField(); txtPlaneId.setPromptText("Uçak ID (P01)");
-        
-        datePicker = new DatePicker();
-        txtTime = new TextField(); txtTime.setPromptText("Saat (HH:mm)");
-
-        Button btnAdd = new Button("Uçuş Ekle");
-        Button btnUpdate = new Button("Uçuş Güncelle");
-        Button btnDelete = new Button("Seçiliyi Sil");
-        
-        btnAdd.setOnAction(e -> {
-            try {
-            	String flightNumInput = txtNum.getText().trim();
-                if (flightNumInput.isEmpty()) {
-                    showAlert("Uyarı", "Lütfen bir uçuş numarası giriniz!");
-                    return;
-                }
-                
-                if (flightManager.getFlightByID(flightNumInput) != null) {
-                    showAlert("Hata", "Bu uçuş numarası (" + flightNumInput + ") zaten sistemde mevcut! Lütfen farklı bir numara giriniz.");
-                    return; // İşlemi burada kes, aşağıya inme.
-                }
-            	
-            	
-                Route route = new Route(txtDep.getText(), txtArr.getText(), Integer.parseInt(txtDist.getText()));
-                
-                if (datePicker.getValue() == null || txtTime.getText().isEmpty()) {
-                    showAlert("Uyarı", "Lütfen tarih ve saat bilgisini eksiksiz giriniz.");
-                    return;
-                }
-                
-                LocalDateTime ldt = LocalDateTime.of(datePicker.getValue(), LocalTime.parse(txtTime.getText()));
-                
-                
-                Flight newFlight = new Flight(txtNum.getText(), route, ldt, Integer.parseInt(txtDur.getText()));
-                
-                
-                Plane newPlane = new Plane(txtPlaneId.getText(), "Boeing 737", 180); 
-                // 180 sabit varsayıldı, burayı değiştirebiliriz
-                
-                
-                SeatManager seatMngr = new SeatManager();
-                seatMngr.seatingArrangements(newPlane);
-                
-                newFlight.setPlane(newPlane);
-
-                
-                flightManager.addFlight(newFlight);
-                updateTable();
-                
-                showAlert("Başarılı", flightNumInput + " numaralı uçuş başarıyla eklendi.");
-                txtNum.clear(); txtDep.clear(); txtArr.clear();
-                
-            } catch (NumberFormatException nfe) {
-            	showAlert("Hata", "Mesafe ve Süre alanlarına sadece sayı girmelisiniz!");	
-            }catch (Exception ex) {
-            	showAlert("Hata", "Bir hata oluştu: " + ex.getMessage());
-                ex.printStackTrace();
-            }
-            
-        });
-        
-        btnUpdate.setOnAction(this::handleUpdateFlight);
-
-        // SİLME BUTONU AKSİYONU
-        btnDelete.setOnAction(e2 -> {
-            Flight selected = table.getSelectionModel().getSelectedItem();
-            if(selected != null) {
-                flightManager.deleteFlight(selected);
-                updateTable();
-                clearFields();
-                showAlert("Bilgi", "Uçuş silindi.");
-            } else {
-                showAlert("Uyarı", "Silinecek uçuşu seçiniz.");
-            }
-        });
-
-        form.getChildren().addAll(
-                new Label("İşlemler:"),
-                new HBox(10, txtNum, txtPlaneId),
-                new HBox(10, txtDep, txtArr, txtDist),
-                new HBox(10, datePicker, txtTime, txtDur),
-                new HBox(10, btnAdd, btnUpdate, btnDelete) // Butonları yan yana koyduk
-            );
-        layout.setBottom(form);
-
-        return layout;
- */
