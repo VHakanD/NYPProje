@@ -1,5 +1,7 @@
 package gui;
 
+import java.util.*;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -10,10 +12,17 @@ import javafx.scene.text.FontWeight;
 
 public class LoginView {
 	private MainApp mainApp;
+	
+	private Map<String, String> adminCredentials;
 
     // Constructor: MainApp referansını alıyoruz ki ekran değiştirebilelim
     public LoginView(MainApp mainApp) {
         this.mainApp = mainApp;
+        
+        adminCredentials = new HashMap<>();
+        adminCredentials.put("VHakanD", "1234");
+        adminCredentials.put("zeyneppkts", "5678"); 
+        adminCredentials.put("root", "0000");
     }
 
     public Parent getView() {
@@ -75,13 +84,21 @@ public class LoginView {
             return;
         }
 
-        if (role.equals("Yönetici (Admin)")) {
-            // Basit Admin Kontrolü (Projede veritabanı olmadığı için hardcoded yapıyoruz)
-            if (username.equals("admin") && password.equals("1234")) {
-                System.out.println("Yönetici girişi başarılı.");
-                mainApp.showAdminScreen(); // Admin ekranına geç
+        if (role.contains("Admin")) {
+        	if (adminCredentials.containsKey(username)) {
+                String correctPass = adminCredentials.get(username);
+                
+                if (correctPass.equals(password)) {
+                    System.out.println("Giriş Başarılı: " + username);
+                    
+                    // KRİTİK NOKTA: Giriş yapan admin ismini MainApp'e gönderiyoruz!
+                    mainApp.showAdminScreen(username); 
+                    
+                } else {
+                    showAlert("Giriş Başarısız", "Şifre hatalı!");
+                }
             } else {
-                showAlert("Giriş Başarısız", "Admin kullanıcı adı veya şifresi hatalı! (admin/1234)");
+                showAlert("Giriş Başarısız", "Böyle bir admin kullanıcısı bulunamadı!");
             }
         } 
         else {

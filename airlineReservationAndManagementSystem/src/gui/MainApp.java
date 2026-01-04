@@ -84,10 +84,15 @@ public class MainApp extends Application{
         primaryStage.setScene(scene);
     }
 
-    public void showAdminScreen() {
-        AdminView adminView = new AdminView(this, flightManager);
-        Scene scene = new Scene(adminView.getView(), 900, 600);
-        primaryStage.setScene(scene);
+    public void showAdminScreen(String adminName) {
+    	try {
+    		AdminView adminView = new AdminView(this, flightManager, adminName);
+            Scene scene = new Scene(adminView.getView(), 900, 600);
+            primaryStage.setScene(scene);
+            primaryStage.centerOnScreen();
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
     public void showUserSearchScreen() {

@@ -36,8 +36,12 @@ public class Route {
 		return distanceKm;
 	}
 	
+	public void setDistanceKm(double distanceKm) {
+		this.distanceKm = distanceKm;
+	}
+	
 	public String toString() {
-		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity + " - Mesafe" + this.distanceKm; 
+		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity; 
 	}
 	
 	public boolean equals(Object comparedObject) {
