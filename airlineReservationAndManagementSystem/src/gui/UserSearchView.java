@@ -1,5 +1,7 @@
 package gui;
 
+import java.util.stream.Collectors;
+
 import flightManagement.Flight;
 import servicesAndManagers.FlightManager;
 import servicesAndManagers.ReservationManager;
@@ -10,6 +12,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
