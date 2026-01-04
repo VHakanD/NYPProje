@@ -88,8 +88,9 @@ public class Flight {
 		
 		Flight flight = new Flight();
 		flight.setFlightNum(data[0]);
-		flight.getRoute().setDepartureCity(data[1]);
-		flight.getRoute().setArrivalCity(data[2]);
+		
+		Route tempRoute = new Route(data[1], data[2], 0); 
+	    flight.setRoute(tempRoute);
 		
 		if (!data[3].equals("null")) {
             LocalDateTime ldt = LocalDateTime.parse(data[3], DATETIME_FORMATTER);
@@ -97,7 +98,9 @@ public class Flight {
         }
 		
 		flight.setDuration(Integer.parseInt(data[5]));
-		flight.plane.setPlaneID(data[6]);
+		
+		Plane tempPlane = new Plane(data[6], "Unknown Model", 180); 
+	    flight.setPlane(tempPlane);
 		
 		return flight;
 	}

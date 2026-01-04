@@ -24,12 +24,18 @@ public class FlightManager {
         if (!file.exists()) {
             return;
         }
+        
+        SeatManager seatInit = new SeatManager();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if(!line.trim().isEmpty()) {
                     Flight f = Flight.fromFileFormat(line);
+                    
+                    f.getPlane().setCapacity(180); 
+                    seatInit.seatingArrangements(f.getPlane());
+                    
                     flights.add(f);
                 }
             }
