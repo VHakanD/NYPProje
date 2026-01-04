@@ -108,10 +108,11 @@ public class SeatSelectionView {
             // Geçici Yolcu Oluştur (Sizin Passenger constructor'a uygun)
             Passenger passenger = new Passenger("12345678901", result.get(), "Yilmaz", "05554443322");
             
-            // ReservationManager üzerinden rezervasyon yap
-            // Not: Sizin makeReservation metodunuz şu an false dönüyor, 
-            // backend tarafında o metodu düzeltmeniz gerekebilir.
-            boolean success = reservationManager.makeReservation(flight, passenger, selectedSeatNum);
+            
+            //plane'in içini doldurmamız lazım
+            //Plane plane = new Plane("1234", "Boeing", 180);
+            //boolean success = reservationManager.makeReservation(plane, flight, passenger, selectedSeatNum);
+            boolean success = false;
             
             // Eğer backend hazır değilse GUI tarafında manuel set edelim ki görelim:
             // (Backend tamamlanınca burayı silin)

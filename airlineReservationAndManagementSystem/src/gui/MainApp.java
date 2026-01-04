@@ -14,6 +14,7 @@ public class MainApp extends Application{
 	
 	private FlightManager flightManager;
     private ReservationManager reservationManager;
+    private StaffManager staffManager;
     private List<Passenger> passengerList;
     
     private final String PASSENGER_FILE = "passengers.txt";
@@ -36,7 +37,7 @@ public class MainApp extends Application{
     
     private void initManagers() {
     	flightManager = new FlightManager();
-        
+    	staffManager = new StaffManager();
         passengerList = new ArrayList<>(); 
         loadPassengers();
         
@@ -83,16 +84,31 @@ public class MainApp extends Application{
         Scene scene = new Scene(loginView.getView(), 400, 300);
         primaryStage.setScene(scene);
     }
+    
+    public void showAdminDashboard(String adminName) {
+        AdminDashboardView dashboard = new AdminDashboardView(this, adminName);
+        Scene scene = new Scene(dashboard.getView(), 600, 400); // Daha küçük, kompakt bir ekran
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Yönetici Paneli - Ana Menü");
+        primaryStage.centerOnScreen();
+    }
+    
+    public void showFlightScreen(String adminName) {
+        // AdminView'i oluşturuyoruz ama sadece Flight kısmını alacağız
+        AdminView adminView = new AdminView(this, flightManager, staffManager, adminName);
+        Scene scene = new Scene(adminView.getFlightView(), 1000, 700);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Uçuş Yönetimi");
+        primaryStage.centerOnScreen();
+    }
 
-    public void showAdminScreen(String adminName) {
-    	try {
-    		AdminView adminView = new AdminView(this, flightManager, adminName);
-            Scene scene = new Scene(adminView.getView(), 900, 600);
-            primaryStage.setScene(scene);
-            primaryStage.centerOnScreen();
-    	}catch(Exception e) {
-    		e.printStackTrace();
-    	}
+    
+    public void showStaffScreen(String adminName) {
+        AdminView adminView = new AdminView(this, flightManager, staffManager, adminName);
+        Scene scene = new Scene(adminView.getStaffView(), 900, 600);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Personel Yönetimi");
+        primaryStage.centerOnScreen();
     }
 
     public void showUserSearchScreen() {

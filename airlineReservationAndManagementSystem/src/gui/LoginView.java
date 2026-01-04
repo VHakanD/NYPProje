@@ -92,7 +92,7 @@ public class LoginView {
                     System.out.println("Giriş Başarılı: " + username);
                     
                     // KRİTİK NOKTA: Giriş yapan admin ismini MainApp'e gönderiyoruz!
-                    mainApp.showAdminScreen(username); 
+                    mainApp.showAdminDashboard(username); 
                     
                 } else {
                     showAlert("Giriş Başarısız", "Şifre hatalı!");

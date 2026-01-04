@@ -132,7 +132,7 @@ public class ReservationManager {
     	return found;
     }
     
-    /*
+    
     public synchronized boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
     	if (!plane.hasSeat(seatNum)) {
             System.out.println("Hata: Böyle bir koltuk yok: " + seatNum);
@@ -162,8 +162,8 @@ public class ReservationManager {
         System.out.println("Rezervasyon Başarılı! PNR: " + resCode);
         return true;
     	
-    	 saveReservations();
-    	 return false;
+    	 //saveReservations();
+    	 //return false;
     	
     }
     
@@ -187,7 +187,7 @@ public class ReservationManager {
         
         return true;
     }
-    */
+    
     
     public boolean changeSeat(String resCode, String newSeatNum) {
     	Reservation res = findReservationByCode(resCode);
