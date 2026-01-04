@@ -34,6 +34,14 @@ public class Flight {
 	public void setFlightNum(String flightNum) {
 		this.flightNum = flightNum;
 	}
+	
+	public String getFormattedDate() {
+	    if (this.date != null) {
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+	        return this.date.format(formatter);
+	    }
+	    return "";
+	}
 
 	public LocalDateTime getDate() {
 		return date;
@@ -80,7 +88,7 @@ public class Flight {
 		
 		return this.flightNum + "," + this.route.getDepartureCity() + "," +
 				this.route.getArrivalCity() + "," + dateStr + "," + this.hour + "," + 
-				this.duration + "," + this.plane.getPlaneID();
+				this.duration + "," + this.route.getDistanceKm() + "," + this.plane.getPlaneID();
 	}
 	
 	public static Flight fromFileFormat(String line) {
@@ -88,8 +96,9 @@ public class Flight {
 		
 		Flight flight = new Flight();
 		flight.setFlightNum(data[0]);
-		flight.getRoute().setDepartureCity(data[1]);
-		flight.getRoute().setArrivalCity(data[2]);
+		
+		Route tempRoute = new Route(data[1], data[2], 0); 
+	    flight.setRoute(tempRoute);
 		
 		if (!data[3].equals("null")) {
             LocalDateTime ldt = LocalDateTime.parse(data[3], DATETIME_FORMATTER);
@@ -97,7 +106,17 @@ public class Flight {
         }
 		
 		flight.setDuration(Integer.parseInt(data[5]));
-		flight.plane.setPlaneID(data[6]);
+		
+		int distance;
+	    try {
+	        distance = Integer.parseInt(data[6]); // Mesafeyi oku
+	    } catch (NumberFormatException e) {
+	        distance = 0; // Hata olursa 0 yap
+	    }
+	    tempRoute.setDistanceKm(distance);
+		
+		Plane tempPlane = new Plane(data[7], "Unknown Model", 180); 
+	    flight.setPlane(tempPlane);
 		
 		return flight;
 	}
