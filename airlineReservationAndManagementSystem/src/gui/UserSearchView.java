@@ -29,12 +29,11 @@ public class UserSearchView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
-        // --- FİLTRELEME ALANI ---
+        
         TextField txtFrom = new TextField(); txtFrom.setPromptText("Nereden");
         Button btnSearch = new Button("Uçuş Ara");
         
         btnSearch.setOnAction(e -> {
-            // Basit filtreleme (Backend'deki flightsByDepartureCity metodunu kullanıyoruz)
             table.setItems(FXCollections.observableArrayList(
                 flightManager.flightsByDepartureCity(txtFrom.getText())
             ));
@@ -46,10 +45,8 @@ public class UserSearchView {
         HBox topBar = new HBox(10, txtFrom, btnSearch, btnShowAll);
         layout.setTop(topBar);
 
-        // --- TABLO ---
+       
         table = new TableView<>();
-        // (Kolon tanımları AdminView ile aynı mantıkta yapılabilir, kodu kısaltmak için tekrarlamıyorum)
-        // Burada basitçe uçuş numarasını gösterelim örnek olarak:
         TableColumn<Flight, String> colNum = new TableColumn<>("Uçuş No");
         colNum.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flightNum"));
         table.getColumns().add(colNum);
@@ -57,14 +54,13 @@ public class UserSearchView {
         table.setItems(FXCollections.observableArrayList(flightManager.getFlights()));
         layout.setCenter(table);
 
-        // --- SEÇİM VE İLERLEME ---
+        
         Button btnSelectSeat = new Button("Koltuk Seç ve İlerle");
         btnSelectSeat.setStyle("-fx-font-size: 14px; -fx-base: #b6e7c9;");
         
         btnSelectSeat.setOnAction(e -> {
             Flight selected = table.getSelectionModel().getSelectedItem();
             if (selected != null) {
-                // Seçilen uçuşu alıp Koltuk Ekranını açıyoruz (Popup veya Yeni Sahne)
                 openSeatSelection(selected);
             } else {
                 new Alert(Alert.AlertType.WARNING, "Lütfen bir uçuş seçiniz!").show();
@@ -76,7 +72,6 @@ public class UserSearchView {
     }
 
     private void openSeatSelection(Flight flight) {
-        // Koltuk Seçim Ekranını Başlat
         SeatSelectionView seatView = new SeatSelectionView(mainApp, flight, reservationManager);
         Stage stage = new Stage();
         stage.setTitle("Koltuk Seçimi: " + flight.getFlightNum());
