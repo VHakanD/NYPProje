@@ -2,6 +2,7 @@ package servicesAndManagers;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 import flightManagement.Flight;
 
@@ -132,10 +133,18 @@ public class FlightManager {
 	}
 	
 	//JUnit için removeExpiredFlights metodu tanımlanmalı
-	
+	public void removeExpiredFlights() {
+	    LocalDateTime now = LocalDateTime.now();
+	    //Tarihi geçenleri siler.
+	    flights.removeIf(flight -> flight.getDate().isBefore(now));
+	    
+	    // Dosyayı günceller.
+	    saveFlights(); 
+	    System.out.println("Tarihi geçen uçuşlar temizlendi.");
+	}
 	/*calculateTotalOccupancyRate asenkron raporlama için bu tarz bir metot eklememiz lazım sanırım
 	 tüm uçuşlar için doluluk oranını hesaplayan bir metod*/
 	
-	/*GUI için uçuşarı ucuzdan-pahalıya, erken tarihliden ileri tarihliye şeklinde sıralama için
+	/*GUI için uçuşları ucuzdan-pahalıya, erken tarihliden ileri tarihliye şeklinde sıralama için
 	 sortFlights diye bir metod ekleyebiliriz */
 }

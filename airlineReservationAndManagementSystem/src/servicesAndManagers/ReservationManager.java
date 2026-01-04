@@ -132,11 +132,62 @@ public class ReservationManager {
     	return found;
     }
     
-    public synchronized boolean makeReservation(Flight flight, Passenger passenger, String seatNum) {
+    /*
+    public synchronized boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
+    	if (!plane.hasSeat(seatNum)) {
+            System.out.println("Hata: Böyle bir koltuk yok: " + seatNum);
+            return false;
+        }
     	
-    	saveReservations();
-    	return false;
+    	Seat seat = plane.getSeatMatrix().get(seatNum);
+    	
+    	if (seat == null) {
+    	    System.out.println("Hata: Böyle bir koltuk uçakta mevcut değil: " + seatNum);
+    	    return false;
+    	}
+    	
+    	if (seat.isReserved()) {
+    	    System.out.println("Hata: Koltuk zaten başkası tarafından alınmış: " + seatNum);
+    	    return false;
+    	}
+    	
+    	String resCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        Reservation newRes = new Reservation(resCode, flight, passenger, seat);
+    	
+        reservations.add(newRes);
+        seat.setReserveStatus(true);
+        
+        saveReservations();
+        
+        System.out.println("Rezervasyon Başarılı! PNR: " + resCode);
+        return true;
+    	
+    	 saveReservations();
+    	 return false;
+    	
     }
+    
+    public boolean makeReservationUnsafe(Flight flight, Passenger passenger, String seatNum) {        
+        Plane plane = flight.getPlane();
+        Seat seat = plane.getSeatMatrix().get(seatNum);
+        
+        if (seat == null || seat.isReserved()) {
+            return false;
+        }
+        
+        try { Thread.sleep(50); } catch (InterruptedException e) {}
+
+        String resCode = java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        Reservation newRes = new Reservation(resCode, flight, passenger, seat);
+        
+        reservations.add(newRes);
+        seat.setReserveStatus(true);
+        
+        saveReservations();
+        
+        return true;
+    }
+    */
     
     public boolean changeSeat(String resCode, String newSeatNum) {
     	Reservation res = findReservationByCode(resCode);
