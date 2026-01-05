@@ -112,7 +112,7 @@ public class MainApp extends Application{
     }
 
     public void showUserSearchScreen(String username) {
-        UserSearchView userView = new UserSearchView(this, flightManager, reservationManager);
+        UserSearchView userView = new UserSearchView(this, flightManager, reservationManager, username);
         Scene scene = new Scene(userView.getView(), 1000, 700);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Yolcu Uçuş Arama");

@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import java.util.Locale;
 
 public class UserSearchView {
 	private MainApp mainApp;
@@ -78,12 +79,16 @@ public class UserSearchView {
         
         Button btnShowAll = new Button("Tüm Uçuşları Listele");
         
-        btnSearch.setOnAction(e -> {
-            table.setItems(FXCollections.observableArrayList(
-                flightManager.flightsByDepartureCity(txtFrom.getText())
-            ));
-        });
+        btnSearch.setOnAction(e -> handleSearch(txtFrom.getText(), txtTo.getText()));
         
+        btnShowAll.setOnAction(e -> {
+            txtFrom.clear();
+            txtTo.clear();
+            // Tüm listeyi geri yükle
+            if(flightManager.getFlights() != null) {
+                table.setItems(FXCollections.observableArrayList(flightManager.getFlights()));
+            }
+        });
         
         btnShowAll.setOnAction(e -> table.setItems(FXCollections.observableArrayList(flightManager.getFlights())));
 
@@ -161,27 +166,38 @@ public class UserSearchView {
     }
 
     private void handleSearch(String from, String to) {
-        if (flightManager.getFlights() == null) return;
+    	if (flightManager.getFlights() == null) return;
 
-        // Java Streams ile filtreleme (Hem Kalkış Hem Varış'a göre)
+        // Türkçe karakter sorunlarını (İ-i, I-ı) en aza indirmek için Locale.ROOT veya ENGLISH kullanabiliriz
+        // veya varsayılan locale ile devam edebiliriz.
+        String searchFrom = from.trim().toLowerCase(Locale.ROOT);
+        String searchTo = to.trim().toLowerCase(Locale.ROOT);
+
         ObservableList<Flight> filteredList = FXCollections.observableArrayList(
             flightManager.getFlights().stream()
-                .filter(f -> {
-                    String dep = f.getRoute().getDepartureCity().toLowerCase();
-                    String arr = f.getRoute().getArrivalCity().toLowerCase();
-                    String searchFrom = from.toLowerCase().trim();
-                    String searchTo = to.toLowerCase().trim();
+                .filter(flight -> {
+                    // Veritabanındaki şehir isimlerini de aynı şekilde küçültüyoruz
+                    String depCity = flight.getRoute().getDepartureCity().toLowerCase(Locale.ROOT);
+                    String arrCity = flight.getRoute().getArrivalCity().toLowerCase(Locale.ROOT);
                     
-                    // Arama kutusu boşsa o kriteri geç (true), doluysa eşleşme ara
-                    boolean matchFrom = searchFrom.isEmpty() || dep.contains(searchFrom);
-                    boolean matchTo = searchTo.isEmpty() || arr.contains(searchTo);
+                    // Logic:
+                    // 1. Arama kutusu boşsa (isEmpty), o kriteri yok say (true dön).
+                    // 2. Doluysa, şehir isminin içinde aranan kelime geçiyor mu (contains)?
                     
+                    boolean matchFrom = searchFrom.isEmpty() || depCity.contains(searchFrom);
+                    boolean matchTo = searchTo.isEmpty() || arrCity.contains(searchTo);
+                    
+                    // Her iki şart da (veya boşlarsa) sağlanmalı
                     return matchFrom && matchTo;
                 })
                 .collect(Collectors.toList())
         );
         
         table.setItems(filteredList);
+        
+        if(filteredList.isEmpty()) {
+            showAlert("Bilgi", "Aradığınız kriterlere uygun uçuş bulunamadı.");
+        }
     }
 
     private void openSeatSelection(Flight flight) {
