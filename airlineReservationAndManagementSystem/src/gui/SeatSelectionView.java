@@ -60,12 +60,25 @@ public class SeatSelectionView {
                 if (seat != null) {
                     Button btn = new Button(seatNum);
                     btn.setPrefSize(50, 40);
+                    
+                    boolean isBusiness = (row <= 4);
+                    
+                    
 
                     // Duruma göre renk ver
                     if (seat.isReserved()) {
                         btn.setStyle("-fx-background-color: #ff6b6b;"); // Kırmızı (Dolu)
                         btn.setDisable(true);
-                    } else {
+                    } else if(isBusiness) {
+                    	btn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
+                        
+                        // Tıklama olayını buraya da ekliyoruz
+                        btn.setOnAction(e -> {
+                            selectedSeatNum = seatNum;
+                            // Kullanıcıya Business seçtiğini belirtebiliriz
+                            new Alert(Alert.AlertType.INFORMATION, "Seçilen Business Koltuk: " + seatNum).show();
+                        });
+                    }else {
                         btn.setStyle("-fx-background-color: #51cf66;"); // Yeşil (Boş)
                         
                         // Tıklama Olayı

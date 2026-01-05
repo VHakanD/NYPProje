@@ -118,6 +118,16 @@ public class AdminView {
         staffTable.getColumns().add(colContact);
         staffTable.getColumns().add(colRole);
         staffTable.getColumns().add(colPass);
+        
+        staffTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                txtStaffName.setText(newVal.getName());
+                txtStaffSurname.setText(newVal.getSurname()); // Eğer surname private ise getSurname() kullanın
+                txtStaffContact.setText(newVal.getContactInfo()); // getter kullanın
+                txtStaffRole.setText(newVal.getRole()); // getter kullanın
+                txtStaffPass.setText(newVal.getPassword()); // getter kullanın
+            }
+        });
 
         // 2. Form Alanları (Yeni Staff Constructor yapısına uygun)
         HBox formBox = new HBox(10);
@@ -139,6 +149,7 @@ public class AdminView {
 
         Button btnAddStaff = new Button("Ekle");
         Button btnDelStaff = new Button("Sil");
+        Button btnUpdateStaff = new Button("Güncelle");
 
         // Ekleme İşlemi
         btnAddStaff.setOnAction(e -> {
@@ -160,9 +171,7 @@ public class AdminView {
             staffManager.addStaff(newStaff);
             updateStaffTable();
             
-            // Alanları temizle
-            txtStaffName.clear(); txtStaffSurname.clear(); 
-            txtStaffContact.clear(); txtStaffRole.clear(); txtStaffPass.clear();
+            clearStaffFields();
         });
 
         // Silme İşlemi
@@ -174,11 +183,54 @@ public class AdminView {
             } else {
                 showAlert("Uyarı", "Silinecek personeli seçin.");
             }
+            clearStaffFields();
+        });
+        
+        btnUpdateStaff.setOnAction(e -> {
+            Staff selected = staffTable.getSelectionModel().getSelectedItem();
+            
+            if (selected == null) {
+                showAlert("Uyarı", "Lütfen güncellenecek personeli tablodan seçiniz.");
+                return;
+            }
+            
+            // Boş alan kontrolü
+            if (txtStaffName.getText().isEmpty() || txtStaffSurname.getText().isEmpty()) {
+                showAlert("Uyarı", "Ad ve Soyad alanları boş bırakılamaz.");
+                return;
+            }
+            
+            // Yeni bilgilerle geçici bir nesne oluştur
+            Staff updatedStaffInfo = new Staff(
+                txtStaffName.getText(),
+                txtStaffSurname.getText(),
+                txtStaffContact.getText(),
+                txtStaffRole.getText(),
+                txtStaffPass.getText()
+            );
+            
+            // Manager üzerinden güncelle
+            // (Eski nesneyi referans olarak veriyoruz ki listedeki yerini bulsun)
+            boolean success = staffManager.updateStaff(selected, updatedStaffInfo);
+            
+            if (success) {
+                showAlert("Başarılı", "Personel bilgileri güncellendi.");
+                updateStaffTable(); // Tabloyu yenile
+                
+                // Alanları temizle
+                txtStaffName.clear(); txtStaffSurname.clear(); 
+                txtStaffContact.clear(); txtStaffRole.clear(); txtStaffPass.clear();
+            } else {
+                showAlert("Hata", "Güncelleme sırasında bir sorun oluştu.");
+            }
+            clearStaffFields();
         });
 
-        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffPass, btnAddStaff, btnDelStaff);
+        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffPass, btnAddStaff, btnUpdateStaff,btnDelStaff);
         
         layout.getChildren().addAll(staffTable, new Label("Personel Yönetimi:"), formBox);
+        
+        
         return layout;
     }
     
@@ -261,6 +313,7 @@ public class AdminView {
                 updateFlightTable();
                 clearFlightFields();
                 showAlert("Başarılı", "Uçuş Eklendi");
+                clearFlightFields();
             } catch (Exception ex) {
                 showAlert("Hata", "Girişleri kontrol edin: " + ex.getMessage());
             }
@@ -273,8 +326,8 @@ public class AdminView {
             if(selected != null) {
                 flightManager.deleteFlight(selected);
                 updateFlightTable();
-                clearFlightFields();
             }
+            clearFlightFields();
         });
 
         form.getChildren().addAll(
@@ -351,6 +404,7 @@ public class AdminView {
             } else {
                 showAlert("Hata", "Güncelleme yapılamadı.");
             }
+            clearFlightFields();
 
         } catch (java.time.format.DateTimeParseException e) {
             showAlert("Hata", "Saat formatı hatalı (Örn: 10:00 olmalı).");
@@ -359,6 +413,7 @@ public class AdminView {
         } catch (Exception e) {
             showAlert("Hata", "Beklenmedik hata: " + e.getMessage());
         }
+    
     }
 
     
@@ -391,6 +446,16 @@ public class AdminView {
         txtPlaneId.clear();
         txtTime.clear();
         datePicker.setValue(null);
+        flightTable.getSelectionModel().clearSelection();
+    }
+    
+    private void clearStaffFields() {
+        txtStaffName.clear();
+        txtStaffSurname.clear();
+        txtStaffContact.clear();
+        txtStaffRole.clear();
+        txtStaffPass.clear();
+        staffTable.getSelectionModel().clearSelection();
     }
     
     
