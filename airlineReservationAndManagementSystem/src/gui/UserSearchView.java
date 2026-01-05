@@ -149,12 +149,23 @@ public class UserSearchView {
         colDate.setCellValueFactory(new PropertyValueFactory<>("formattedDate")); 
 
         // Saat
-        TableColumn<Flight, String> colTime = new TableColumn<>("Saat");
+        TableColumn<Flight, String> colTime = new TableColumn<>("Kalkış Saati");
         colTime.setCellValueFactory(new PropertyValueFactory<>("hour"));
 
         // Süre
-        TableColumn<Flight, Integer> colDur = new TableColumn<>("Süre (Dk)");
-        colDur.setCellValueFactory(new PropertyValueFactory<>("duration"));
+        TableColumn<Flight, String> colDur = new TableColumn<>("Uçuş Süresi");
+        colDur.setCellValueFactory(cell -> {
+            int rawMinutes = cell.getValue().getDuration(); // Toplam dakika (örn: 150)
+            
+            int hours = rawMinutes / 60;    // Tam sayı bölmesi (150 / 60 = 2)
+            int minutes = rawMinutes % 60;  // Kalanı bulma (150 % 60 = 30)
+            
+            // Ekranda görünecek format
+            // İsterseniz "saat" ve "dakika" kelimelerini uzun da yazabilirsiniz.
+            String formatted = String.format("%d sa %d dk", hours, minutes);
+            
+            return new javafx.beans.property.SimpleStringProperty(formatted);
+        });
         
         // Mesafe
         TableColumn<Flight, Double> colDist = new TableColumn<>("Mesafe (KM)");
@@ -162,7 +173,33 @@ public class UserSearchView {
              new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getRoute().getDistanceKm()));
 
         table.getColumns().addAll(colNum, colDep, colArr, colDate, colTime, colDur, colDist);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // Sütunları ekrana yay
+       
+        
+        TableColumn<Flight, String> colPrice = new TableColumn<>("Tahmini Fiyat (Eco - Bus)");
+        
+        colPrice.setCellValueFactory(cell -> {
+            Flight f = cell.getValue();
+            if (f.getRoute() != null) {
+                double dist = f.getRoute().getDistanceKm();
+                
+                // FİYAT POLİTİKASI VARSAYIMI:
+                // Sizin CalculatePrice sınıfınızdaki mantığa yakın bir oran kullanıyoruz.
+                // Örnek: KM başına 1.5 TL (Ekonomi) ve 3.0 TL (Business) olsun.
+                // Bu oranları projenizin gerçek fiyatlandırma mantığına göre değiştirebilirsiniz.
+                
+                double minPrice = dist * 1.5; 
+                double maxPrice = dist * 3.5; 
+                
+                String priceText = String.format("%.0f ₺ - %.0f ₺", minPrice, maxPrice);
+                return new javafx.beans.property.SimpleStringProperty(priceText);
+            } else {
+                return new javafx.beans.property.SimpleStringProperty("-");
+            }
+        });
+        
+        table.getColumns().add(colPrice);
+        
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     private void handleSearch(String from, String to) {
