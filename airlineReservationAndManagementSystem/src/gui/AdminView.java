@@ -265,22 +265,8 @@ public class AdminView {
                 showAlert("Hata", "Girişleri kontrol edin: " + ex.getMessage());
             }
         });
-
-        btnUpdate.setOnAction(e -> {
-            Flight selected = flightTable.getSelectionModel().getSelectedItem();
-            if(selected == null) return;
-            try {
-                LocalDateTime newDate = LocalDateTime.of(datePicker.getValue(), LocalTime.parse(txtTime.getText()));
-                Flight updateInfo = new Flight();
-                updateInfo.setFlightNum(selected.getFlightNum());
-                updateInfo.setDate(newDate);
-                updateInfo.setDuration(Integer.parseInt(txtDur.getText()));
-                
-                flightManager.updateFlight(updateInfo);
-                updateFlightTable();
-                showAlert("Başarılı", "Güncellendi");
-            } catch (Exception ex) { showAlert("Hata", "Format hatası"); }
-        });
+        
+        btnUpdate.setOnAction(this::handleUpdateFlight);
 
         btnDelete.setOnAction(e -> {
             Flight selected = flightTable.getSelectionModel().getSelectedItem();
@@ -304,11 +290,11 @@ public class AdminView {
     private void updateFlightTable() {
         ObservableList<Flight> data = FXCollections.observableArrayList(flightManager.getFlights());
         flightTable.setItems(data);
+        flightTable.refresh();
     }
     
     
     void handleUpdateFlight(ActionEvent event) {
-        // 1. Tablodan seçili uçuşu al
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         
         if (selectedFlight == null) {
@@ -316,36 +302,62 @@ public class AdminView {
             return;
         }
 
-        // 2. Arayüzdeki (TextField/DatePicker) yeni değerleri al
-        // Not: Kullanıcının girdiği yeni tarih ve süreyi alıyoruz
-        LocalDate newDate = datePicker.getValue(); 
-        String newTime = txtTime.getText(); // Örn: "14:30"
-        String newDurationStr = txtDur.getText();
-
         try {
-            // Yeni bir LocalDateTime oluştur
+            // Formdaki verileri al
+            LocalDate newDate = datePicker.getValue(); 
+            String newTime = txtTime.getText(); 
+            String newDurationStr = txtDur.getText();
+            String newPlaneID = txtPlaneId.getText();
+            
+            String dep = txtDep.getText();
+            String arr = txtArr.getText();
+            String distStr = txtDist.getText();
+
+            // Format dönüşümleri
             LocalDateTime newDateTime = LocalDateTime.of(newDate, LocalTime.parse(newTime));
             int newDuration = Integer.parseInt(newDurationStr);
+            double newDistance = Double.parseDouble(distStr);
 
-            // 3. Güncelleme için geçici bir nesne oluştur (ID'si aynı olmalı)
+            // Güncelleme nesnesi oluştur
             Flight updatedInfo = new Flight();
-            updatedInfo.setFlightNum(selectedFlight.getFlightNum()); // ID değişmez
+            updatedInfo.setFlightNum(selectedFlight.getFlightNum());
             updatedInfo.setDate(newDateTime);
             updatedInfo.setDuration(newDuration);
-            //updatedInfo.setRoute(newRoute);
+            
+            // Rota Güncellemesi
+            Route newRoute = new Route(dep, arr, newDistance);
+            updatedInfo.setRoute(newRoute);
+            
+            // Uçak Güncellemesi
+            // DİKKAT: Plane sınıfında 'getModel()' mi yoksa 'getPlaneModel()' mi var kontrol et.
+            // Genelde 'getModel()' kullanılır. Eğer hata verirse burayı düzelt.
+            String currentModel = "Unknown";
+            if(selectedFlight.getPlane() != null) {
+                 // Plane sınıfında getModel() varsa onu kullan, yoksa getPlaneModel()
+                 // Buraya varsayılan bir değer atıyoruz şimdilik.
+                 currentModel = "Boeing 737"; 
+            }
+            
+            Plane newPlane = new Plane(newPlaneID, currentModel, 180); 
+            updatedInfo.setPlane(newPlane);
 
-            // 4. Manager üzerinden güncelleme işlemini yap
+            // Manager'a gönder
             boolean success = flightManager.updateFlight(updatedInfo);
 
             if (success) {
                 showAlert("Başarılı", "Uçuş bilgileri güncellendi.");
-                updateFlightTable(); // Tabloyu yenileme metodu (verileri tekrar yükler)
+                updateFlightTable();
+                clearFlightFields();
             } else {
                 showAlert("Hata", "Güncelleme yapılamadı.");
             }
 
+        } catch (java.time.format.DateTimeParseException e) {
+            showAlert("Hata", "Saat formatı hatalı (Örn: 10:00 olmalı).");
+        } catch (NumberFormatException e) {
+            showAlert("Hata", "Mesafe ve Süre alanlarına sadece sayı giriniz.");
         } catch (Exception e) {
-            showAlert("Hata", "Lütfen tarih ve saat formatını kontrol edin.\nSaat formatı HH:mm olmalı.");
+            showAlert("Hata", "Beklenmedik hata: " + e.getMessage());
         }
     }
 

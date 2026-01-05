@@ -94,7 +94,24 @@ public class FlightManager {
 		}
 	}
 	
-	public boolean updateFlight(Flight flight) {
+	public boolean updateFlight(Flight updatedFlight) {
+	    // 1. Önce listedeki (RAM'deki) eski kaydı bulup yenisiyle değiştirelim
+	    for (int i = 0; i < flights.size(); i++) {
+	        if (flights.get(i).getFlightNum().equals(updatedFlight.getFlightNum())) {
+	            
+	            // Listeyi güncelle (Eski objeyi sil, yenisini aynı yere koy)
+	            flights.set(i, updatedFlight);
+	            
+	            // 2. Şimdi dosyaya kaydet
+	            saveFlights();
+	            
+	            return true; // İşlem başarılı
+	        }
+	    }
+	    return false; // Uçuş bulunamadı
+	}
+	
+	/*public boolean updateFlight(Flight flight) {
 		
 		if (flight == null || flight.getFlightNum() == null || flights == null) {
 	        return false;
@@ -104,13 +121,22 @@ public class FlightManager {
 			if(aFlight != null && aFlight.getFlightNum().equals(flight.getFlightNum())) {
 				aFlight.setDate(flight.getDate());
 				aFlight.setDuration(flight.getDuration());
+				aFlight.setRoute(flight.getRoute());
+				if (flight.getRoute() != null) {
+                    aFlight.setRoute(flight.getRoute());
+                }
+				if (flight.getPlane() != null) {
+                    aFlight.setPlane(flight.getPlane());
+                }
+				
+				flights.set(i, flight);
 				saveFlights();
 				return true;
 			}
 		}
 		
 		return false;
-	}
+	}*/
 	
 	public Flight getFlightByID(String flightNum) {
 		Flight searchedFlight = null;
