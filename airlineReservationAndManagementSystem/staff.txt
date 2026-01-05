@@ -1,8 +1,0 @@
-Ahmet,Yilmaz,05551234567,Pilot,1234
-Zeynep,Kaya,05329998877,Kabin Amiri,5678
-Mehmet,Demir,05051112233,Yer Hizmetleri,0000
-Ayse,Celik,05423334455,Pilot,plt123
-Fatma,Ozturk,05356667788,Kabin Memuru,pass1
-Burak,Sahn,05332221100,Pilot,brk12
-Elif,Yildiz,05078889900,Kabin Memuru,elf99
-Abuzer,Kömürcü,05123456789,Pilot,Meth
