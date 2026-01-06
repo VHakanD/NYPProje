@@ -261,8 +261,8 @@ public class PaymentView {
 
     private void closeAllWindows() {
         // Tüm açık popup pencereleri kapat
-        Stage.getWindows().stream()
-             .filter(window -> window instanceof Stage && window != mainApp.getPrimaryStage())
-             .forEach(window -> ((Stage) window).close());
+    	new ArrayList<>(Stage.getWindows()).stream()
+        .filter(window -> window instanceof Stage && window != mainApp.getPrimaryStage())
+        .forEach(window -> ((Stage) window).close());
     }
 }

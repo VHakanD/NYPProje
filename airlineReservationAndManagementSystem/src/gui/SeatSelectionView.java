@@ -28,11 +28,13 @@ public class SeatSelectionView {
     private String selectedSeatNum = null; // Kullanıcının o an tıkladığı koltuk
     private Button btnBook;
     private Label lblSelectionInfo;
+    private Passenger loggedInPassenger;
 
-    public SeatSelectionView(MainApp mainApp, Flight flight, ReservationManager reservationManager) {
+    public SeatSelectionView(MainApp mainApp, Flight flight, ReservationManager reservationManager, Passenger loggedInPassenger) {
         this.mainApp = mainApp;
         this.flight = flight;
         this.reservationManager = reservationManager;
+        this.loggedInPassenger = loggedInPassenger; // Kaydet
     }
 
     /*public Parent getView() {
@@ -240,12 +242,14 @@ public class SeatSelectionView {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField txtName = new TextField(); txtName.setPromptText("Ad");
-        TextField txtSurname = new TextField(); txtSurname.setPromptText("Soyad");
-        TextField txtId = new TextField(); txtId.setPromptText("TC / Pasaport");
-        TextField txtPhone = new TextField(); txtPhone.setPromptText("05XX...");
-        TextField txtBaggage = new TextField(); txtBaggage.setPromptText("KG (Örn: 15)"); // YENİ ALAN
-
+        TextField txtName = new TextField(loggedInPassenger.getName()); 
+        TextField txtSurname = new TextField(loggedInPassenger.getSurname());
+        TextField txtId = new TextField(loggedInPassenger.getPassengerID());
+        TextField txtPhone = new TextField(loggedInPassenger.getContactInfo());
+        TextField txtBaggage = new TextField(); 
+        txtBaggage.setPromptText("KG (Örn: 15)");
+        
+        
         grid.add(new Label("Ad:"), 0, 0);       grid.add(txtName, 1, 0);
         grid.add(new Label("Soyad:"), 0, 1);    grid.add(txtSurname, 1, 1);
         grid.add(new Label("Kimlik No:"), 0, 2); grid.add(txtId, 1, 2);
@@ -253,7 +257,7 @@ public class SeatSelectionView {
         grid.add(new Label("Bagaj (kg):"), 0, 4); grid.add(txtBaggage, 1, 4); // YENİ ALAN EKLENDİ
 
         dialog.getDialogPane().setContent(grid);
-        Platform.runLater(txtName::requestFocus);
+        Platform.runLater(txtBaggage::requestFocus);
 
         // Sonuç Dönüştürücü
         dialog.setResultConverter(dialogButton -> {

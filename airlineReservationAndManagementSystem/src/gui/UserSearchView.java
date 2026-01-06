@@ -21,6 +21,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import reservationAndTicketing.Passenger;
+
 import java.util.Locale;
 
 public class UserSearchView {
@@ -28,13 +30,13 @@ public class UserSearchView {
     private FlightManager flightManager;
     private ReservationManager reservationManager;
     private TableView<Flight> table;
-    private String passengerName;
+    private Passenger loggedInPassenger;
 
-    public UserSearchView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, String passengerName) {
+    public UserSearchView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, Passenger loggedInPassenger) {
         this.mainApp = mainApp;
         this.flightManager = flightManager;
         this.reservationManager = reservationManager;
-        this.passengerName = passengerName;
+        this.loggedInPassenger = loggedInPassenger;
     }
 
     public Parent getView() {
@@ -50,14 +52,18 @@ public class UserSearchView {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS); // Araya boşluk at
         
-        Label lblWelcome = new Label("Hoşgeldiniz, Sayın " + passengerName);
+        Label lblWelcome = new Label("Hoşgeldiniz, Sayın " + loggedInPassenger.getName() + " " + loggedInPassenger.getSurname());
         lblWelcome.setStyle("-fx-text-fill: #2980b9; -fx-font-weight: bold; -fx-font-size: 14px;");
+        
+        Button btnMyReservations = new Button("Rezervasyonlarım");
+        btnMyReservations.setStyle("-fx-base: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnMyReservations.setOnAction(e -> mainApp.showReservationManagementScreen(loggedInPassenger));
         
         Button btnLogout = new Button("Çıkış");
         btnLogout.setStyle("-fx-font-size: 11px;");
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
 
-        headerBox.getChildren().addAll(lblTitle, spacer, lblWelcome, new Label("  "), btnLogout);
+        headerBox.getChildren().addAll(lblTitle, spacer, lblWelcome, new Label("  "), btnMyReservations, new Label(" "), btnLogout);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         
         
@@ -238,7 +244,7 @@ public class UserSearchView {
     }
 
     private void openSeatSelection(Flight flight) {
-        SeatSelectionView seatView = new SeatSelectionView(mainApp, flight, reservationManager);
+        SeatSelectionView seatView = new SeatSelectionView(mainApp, flight, reservationManager, loggedInPassenger);
         Stage stage = new Stage();
         stage.setTitle("Koltuk Seçimi: " + flight.getFlightNum());
         stage.setScene(new Scene(seatView.getView(), 900, 650));

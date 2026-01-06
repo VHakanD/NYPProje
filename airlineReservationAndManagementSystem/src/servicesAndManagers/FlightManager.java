@@ -94,13 +94,32 @@ public class FlightManager {
 	}
 	
 	public void deleteFlight(Flight flight) {
-		if(!(flights.contains(flight))) {
-			flights.remove(flight);
-			System.out.println(flight.getFlightNum() + " numaralı uçuş sistemden silindi");
-		}else {
-			System.out.println(flight.getFlightNum() + " numaralı uçuş bulunamadı!");
-		}
-		saveFlights();
+		if (flight == null) return;
+	    
+	    Flight toRemove = null;
+	    boolean found = false;
+	    int i = 0;
+	    
+	    // BREAK KULLANMADAN ARAMA:
+	    // Listeyi tarıyoruz, bulduğumuz an 'found' true oluyor ve döngü duruyor.
+	    while (i < flights.size() && !found) {
+	        Flight f = flights.get(i);
+	        // ID'leri karşılaştırıyoruz
+	        if (f.getFlightNum().equals(flight.getFlightNum())) {
+	            toRemove = f;
+	            found = true; // Döngü koşulunu bozarak çıkışı sağlar
+	        }
+	        i++;
+	    }
+	    
+	    // Eğer bulunduysa listeden sil ve dosyayı güncelle
+	    if (found) {
+	        flights.remove(toRemove);
+	        saveFlights(); // Dosyaya yazma işlemi
+	        System.out.println("Uçuş başarıyla silindi ve kaydedildi: " + toRemove.getFlightNum());
+	    } else {
+	        System.out.println("Silinecek uçuş listede bulunamadı.");
+	    }
 	}
 	
 	public void listAllFlights() {

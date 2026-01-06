@@ -19,6 +19,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.time.*;
+import java.util.Optional;
 
 public class AdminView {
 	
@@ -355,12 +356,36 @@ public class AdminView {
         btnUpdate.setOnAction(this::handleUpdateFlight);
 
         btnDelete.setOnAction(e -> {
-            Flight selected = flightTable.getSelectionModel().getSelectedItem();
-            if(selected != null) {
-                flightManager.deleteFlight(selected);
-                updateFlightTable();
+        	Flight selected = flightTable.getSelectionModel().getSelectedItem();
+            
+            // 2. Eğer tablodan seçilmediyse ama ID kutusunda bir şey yazıyorsa, ID ile bulmaya çalış
+            if (selected == null && !txtNum.getText().trim().isEmpty()) {
+                String flightId = txtNum.getText().trim();
+                selected = flightManager.getFlightByID(flightId);
             }
-            clearFlightFields();
+
+            if (selected != null) {
+                // 3. Onay Penceresi (Güvenlik Önlemi)
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Uçuş Sil");
+                alert.setHeaderText("Uçuş Siliniyor: " + selected.getFlightNum());
+                alert.setContentText("Bu işlem geri alınamaz. Silmek istediğinize emin misiniz?");
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    
+                    // 4. Silme işlemini gerçekleştir
+                    flightManager.deleteFlight(selected);
+                    
+                    // 5. Tabloyu ve ekranı güncelle
+                    updateFlightTable();
+                    clearFlightFields();
+                    
+                    showAlert("Başarılı", "Uçuş başarıyla silindi.");
+                }
+            } else {
+                showAlert("Uyarı", "Lütfen silinecek uçuşu listeden seçiniz veya geçerli bir Uçuş No giriniz.");
+            }
         });
 
         form.getChildren().addAll(
@@ -489,6 +514,8 @@ public class AdminView {
                 txtArr.setText(selected.getRoute().getArrivalCity());
                 txtDist.setText(String.valueOf((int)selected.getRoute().getDistanceKm()));
             }
+            
+            txtPlaneId.setText(selected.getPlane().getPlaneID());
         }
     }
     

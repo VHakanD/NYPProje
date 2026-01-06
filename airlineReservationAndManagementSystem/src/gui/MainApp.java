@@ -51,42 +51,38 @@ public class MainApp extends Application{
     
     private void loadPassengers() {
         File file = new File(PASSENGER_FILE);
-        
-        // Dosya yoksa oluşturmaya çalışma, sadece listeyi boş bırak
-        if (!file.exists()) {
-            System.out.println("Uyarı: " + PASSENGER_FILE + " bulunamadı. Yeni liste ile başlanıyor.");
-            return;
-        }
+        if (!file.exists()) return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
-                    String[] data = line.split(",");
-                    
-                    // Veri bütünlüğü kontrolü (En az 4 parça olmalı)
-                    if (data.length >= 4) {
-                        String id = data[0].trim();
-                        String name = data[1].trim();
-                        String surname = data[2].trim();
-                        String contact = data[3].trim();
-                        
-                        Passenger p = new Passenger(id, name, surname, contact);
+                    Passenger p = Passenger.fromFileFormat(line);
+                    if (p != null) {
                         passengerList.add(p);
                     }
                 }
             }
-            System.out.println("Yolcular yüklendi. Toplam: " + passengerList.size());
-            
         } catch (IOException e) {
             System.out.println("Yolcu dosyası okuma hatası: " + e.getMessage());
         }
     }
     
+    public void savePassengerToFile(Passenger p) {
+        passengerList.add(p);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, true))) {
+            writer.write(p.toFileFormat());
+            writer.newLine();
+        } catch (IOException e) {
+            System.out.println("Yolcu kaydedilemedi: " + e.getMessage());
+        }
+    }
+    
     public void showLoginScreen() {
         LoginView loginView = new LoginView(this);
-        Scene scene = new Scene(loginView.getView(), 400, 300);
+        Scene scene = new Scene(loginView.getView(), 400, 450);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Giriş Yap");
     }
     
     public void showAdminDashboard(String adminName) {
@@ -115,14 +111,21 @@ public class MainApp extends Application{
         primaryStage.centerOnScreen();
     }
 
-    public void showUserSearchScreen(String username) {
-        UserSearchView userView = new UserSearchView(this, flightManager, reservationManager, username);
+    public void showUserSearchScreen(Passenger loggedInPassenger) {
+        UserSearchView userView = new UserSearchView(this, flightManager, reservationManager, loggedInPassenger);
         Scene scene = new Scene(userView.getView(), 1000, 700);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Yolcu Uçuş Arama");
+        primaryStage.setTitle("Yolcu Paneli - " + loggedInPassenger.getName());
         primaryStage.centerOnScreen();
     }
-
+    
+    public void showReservationManagementScreen(Passenger loggedInPassenger) {
+        ReservationManagementView resView = new ReservationManagementView(this, reservationManager, loggedInPassenger);
+        Scene scene = new Scene(resView.getView(), 1000, 700);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Rezervasyonlarım - " + loggedInPassenger.getName());
+        primaryStage.centerOnScreen();
+    }
     
     public List<Passenger> getPassengerList() {
         return passengerList;
