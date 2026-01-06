@@ -16,6 +16,26 @@ public class Plane {
 		this.planeModel = planeModel;
 		this.capacity = capacity;
 	}
+	
+	public String toFileFormat() {
+        return planeID + "," + planeModel + "," + capacity;
+    }
+
+    // Dosyadan okurken satırı nesneye çeviren yardımcı metot
+    public static Plane fromFileFormat(String line) {
+        String[] data = line.split(",");
+        
+        if (data.length < 3) {
+            System.out.println("Hatalı uçak verisi: " + line);
+            return null;
+        }
+
+        String id = data[0].trim();
+        String model = data[1].trim();
+        int cap = Integer.parseInt(data[2].trim());
+
+        return new Plane(id, model, cap);
+    }
 
 	public String getPlaneID() {
 		return planeID;

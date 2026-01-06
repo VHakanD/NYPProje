@@ -13,7 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
@@ -27,6 +27,7 @@ public class SeatSelectionView {
     private ReservationManager reservationManager;
     private String selectedSeatNum = null; // Kullanıcının o an tıkladığı koltuk
     private Button btnBook;
+    private Label lblSelectionInfo;
 
     public SeatSelectionView(MainApp mainApp, Flight flight, ReservationManager reservationManager) {
         this.mainApp = mainApp;
@@ -34,7 +35,7 @@ public class SeatSelectionView {
         this.reservationManager = reservationManager;
     }
 
-    public Parent getView() {
+    /*public Parent getView() {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
@@ -115,181 +116,110 @@ public class SeatSelectionView {
         layout.setBottom(bottomBar);
 
         return layout;
-    }
+    }*/
     
-    
-    /*private void handleBookingProcess() {
-        if (selectedSeatNum == null) {
-            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen önce tablodan boş bir koltuk seçiniz!");
-            return;
-        }
+    public Parent getView() {
+        BorderPane layout = new BorderPane();
+        layout.setPadding(new Insets(20));
 
-        // Özel Dialog Penceresi Oluştur (Yolcu Bilgileri İçin)
-        Dialog<Passenger> dialog = new Dialog<>();
-        dialog.setTitle("Yolcu Bilgileri");
-        dialog.setHeaderText("Biletleme için lütfen bilgilerinizi eksiksiz giriniz.");
+        Label lblHeader = new Label("Uçuş: " + flight.getFlightNum() + " - " + flight.getRoute().toString());
+        layout.setTop(lblHeader);
 
-        // Dialog Butonları
-        ButtonType loginButtonType = new ButtonType("Onayla", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-        // Form Düzeni
+        // --- KOLTUK MATRİSİ (GRID) ---
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
+        grid.setAlignment(Pos.CENTER);
 
-        TextField txtName = new TextField(); txtName.setPromptText("Ad");
-        TextField txtSurname = new TextField(); txtSurname.setPromptText("Soyad");
-        TextField txtId = new TextField(); txtId.setPromptText("T.C. / Pasaport No");
-        TextField txtPhone = new TextField(); txtPhone.setPromptText("Telefon (5XX...)");
+        Plane plane = flight.getPlane();
+        Map<String, Seat> seats = plane.getSeatMatrix();
 
-        grid.add(new Label("Ad:"), 0, 0);
-        grid.add(txtName, 1, 0);
-        grid.add(new Label("Soyad:"), 0, 1);
-        grid.add(txtSurname, 1, 1);
-        grid.add(new Label("Kimlik No:"), 0, 2);
-        grid.add(txtId, 1, 2);
-        grid.add(new Label("Telefon:"), 0, 3);
-        grid.add(txtPhone, 1, 3);
+        int totalRows = plane.getCapacity() / 6;
+        char[] cols = {'A', 'B', 'C', 'D', 'E', 'F'};
+        lblSelectionInfo = new Label("Lütfen bir koltuk seçiniz.");
+        lblSelectionInfo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
 
-        dialog.getDialogPane().setContent(grid);
+        for (int row = 1; row <= totalRows; row++) {
+            for (int c = 0; c < cols.length; c++) {
+                char colChar = cols[c];
+                String seatNum = row + String.valueOf(colChar);
+                Seat seat = seats.get(seatNum);
 
-        // Varsayılan olarak odaklanılacak alan
-        Platform.runLater(() -> txtName.requestFocus());
+                if (seat != null) {
+                    Button btn = new Button(seatNum);
+                    btn.setPrefSize(55, 45); // Butonları biraz büyüttük (Sehpa yazısı sığsın diye)
 
-        // Sonuç Dönüştürücü (Butona basılınca ne dönecek?)
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
-                // Boş alan kontrolü
-                if (txtName.getText().isEmpty() || txtSurname.getText().isEmpty() || 
-                    txtId.getText().isEmpty() || txtPhone.getText().isEmpty()) {
-                    return null; // Null dönerse aşağıda hata basarız veya işlem yapmayız
+                    // --- Backend'den Gelen Gerçek Tipe Bakıyoruz ---
+                    boolean isBusiness = (seat.getSeatType() == Seat.SeatType.BUSINESS);
+                    
+                    // Business Class'ta Orta Koltuklar (B ve E) Sehpa Olsun
+                    boolean isTable = isBusiness && (colChar == 'B' || colChar == 'E');
+
+                    if (isTable) {
+                        // --- SEHPA / MASAL (Business Orta Koltuk) ---
+                        btn.setText("SEHPA");
+                        btn.setStyle("-fx-background-color: #000000; -fx-text-fill: white; -fx-font-size: 10px;");
+                        btn.setDisable(true); // Tıklanamaz
+                    } 
+                    else if (seat.isReserved()) {
+                        // --- DOLU KOLTUK ---
+                        btn.setStyle("-fx-background-color: #ff6b6b; -fx-text-fill: white;"); 
+                        btn.setDisable(true);
+                    } 
+                    else {
+                        // --- RENK AYARLARI ---
+                        if (isBusiness) {
+                            btn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
+                        } else {
+                            btn.setStyle("-fx-background-color: #51cf66; -fx-text-fill: white;");
+                        }
+                        
+                        // --- 3. TIKLAMA OLAYI GÜNCELLEMESİ ---
+                        // Hem Business hem Ekonomi için ortak tıklama mantığı
+                        btn.setOnAction(e -> {
+                            selectedSeatNum = seatNum;
+                            
+                            // Label'ı güncelle
+                            String typeStr = isBusiness ? "Business" : "Ekonomi";
+                            lblSelectionInfo.setText("Seçilen Koltuk: " + seatNum + " (" + typeStr + ")");
+                            lblSelectionInfo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"); // Yeşil renk yap
+                        });
+                    }
+
+                    // Arayüzde koridor boşluğu bırakmak için sütun indeksi ayarlama
+                    int colIndex = c;
+                    if (c >= 3) colIndex++; // A,B,C (boşluk) D,E,F
+                    
+                    grid.add(btn, colIndex, row);
                 }
-                return new Passenger(txtId.getText(), txtName.getText(), txtSurname.getText(), txtPhone.getText());
             }
-            return null;
-        });
-
-        // Dialogu Göster ve Sonucu Bekle
-        Optional<Passenger> result = dialog.showAndWait();
-
-        if (result.isPresent()) {
-            Passenger passenger = result.get();
-            
-            // Backend'e gönder (Şimdilik mock işlem, backend entegrasyonu için ReservationManager kullanılmalı)
-            // boolean success = reservationManager.makeReservation(flight.getPlane(), flight, passenger, selectedSeatNum);
-            
-            // GEÇİCİ SİMÜLASYON (Backend tam değilse bunu kullanın):
-            flight.getPlane().getSeatMatrix().get(selectedSeatNum).setReserveStatus(true);
-            boolean success = true;
-
-            if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Başarılı", 
-                        "Sayın " + passenger.getName() + " " + passenger.getSurname() + "\n" +
-                        flight.getFlightNum() + " uçuşu için " + selectedSeatNum + " numaralı koltuk ayrıldı.");
-                
-                // Pencereyi kapat veya güncelle (Burada basitçe yeni bir View çağırılabilir veya bu pencere kapatılabilir)
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Hata", "Rezervasyon işlemi gerçekleştirilemedi.");
-            }
-        } else {
-            // Kullanıcı iptal etti veya eksik bilgi girdi
-            showAlert(Alert.AlertType.WARNING, "İptal", "Bilgiler eksik girildiği için işlem yapılmadı.");
         }
-    }*/
-    
-    
-    private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        
+        // Koridor Etiketi
+        Label lblKoridor = new Label("KORİDOR");
+        lblKoridor.setStyle("-fx-font-weight: bold; -fx-text-fill: #7f8c8d;");
+        grid.add(lblKoridor, 3, 0);
+
+        ScrollPane scroll = new ScrollPane(grid);
+        scroll.setFitToWidth(true);
+        // ScrollPane arka planını temizle
+        scroll.setStyle("-fx-background-color:transparent;");
+        layout.setCenter(scroll);
+
+        // --- REZERVASYONU TAMAMLA ---
+        btnBook = new Button("Bilgileri Gir ve Rezervasyonu Tamamla");
+        btnBook.setStyle("-fx-base: #f39c12; -fx-font-size: 14px; -fx-font-weight: bold;");
+        btnBook.setPrefHeight(45);
+        btnBook.setOnAction(e -> handleBookingProcess());
+        
+        VBox bottomContainer = new VBox(10); // Aralarında 10px boşluk
+        bottomContainer.setAlignment(Pos.CENTER);
+        bottomContainer.setPadding(new Insets(15));
+        bottomContainer.getChildren().addAll(lblSelectionInfo, btnBook);
+        layout.setBottom(bottomContainer);
+
+        return layout;
     }
-    
-    /*private void handleBookingProcess() {
-        // 1. Koltuk Seçim Kontrolü
-        if (selectedSeatNum == null) {
-            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen önce tablodan boş bir koltuk seçiniz!");
-            return;
-        }
-
-        // 2. Yolcu Bilgileri Dialog Penceresi
-        Dialog<Passenger> dialog = new Dialog<>();
-        dialog.setTitle("Yolcu Bilgileri");
-        dialog.setHeaderText("Biletleme için lütfen bilgilerinizi eksiksiz giriniz.");
-
-        ButtonType loginButtonType = new ButtonType("Onayla", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-
-        TextField txtName = new TextField(); txtName.setPromptText("Ad");
-        TextField txtSurname = new TextField(); txtSurname.setPromptText("Soyad");
-        TextField txtId = new TextField(); txtId.setPromptText("T.C. / Pasaport No");
-        TextField txtPhone = new TextField(); txtPhone.setPromptText("Telefon (5XX...)");
-
-        grid.add(new Label("Ad:"), 0, 0);       grid.add(txtName, 1, 0);
-        grid.add(new Label("Soyad:"), 0, 1);    grid.add(txtSurname, 1, 1);
-        grid.add(new Label("Kimlik No:"), 0, 2); grid.add(txtId, 1, 2);
-        grid.add(new Label("Telefon:"), 0, 3);  grid.add(txtPhone, 1, 3);
-
-        dialog.getDialogPane().setContent(grid);
-        Platform.runLater(() -> txtName.requestFocus());
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
-                if (txtName.getText().isEmpty() || txtSurname.getText().isEmpty() || 
-                    txtId.getText().isEmpty() || txtPhone.getText().isEmpty()) {
-                    return null;
-                }
-                return new Passenger(txtId.getText(), txtName.getText(), txtSurname.getText(), txtPhone.getText());
-            }
-            return null;
-        });
-
-        Optional<Passenger> result = dialog.showAndWait();
-
-        // 3. Gerçek Rezervasyon İşlemi
-        if (result.isPresent()) {
-            Passenger passenger = result.get();
-            
-            // MANAGER ÇAĞRISI (Burada gerçek kayıt yapılıyor ve dosyaya yazılıyor)
-            boolean success = reservationManager.makeReservation(
-                flight.getPlane(), 
-                flight, 
-                passenger, 
-                selectedSeatNum
-            );
-
-            if (success) {
-                // İsteğe bağlı: Başarılı rezervasyon sonrası hemen bilet üretimi
-                // ReservationManager'da en son eklenen rezervasyonu bulmamız gerekebilir
-                // veya makeReservation metodunun Reservation objesi dönmesini sağlayabilirsiniz.
-                // Şimdilik sadece mesaj verelim.
-                
-                showAlert(Alert.AlertType.INFORMATION, "Başarılı", 
-                        "Sayın " + passenger.getName() + ",\n" +
-                        flight.getFlightNum() + " uçuşu için " + selectedSeatNum + " numaralı koltuk başarıyla ayrıldı.\n" +
-                        "Rezervasyon kaydı oluşturuldu.");
-                
-                // Başarılı işlemden sonra pencreyi kapat
-                // 'grid' değişkeni yukarıdaki layout değil, dialog içindeki grid'dir. 
-                // Bu yüzden view'in ana layout'una ulaşmamız lazım veya en temiz yol:
-                // Butona referans verip oradan sahneye ulaşmak.
-                 closeWindow();
-
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Hata", "Rezervasyon işlemi gerçekleştirilemedi.\nKoltuk dolu olabilir.");
-            }
-        } else {
-            showAlert(Alert.AlertType.WARNING, "İptal", "Bilgiler eksik girildiği için işlem yapılmadı.");
-        }
-    }*/
     
     private void handleBookingProcess() {
         if (selectedSeatNum == null) {
@@ -313,7 +243,7 @@ public class SeatSelectionView {
         TextField txtName = new TextField(); txtName.setPromptText("Ad");
         TextField txtSurname = new TextField(); txtSurname.setPromptText("Soyad");
         TextField txtId = new TextField(); txtId.setPromptText("TC / Pasaport");
-        TextField txtPhone = new TextField(); txtPhone.setPromptText("5XX...");
+        TextField txtPhone = new TextField(); txtPhone.setPromptText("05XX...");
         TextField txtBaggage = new TextField(); txtBaggage.setPromptText("KG (Örn: 15)"); // YENİ ALAN
 
         grid.add(new Label("Ad:"), 0, 0);       grid.add(txtName, 1, 0);
@@ -368,16 +298,31 @@ public class SeatSelectionView {
             Stage paymentStage = new Stage();
             paymentStage.setTitle("Ödeme ve Biletleme");
             paymentStage.setScene(new Scene(paymentView.getView(), 500, 600));
+            paymentStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            
+            // 2. Sahiplik: Ana pencereye bağla
+            paymentStage.initOwner(mainApp.getPrimaryStage());
             paymentStage.show();
             
         } else {
             // İptal edildi veya eksik bilgi
+        	showAlert(Alert.AlertType.INFORMATION, "İşlem İptal Edildi", 
+                    "Yolcu bilgileri eksik girildiği veya işlem iptal edildiği için ödeme adımına geçilemedi.\n\n" +
+                    "Lütfen tekrar deneyiniz.");
         }
     }
     
     private void closeWindow() {
         Stage stage = (Stage) btnBook.getScene().getWindow();
         stage.close();
+    }
+    
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
 }

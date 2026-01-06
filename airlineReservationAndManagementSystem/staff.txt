@@ -1,0 +1,6 @@
+Ahmet,Yilmaz,05553334455,Personel,1111
+Ayse,Demir,05554445566,Personel,2222
+Mehmet,Ozturk,05556667788,Pilot,3333
+Elif,Kaya,05557778899,KabinMemuru,4444
+Can,Yildiz,05558889900,Personel,5555
+Selin,Aras,05559990011,Admin,9999

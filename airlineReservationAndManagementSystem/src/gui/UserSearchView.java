@@ -242,6 +242,12 @@ public class UserSearchView {
         Stage stage = new Stage();
         stage.setTitle("Koltuk Seçimi: " + flight.getFlightNum());
         stage.setScene(new Scene(seatView.getView(), 900, 650));
+        
+        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        
+        // 2. Bu pencerenin sahibini (Owner) ana sahne yap (Hep onun üstünde dursun)
+        stage.initOwner(mainApp.getPrimaryStage());
+        
         stage.show(); // showAndWait yerine show yaptık ki ana ekran kilitlenmesin
     }
     

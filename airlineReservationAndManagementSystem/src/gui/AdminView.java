@@ -28,7 +28,8 @@ public class AdminView {
     private String adminUsername;
     private StaffManager staffManager;
     
-    private TextField txtNum, txtDep, txtArr, txtDist, txtDur, txtPlaneId, txtTime;
+    private TextField txtNum, txtDep, txtArr, txtDist, txtDur, txtPlaneId;
+    private Spinner<Integer> spinHour, spinMinute;;
     private DatePicker datePicker;
     
     private TableView<Staff> staffTable;
@@ -290,30 +291,62 @@ public class AdminView {
         txtPlaneId = new TextField(); txtPlaneId.setPromptText("Uçak ID");
         
         datePicker = new DatePicker();
-        txtTime = new TextField(); txtTime.setPromptText("Saat (HH:mm)");
+        
+        spinHour = new Spinner<>(0, 23, 12);
+        spinHour.setEditable(true); // Elle yazmaya izin ver
+        spinHour.setPrefWidth(70);
+
+        // Dakika: 0-59 arası, varsayılan 00
+        spinMinute = new Spinner<>(0, 59, 0);
+        spinMinute.setEditable(true);
+        spinMinute.setPrefWidth(70);
+
+        // Değerler döngüsel olsun (59'dan sonra 0'a geçsin)
+        SpinnerValueFactory.IntegerSpinnerValueFactory hourFactory = 
+            (SpinnerValueFactory.IntegerSpinnerValueFactory) spinHour.getValueFactory();
+        hourFactory.setWrapAround(true);
+
+        SpinnerValueFactory.IntegerSpinnerValueFactory minFactory = 
+            (SpinnerValueFactory.IntegerSpinnerValueFactory) spinMinute.getValueFactory();
+        minFactory.setWrapAround(true);
 
         Button btnAdd = new Button("Ekle");
         Button btnUpdate = new Button("Güncelle");
         Button btnDelete = new Button("Sil");
 
         btnAdd.setOnAction(e -> {
-            try {
+        	try {
                 String fNum = txtNum.getText();
-                if(flightManager.getFlightByID(fNum) != null) { showAlert("Hata", "Bu ID zaten var."); return; }
+                if(flightManager.getFlightByID(fNum) != null) { 
+                    showAlert("Hata", "Bu Uçuş No zaten var."); return; 
+                }
                 
+                // 1. UÇAĞI BUL (YENİ KISIM)
+                String planeIdInput = txtPlaneId.getText().trim();
+                Plane selectedPlane = flightManager.getPlaneTemplateByID(planeIdInput);
+                
+                if (selectedPlane == null) {
+                    showAlert("Hata", "Girilen Uçak ID (" + planeIdInput + ") sistemde kayıtlı değil!\nLütfen planes.txt dosyasını kontrol edin.");
+                    return;
+                }
+
+                // 2. KOLTUKLARI DÖŞE (SeatManager ile)
+                // Uçağın kapasitesi planes.txt'den geldiği için (örn: 240), koltuklar ona göre oluşacak.
+                new SeatManager().seatingArrangements(selectedPlane);
+
+                // 3. UÇUŞU OLUŞTUR
+                String timeStr = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
                 Route route = new Route(txtDep.getText(), txtArr.getText(), Integer.parseInt(txtDist.getText()));
-                LocalDateTime ldt = LocalDateTime.of(datePicker.getValue(), LocalTime.parse(txtTime.getText()));
+                LocalDateTime ldt = LocalDateTime.of(datePicker.getValue(), LocalTime.parse(timeStr));
                 
                 Flight newFlight = new Flight(fNum, route, ldt, Integer.parseInt(txtDur.getText()));
-                Plane p = new Plane(txtPlaneId.getText(), "B737", 180);
-                new SeatManager().seatingArrangements(p);
-                newFlight.setPlane(p);
+                newFlight.setPlane(selectedPlane); // Bulduğumuz uçağı atadık
                 
                 flightManager.addFlight(newFlight);
                 updateFlightTable();
                 clearFlightFields();
-                showAlert("Başarılı", "Uçuş Eklendi");
-                clearFlightFields();
+                showAlert("Başarılı", "Uçuş Eklendi.\nAtanan Uçak: " + selectedPlane.getPlaneModel() + "\nKapasite: " + selectedPlane.getCapacity());
+                
             } catch (Exception ex) {
                 showAlert("Hata", "Girişleri kontrol edin: " + ex.getMessage());
             }
@@ -332,7 +365,7 @@ public class AdminView {
 
         form.getChildren().addAll(
             new HBox(10, txtNum, txtPlaneId, txtDep, txtArr),
-            new HBox(10, datePicker, txtTime, txtDur, txtDist),
+            new HBox(10, datePicker, new Label("Saat:"), spinHour, new Label(":"), spinMinute, txtDur, txtDist),
             new HBox(10, btnAdd, btnUpdate, btnDelete)
         );
         innerLayout.setBottom(form);
@@ -356,9 +389,10 @@ public class AdminView {
         }
 
         try {
+        	String newTime = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
+        	
             // Formdaki verileri al
-            LocalDate newDate = datePicker.getValue(); 
-            String newTime = txtTime.getText(); 
+            LocalDate newDate = datePicker.getValue();  
             String newDurationStr = txtDur.getText();
             String newPlaneID = txtPlaneId.getText();
             
@@ -381,18 +415,23 @@ public class AdminView {
             Route newRoute = new Route(dep, arr, newDistance);
             updatedInfo.setRoute(newRoute);
             
-            // Uçak Güncellemesi
-            // DİKKAT: Plane sınıfında 'getModel()' mi yoksa 'getPlaneModel()' mi var kontrol et.
-            // Genelde 'getModel()' kullanılır. Eğer hata verirse burayı düzelt.
-            String currentModel = "Unknown";
-            if(selectedFlight.getPlane() != null) {
-                 // Plane sınıfında getModel() varsa onu kullan, yoksa getPlaneModel()
-                 // Buraya varsayılan bir değer atıyoruz şimdilik.
-                 currentModel = "Boeing 737"; 
-            }
+            String inputPlaneID = txtPlaneId.getText().trim();
             
-            Plane newPlane = new Plane(newPlaneID, currentModel, 180); 
-            updatedInfo.setPlane(newPlane);
+            if (selectedFlight.getPlane() == null || !selectedFlight.getPlane().getPlaneID().equals(inputPlaneID)) {
+                Plane newPlane = flightManager.getPlaneTemplateByID(inputPlaneID);
+                
+                if (newPlane == null) {
+                    showAlert("Hata", "Güncellenen Uçak ID sistemde bulunamadı!");
+                    return;
+                }
+                
+                // Yeni uçağın koltuklarını hazırla
+                new SeatManager().seatingArrangements(newPlane);
+                updatedInfo.setPlane(newPlane);
+            } else {
+                // ID değişmediyse mevcut uçağı koru (Koltuk düzenini bozma)
+                updatedInfo.setPlane(selectedFlight.getPlane());
+            }
 
             // Manager'a gönder
             boolean success = flightManager.updateFlight(updatedInfo);
@@ -423,8 +462,24 @@ public class AdminView {
             // Null check ekledik
             if(selected.getDate() != null)
                 datePicker.setValue(selected.getDate().toLocalDate());
-            
-            txtTime.setText(selected.getHour());
+           
+            String timeStr = selected.getHour(); // "14:30" döner
+            if (timeStr != null && timeStr.contains(":")) {
+                try {
+                    String[] parts = timeStr.split(":");
+                    int h = Integer.parseInt(parts[0]);
+                    int m = Integer.parseInt(parts[1]);
+                    
+                    // Spinner değerlerini set et
+                    spinHour.getValueFactory().setValue(h);
+                    spinMinute.getValueFactory().setValue(m);
+                } catch (NumberFormatException e) {
+                    // Format hatası varsa varsayılan 12:00 olsun
+                    spinHour.getValueFactory().setValue(12);
+                    spinMinute.getValueFactory().setValue(0);
+                }
+            }
+           
             txtDur.setText(String.valueOf(selected.getDuration()));
             txtNum.setText(selected.getFlightNum());
             
@@ -444,7 +499,8 @@ public class AdminView {
         txtDist.clear();
         txtDur.clear();
         txtPlaneId.clear();
-        txtTime.clear();
+        spinHour.getValueFactory().setValue(12);
+        spinMinute.getValueFactory().setValue(0);
         datePicker.setValue(null);
         flightTable.getSelectionModel().clearSelection();
     }

@@ -23,6 +23,7 @@ public class LoginView {
         adminCredentials.put("VHakanD", "1234");
         adminCredentials.put("zeyneppkts", "5678"); 
         adminCredentials.put("root", "0000");
+        adminCredentials.put("a", "1");
     }
 
     public Parent getView() {

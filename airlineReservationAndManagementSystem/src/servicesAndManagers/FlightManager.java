@@ -2,17 +2,23 @@ package servicesAndManagers;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 
 import flightManagement.Flight;
+import flightManagement.Plane;
 
 public class FlightManager {
 	//Creating new flights, updating/deleting existing flights.
 	private ArrayList<Flight> flights;
+	private List<Plane> availablePlanes;
 	private final String FILE_NAME = "flights.txt";
+	private final String PLANES_FILE = "planes.txt";
 	
 	public FlightManager() {
 		this.flights = new ArrayList<>();
+		this.availablePlanes = new ArrayList<>();
+		loadPlanes();
 		loadFlights();
 	}
 	
@@ -42,6 +48,26 @@ public class FlightManager {
             }
         } catch (IOException e) {
             System.out.println("Dosya okuma hatası: " + e.getMessage());
+        }
+	}
+	
+	public void loadPlanes() {
+		File file = new File(PLANES_FILE);
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    // Plane.java'ya eklediğiniz fromFileFormat metodunu kullanıyoruz
+                    Plane p = Plane.fromFileFormat(line);
+                    if (p != null) {
+                        availablePlanes.add(p);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Uçak listesi yüklenemedi: " + e.getMessage());
         }
 	}
 	
@@ -149,6 +175,16 @@ public class FlightManager {
 		
 		return searchedFlight;
 	}
+	
+	public Plane getPlaneTemplateByID(String planeID) {
+        for (Plane p : availablePlanes) {
+            if (p.getPlaneID().equalsIgnoreCase(planeID)) {
+                // Referansı değil, yeni bir kopyasını döndürüyoruz:
+                return new Plane(p.getPlaneID(), p.getPlaneModel(), p.getCapacity());
+            }
+        }
+        return null;
+    }
 	
 	public ArrayList<Flight> flightsByDepartureCity(String city){
 		ArrayList<Flight> filteredFlights = new ArrayList<>();
