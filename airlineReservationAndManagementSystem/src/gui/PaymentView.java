@@ -49,6 +49,17 @@ public class PaymentView {
     }
     
     public Parent getView() {
+    	
+    	long hoursUntilFlight = java.time.Duration.between(java.time.LocalDateTime.now(), flight.getDate()).toHours();
+        
+        if (hoursUntilFlight < 24 && hoursUntilFlight >= 0) {
+            // Platform.runLater kullanarak arayüz çizildikten hemen sonra çıkmasını sağlıyoruz
+            javafx.application.Platform.runLater(() -> 
+                showAlert("Son Dakika Uçuşu", 
+                          "Dikkat: Uçuşa 24 saatten az bir süre kaldığı için \nbilet fiyatlarına son dakika tarifesi uygulanmıştır.")
+            );
+        }
+    	
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.TOP_CENTER);
@@ -114,7 +125,7 @@ public class PaymentView {
         txtMonth.setPrefWidth(80);
         
         txtYear = new TextField();
-        txtYear.setPromptText("Yıl (2025)");
+        txtYear.setPromptText("Yıl (20--)");
         txtYear.setPrefWidth(80);
         
         txtCvv = new TextField();

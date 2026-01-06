@@ -161,7 +161,22 @@ public class LoginView {
         // Kayıt Ol Linki
         Hyperlink linkRegister = new Hyperlink("Hesabınız yok mu? Kayıt Olun");
         linkRegister.setOnAction(e -> showRegisterScreen());
+        
+        linkRegister.setVisible(false);
+        //linkRegister.setManaged(false); // Yer kaplamasın
 
+        // 2. Seçim değiştiğinde kontrol et
+        cmbRole.setOnAction(e -> {
+            String selected = cmbRole.getValue();
+            if (selected.contains("Admin")) {
+                linkRegister.setVisible(false);
+                //linkRegister.setManaged(false);
+            } else {
+                linkRegister.setVisible(true);
+                //linkRegister.setManaged(true);
+            }
+        });
+        
         btnLogin.setOnAction(e -> {
             String role = cmbRole.getValue();
             if (role.contains("Admin")) {

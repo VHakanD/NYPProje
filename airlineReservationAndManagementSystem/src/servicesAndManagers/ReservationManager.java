@@ -316,5 +316,56 @@ public class ReservationManager {
         return ticket;
 
     } 
+    
+    public void cancelReservationsByFlightID(String flightNum) {
+        // Listeyi tersten dönüyoruz ki silme işlemi index hatası vermesin
+        boolean removed = false;
+        for (int i = reservations.size() - 1; i >= 0; i--) {
+            Reservation r = reservations.get(i);
+            if (r.getFlight().getFlightNum().equals(flightNum)) {
+                // Koltuk durumunu boşa çıkar (Gerçi uçuş silineceği için çok önemli değil ama temiz kod için)
+                if (r.getSeat() != null) {
+                    r.getSeat().setReserveStatus(false);
+                }
+                reservations.remove(i);
+                removed = true;
+            }
+        }
+        if (removed) {
+            saveReservations();
+            System.out.println(flightNum + " uçuşuna ait tüm rezervasyonlar silindi.");
+        }
+    }
+
+    // 2. Uçuş listesinde artık olmayan (süresi geçmiş veya silinmiş) uçuşların rezervasyonlarını temizler
+    // Program açılışında çalışır.
+    public void cleanUpOrphanReservations() {
+        boolean removed = false;
+        ArrayList<Flight> activeFlights = flightManager.getFlights();
+        
+        for (int i = reservations.size() - 1; i >= 0; i--) {
+            Reservation r = reservations.get(i);
+            boolean flightStillExists = false;
+            
+            // Rezervasyondaki uçuş, aktif uçuş listesinde var mı?
+            for (Flight f : activeFlights) {
+                if (f.getFlightNum().equals(r.getFlight().getFlightNum())) {
+                    flightStillExists = true;
+                    break;
+                }
+            }
+            
+            // Uçuş artık yoksa rezervasyonu da sil
+            if (!flightStillExists) {
+                reservations.remove(i);
+                removed = true;
+            }
+        }
+        
+        if (removed) {
+            saveReservations();
+            System.out.println("Geçersiz (uçuşu silinmiş) rezervasyonlar temizlendi.");
+        }
+    }
 
 }

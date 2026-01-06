@@ -28,6 +28,7 @@ public class AdminView {
     private TableView<Flight> flightTable;
     private String adminUsername;
     private StaffManager staffManager;
+    private ReservationManager reservationManager;
     
     private TextField txtNum, txtDep, txtArr, txtDist, txtDur, txtPlaneId;
     private Spinner<Integer> spinHour, spinMinute;;
@@ -36,13 +37,13 @@ public class AdminView {
     private TableView<Staff> staffTable;
     private TextField txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass;
     
-    public AdminView(MainApp mainApp, FlightManager flightManager, StaffManager staffManager, String adminUsername) {
+    public AdminView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, StaffManager staffManager, String adminUsername) {
         this.mainApp = mainApp;
         this.flightManager = flightManager;
-        this.adminUsername = adminUsername;
+        this.reservationManager = reservationManager;
         this.staffManager = staffManager;
+        this.adminUsername = adminUsername;
     }
-    
     
     public Parent getFlightView() {
         BorderPane layout = new BorderPane();
@@ -140,9 +141,13 @@ public class AdminView {
         HBox formBox = new HBox(10);
         formBox.setAlignment(Pos.CENTER_LEFT);
         
-        TextField txtStaffUser = new TextField(); 
+        txtStaffUser = new TextField(); 
         txtStaffUser.setPromptText("Kullanıcı Adı");
         txtStaffUser.setPrefWidth(100);
+        
+        txtStaffPass = new TextField();
+        txtStaffPass.setPromptText("Şifre");
+        txtStaffPass.setPrefWidth(80);
         
         // Yeni input alanları
         txtStaffName = new TextField(); txtStaffName.setPromptText("Ad");
@@ -330,6 +335,10 @@ public class AdminView {
         Button btnAdd = new Button("Ekle");
         Button btnUpdate = new Button("Güncelle");
         Button btnDelete = new Button("Sil");
+        
+        Button btnClear = new Button("Temizle");
+        btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); // Gri renk
+        btnClear.setOnAction(e -> clearFlightFields());
 
         btnAdd.setOnAction(e -> {
         	try {
@@ -371,7 +380,7 @@ public class AdminView {
         
         btnUpdate.setOnAction(this::handleUpdateFlight);
 
-        btnDelete.setOnAction(e -> {
+        /*btnDelete.setOnAction(e -> {
         	Flight selected = flightTable.getSelectionModel().getSelectedItem();
             
             // 2. Eğer tablodan seçilmediyse ama ID kutusunda bir şey yazıyorsa, ID ile bulmaya çalış
@@ -402,12 +411,45 @@ public class AdminView {
             } else {
                 showAlert("Uyarı", "Lütfen silinecek uçuşu listeden seçiniz veya geçerli bir Uçuş No giriniz.");
             }
+        });*/
+        
+        btnDelete.setOnAction(e -> {
+            Flight selected = flightTable.getSelectionModel().getSelectedItem();
+            
+            if (selected == null && !txtNum.getText().trim().isEmpty()) {
+                String flightId = txtNum.getText().trim();
+                selected = flightManager.getFlightByID(flightId);
+            }
+
+            if (selected != null) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Uçuş Sil");
+                alert.setHeaderText("Uçuş Siliniyor: " + selected.getFlightNum());
+                // Uyarıyı güçlendirdik
+                alert.setContentText("DİKKAT: Bu uçuşu silerseniz, uçuşa ait TÜM BİLETLER de silinecektir!\nOnaylıyor musunuz?");
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    
+                    // 1. Önce bu uçuşa ait rezervasyonları sil
+                    reservationManager.cancelReservationsByFlightID(selected.getFlightNum());
+                    
+                    // 2. Sonra uçuşu sil
+                    flightManager.deleteFlight(selected);
+                    
+                    updateFlightTable();
+                    clearFlightFields();
+                    showAlert("Başarılı", "Uçuş ve ilgili tüm biletler silindi.");
+                }
+            } else {
+                showAlert("Uyarı", "Lütfen silinecek uçuşu seçiniz.");
+            }
         });
 
         form.getChildren().addAll(
             new HBox(10, txtNum, txtPlaneId, txtDep, txtArr),
             new HBox(10, datePicker, new Label("Saat:"), spinHour, new Label(":"), spinMinute, txtDur, txtDist),
-            new HBox(10, btnAdd, btnUpdate, btnDelete)
+            new HBox(10, btnAdd, btnUpdate, btnDelete, btnClear)
         );
         innerLayout.setBottom(form);
         

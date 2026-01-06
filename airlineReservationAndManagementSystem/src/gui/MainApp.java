@@ -47,6 +47,8 @@ public class MainApp extends Application{
         
         reservationManager = new ReservationManager(flightManager, passengerList);
         
+        flightManager.removeExpiredFlights();
+        reservationManager.cleanUpOrphanReservations(); 
     }
     
     private void loadPassengers() {
@@ -95,8 +97,8 @@ public class MainApp extends Application{
     
     public void showFlightScreen(String adminName) {
         // AdminView'i oluşturuyoruz ama sadece Flight kısmını alacağız
-        AdminView adminView = new AdminView(this, flightManager, staffManager, adminName);
-        Scene scene = new Scene(adminView.getFlightView(), 1000, 700);
+    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminName);
+    	Scene scene = new Scene(adminView.getFlightView(), 1000, 700);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Uçuş Yönetimi");
         primaryStage.centerOnScreen();
@@ -104,8 +106,8 @@ public class MainApp extends Application{
 
     
     public void showStaffScreen(String adminName) {
-        AdminView adminView = new AdminView(this, flightManager, staffManager, adminName);
-        Scene scene = new Scene(adminView.getStaffView(), 900, 600);
+    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminName);
+    	Scene scene = new Scene(adminView.getStaffView(), 900, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Personel Yönetimi");
         primaryStage.centerOnScreen();
