@@ -3,6 +3,8 @@ package gui;
 import java.util.stream.Collectors;
 
 import flightManagement.Flight;
+import flightManagement.Seat;
+import servicesAndManagers.CalculatePrice;
 import servicesAndManagers.FlightManager;
 import servicesAndManagers.ReservationManager;
 import javafx.collections.FXCollections;
@@ -22,15 +24,20 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import reservationAndTicketing.Passenger;
+import reservationAndTicketing.Reservation;
 
 import java.util.Locale;
 
 public class UserSearchView {
-	private MainApp mainApp;
+    private MainApp mainApp;
     private FlightManager flightManager;
     private ReservationManager reservationManager;
     private TableView<Flight> table;
     private Passenger loggedInPassenger;
+    
+    // Arama kutularını sınıf seviyesine taşıdık (Erişim için)
+    private TextField txtFrom;
+    private TextField txtTo;
 
     public UserSearchView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, Passenger loggedInPassenger) {
         this.mainApp = mainApp;
@@ -45,6 +52,7 @@ public class UserSearchView {
         
         VBox topContainer = new VBox(15);
         
+        // --- 1. ÜST KISIM (HEADER - Kaybolan kısım burasıydı) ---
         HBox headerBox = new HBox();
         Label lblTitle = new Label("Uçuş Arama");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
@@ -63,30 +71,37 @@ public class UserSearchView {
         btnLogout.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
 
+        // Header elemanlarını ekle
         headerBox.getChildren().addAll(lblTitle, spacer, lblWelcome, new Label("  "), btnMyReservations, new Label(" "), btnLogout);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         
         
+        // --- 2. ARAMA KUTUSU (SEARCH BOX - Güncellenen Kısım) ---
         HBox searchBox = new HBox(10);
         searchBox.setPadding(new Insets(10));
         searchBox.setStyle("-fx-background-color: #ecf0f1; -fx-background-radius: 5;");
         searchBox.setAlignment(Pos.CENTER_LEFT);
 
-        TextField txtFrom = new TextField(); 
+        txtFrom = new TextField(); 
         txtFrom.setPromptText("Nereden (Kalkış Şehri)");
         txtFrom.setPrefWidth(200);
 
-        TextField txtTo = new TextField(); 
+        txtTo = new TextField(); 
         txtTo.setPromptText("Nereye (Varış Şehri)");
         txtTo.setPrefWidth(200);
+        
+        // Listener: Her harf basışında anlık filtreleme (Google gibi)
+        txtFrom.textProperty().addListener((observable, oldValue, newValue) -> filterFlights());
+        txtTo.textProperty().addListener((observable, oldValue, newValue) -> filterFlights());
 
         Button btnSearch = new Button("Uçuş Ara");
         btnSearch.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
+        // Butona basınca da filtrelesin (Gerekirse)
+        btnSearch.setOnAction(e -> filterFlights());
         
         Button btnShowAll = new Button("Tüm Uçuşları Listele");
         
-        btnSearch.setOnAction(e -> handleSearch(txtFrom.getText(), txtTo.getText()));
-        
+        // Temizleme ve Listeleme Fonksiyonu
         btnShowAll.setOnAction(e -> {
             txtFrom.clear();
             txtTo.clear();
@@ -95,15 +110,14 @@ public class UserSearchView {
                 table.setItems(FXCollections.observableArrayList(flightManager.getFlights()));
             }
         });
-        
-        btnShowAll.setOnAction(e -> table.setItems(FXCollections.observableArrayList(flightManager.getFlights())));
 
         searchBox.getChildren().addAll(new Label("Rota Ara:"), txtFrom, new Label("->"), txtTo, btnSearch, btnShowAll);
         
+        // Üst konteyner'a hem Header'ı hem Arama kutusunu ekle
         topContainer.getChildren().addAll(headerBox, searchBox);
         layout.setTop(topContainer);
 
-       
+        // --- 3. TABLO KISMI ---
         table = new TableView<>();
         createTableColumns();
         
@@ -113,6 +127,7 @@ public class UserSearchView {
         
         layout.setCenter(table);
         
+        // --- 4. ALT KISIM (KOLTUK SEÇ BUTONU) ---
         Button btnSelectSeat = new Button("Seçili Uçuşta Koltuk Seç");
         btnSelectSeat.setStyle("-fx-font-size: 14px; -fx-base: #27ae60; -fx-text-fill: white;");
         btnSelectSeat.setPadding(new Insets(10, 20, 10, 20));
@@ -132,7 +147,6 @@ public class UserSearchView {
         layout.setBottom(bottomBox);
 
         return layout;
-        
     }
     
     private void createTableColumns() {
@@ -140,7 +154,7 @@ public class UserSearchView {
         TableColumn<Flight, String> colNum = new TableColumn<>("Uçuş No");
         colNum.setCellValueFactory(new PropertyValueFactory<>("flightNum"));
 
-        // Kalkış Yeri (Route içinden)
+        // Kalkış Yeri
         TableColumn<Flight, String> colDep = new TableColumn<>("Kalkış");
         colDep.setCellValueFactory(cell -> 
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getRoute().getDepartureCity()));
@@ -150,7 +164,7 @@ public class UserSearchView {
         colArr.setCellValueFactory(cell -> 
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getRoute().getArrivalCity()));
 
-        // Tarih (Özel formatlı metodunuz varsa onu kullanır, yoksa toString)
+        // Tarih
         TableColumn<Flight, String> colDate = new TableColumn<>("Tarih");
         colDate.setCellValueFactory(new PropertyValueFactory<>("formattedDate")); 
 
@@ -161,15 +175,10 @@ public class UserSearchView {
         // Süre
         TableColumn<Flight, String> colDur = new TableColumn<>("Uçuş Süresi");
         colDur.setCellValueFactory(cell -> {
-            int rawMinutes = cell.getValue().getDuration(); // Toplam dakika (örn: 150)
-            
-            int hours = rawMinutes / 60;    // Tam sayı bölmesi (150 / 60 = 2)
-            int minutes = rawMinutes % 60;  // Kalanı bulma (150 % 60 = 30)
-            
-            // Ekranda görünecek format
-            // İsterseniz "saat" ve "dakika" kelimelerini uzun da yazabilirsiniz.
+            int rawMinutes = cell.getValue().getDuration();
+            int hours = rawMinutes / 60;
+            int minutes = rawMinutes % 60;
             String formatted = String.format("%d sa %d dk", hours, minutes);
-            
             return new javafx.beans.property.SimpleStringProperty(formatted);
         });
         
@@ -178,69 +187,60 @@ public class UserSearchView {
         colDist.setCellValueFactory(cell -> 
              new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getRoute().getDistanceKm()));
 
-        table.getColumns().addAll(colNum, colDep, colArr, colDate, colTime, colDur, colDist);
-       
-        
+        // FİYAT SÜTUNU (DÜZELTİLMİŞ HALİ)
         TableColumn<Flight, String> colPrice = new TableColumn<>("Tahmini Fiyat (Eco - Bus)");
         
         colPrice.setCellValueFactory(cell -> {
             Flight f = cell.getValue();
             if (f.getRoute() != null) {
-                double dist = f.getRoute().getDistanceKm();
+                CalculatePrice calculator = new CalculatePrice();
                 
-                // FİYAT POLİTİKASI VARSAYIMI:
-                // Sizin CalculatePrice sınıfınızdaki mantığa yakın bir oran kullanıyoruz.
-                // Örnek: KM başına 1.5 TL (Ekonomi) ve 3.0 TL (Business) olsun.
-                // Bu oranları projenizin gerçek fiyatlandırma mantığına göre değiştirebilirsiniz.
+                // HATA DÜZELTME: Null yerine geçici (dummy) bir yolcu oluşturuyoruz.
+                Passenger dummyPassenger = new Passenger("TEMP_ID", "Fiyat", "Hesaplayici", "000");
                 
-                double minPrice = dist * 1.5; 
-                double maxPrice = dist * 3.5; 
+                Seat dummyEcoSeat = new Seat("XX", Seat.SeatType.ECONOMY);
+                Seat dummyBusSeat = new Seat("XX", Seat.SeatType.BUSINESS);
                 
-                String priceText = String.format("%.0f ₺ - %.0f ₺", minPrice, maxPrice);
+                Reservation dummyResEco = new Reservation("TEMP", f, dummyPassenger, dummyEcoSeat);
+                Reservation dummyResBus = new Reservation("TEMP", f, dummyPassenger, dummyBusSeat);
+                
+                double realEcoPrice = calculator.calculateTicketPrice(dummyResEco);
+                double realBusPrice = calculator.calculateTicketPrice(dummyResBus);
+                
+                String priceText = String.format("%.0f ₺ - %.0f ₺", realEcoPrice, realBusPrice);
                 return new javafx.beans.property.SimpleStringProperty(priceText);
             } else {
                 return new javafx.beans.property.SimpleStringProperty("-");
             }
         });
         
-        table.getColumns().add(colPrice);
-        
+        table.getColumns().addAll(colNum, colDep, colArr, colDate, colTime, colDur, colDist, colPrice);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void handleSearch(String from, String to) {
-    	if (flightManager.getFlights() == null) return;
+    // YENİ FİLTRELEME METODU (Listener tarafından çağrılır)
+    private void filterFlights() {
+        if (flightManager.getFlights() == null) return;
 
-        // Türkçe karakter sorunlarını (İ-i, I-ı) en aza indirmek için Locale.ROOT veya ENGLISH kullanabiliriz
-        // veya varsayılan locale ile devam edebiliriz.
-        String searchFrom = from.trim().toLowerCase(Locale.ROOT);
-        String searchTo = to.trim().toLowerCase(Locale.ROOT);
+        String searchFrom = txtFrom.getText().toLowerCase(Locale.ENGLISH);
+        String searchTo = txtTo.getText().toLowerCase(Locale.ENGLISH);
 
         ObservableList<Flight> filteredList = FXCollections.observableArrayList(
             flightManager.getFlights().stream()
                 .filter(flight -> {
-                    // Veritabanındaki şehir isimlerini de aynı şekilde küçültüyoruz
-                    String depCity = flight.getRoute().getDepartureCity().toLowerCase(Locale.ROOT);
-                    String arrCity = flight.getRoute().getArrivalCity().toLowerCase(Locale.ROOT);
+                    String depCity = flight.getRoute().getDepartureCity().toLowerCase(Locale.ENGLISH);
+                    String arrCity = flight.getRoute().getArrivalCity().toLowerCase(Locale.ENGLISH);
                     
-                    // Logic:
-                    // 1. Arama kutusu boşsa (isEmpty), o kriteri yok say (true dön).
-                    // 2. Doluysa, şehir isminin içinde aranan kelime geçiyor mu (contains)?
-                    
+                    // Logic: Arama kutusu boşsa veya eşleşiyorsa true
                     boolean matchFrom = searchFrom.isEmpty() || depCity.contains(searchFrom);
                     boolean matchTo = searchTo.isEmpty() || arrCity.contains(searchTo);
                     
-                    // Her iki şart da (veya boşlarsa) sağlanmalı
                     return matchFrom && matchTo;
                 })
                 .collect(Collectors.toList())
         );
         
         table.setItems(filteredList);
-        
-        if(filteredList.isEmpty()) {
-            showAlert("Bilgi", "Aradığınız kriterlere uygun uçuş bulunamadı.");
-        }
     }
 
     private void openSeatSelection(Flight flight) {
@@ -250,11 +250,9 @@ public class UserSearchView {
         stage.setScene(new Scene(seatView.getView(), 900, 650));
         
         stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-        
-        // 2. Bu pencerenin sahibini (Owner) ana sahne yap (Hep onun üstünde dursun)
         stage.initOwner(mainApp.getPrimaryStage());
         
-        stage.show(); // showAndWait yerine show yaptık ki ana ekran kilitlenmesin
+        stage.show();
     }
     
     private void showAlert(String title, String msg) {
@@ -264,5 +262,4 @@ public class UserSearchView {
         alert.setContentText(msg);
         alert.showAndWait();
     }
-
 }
