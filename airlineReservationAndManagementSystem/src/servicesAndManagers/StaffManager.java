@@ -68,5 +68,22 @@ public class StaffManager {
         }
         return false;
     }
+    
+    public Staff validateLogin(String inputUsername, String inputPassword) {
+        Staff foundStaff = null;
+        boolean found = false;
+        int i = 0;
+
+        
+        while (i < staffList.size() && !found) {
+            Staff s = staffList.get(i);
+            if (s.getUsername().equals(inputUsername) && s.getPassword().equals(inputPassword)) {
+                foundStaff = s;
+                found = true;
+            }
+            i++;
+        }
+        return foundStaff;
+    }
 
 }

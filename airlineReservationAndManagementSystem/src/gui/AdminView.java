@@ -34,7 +34,7 @@ public class AdminView {
     private DatePicker datePicker;
     
     private TableView<Staff> staffTable;
-    private TextField txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffPass;
+    private TextField txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass;
     
     public AdminView(MainApp mainApp, FlightManager flightManager, StaffManager staffManager, String adminUsername) {
         this.mainApp = mainApp;
@@ -112,6 +112,9 @@ public class AdminView {
         TableColumn<Staff, String> colRole = new TableColumn<>("Görevi");
         colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
         
+        TableColumn<Staff, String> colUser = new TableColumn<>("Kullanıcı Adı");
+        colUser.setCellValueFactory(new PropertyValueFactory<>("username"));
+        
         TableColumn<Staff, String> colPass = new TableColumn<>("Şifre");
         colPass.setCellValueFactory(new PropertyValueFactory<>("password"));
 
@@ -119,6 +122,7 @@ public class AdminView {
         staffTable.getColumns().add(colSurname);
         staffTable.getColumns().add(colContact);
         staffTable.getColumns().add(colRole);
+        staffTable.getColumns().add(colUser);
         staffTable.getColumns().add(colPass);
         
         staffTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -127,6 +131,7 @@ public class AdminView {
                 txtStaffSurname.setText(newVal.getSurname()); // Eğer surname private ise getSurname() kullanın
                 txtStaffContact.setText(newVal.getContactInfo()); // getter kullanın
                 txtStaffRole.setText(newVal.getRole()); // getter kullanın
+                txtStaffUser.setText(newVal.getUsername());
                 txtStaffPass.setText(newVal.getPassword()); // getter kullanın
             }
         });
@@ -134,6 +139,10 @@ public class AdminView {
         // 2. Form Alanları (Yeni Staff Constructor yapısına uygun)
         HBox formBox = new HBox(10);
         formBox.setAlignment(Pos.CENTER_LEFT);
+        
+        TextField txtStaffUser = new TextField(); 
+        txtStaffUser.setPromptText("Kullanıcı Adı");
+        txtStaffUser.setPrefWidth(100);
         
         // Yeni input alanları
         txtStaffName = new TextField(); txtStaffName.setPromptText("Ad");
@@ -163,12 +172,13 @@ public class AdminView {
             
             // YENİ STAFF CONSTRUCTOR: (name, surname, contactInfo, role, password)
             Staff newStaff = new Staff(
-                txtStaffName.getText(),
-                txtStaffSurname.getText(),
-                txtStaffContact.getText(),
-                txtStaffRole.getText(),
-                txtStaffPass.getText()
-            );
+                    txtStaffUser.getText(), // Username
+                    txtStaffPass.getText(), // Password
+                    txtStaffName.getText(),
+                    txtStaffSurname.getText(),
+                    txtStaffContact.getText(),
+                    txtStaffRole.getText()
+                );
             
             staffManager.addStaff(newStaff);
             updateStaffTable();
@@ -204,12 +214,13 @@ public class AdminView {
             
             // Yeni bilgilerle geçici bir nesne oluştur
             Staff updatedStaffInfo = new Staff(
-                txtStaffName.getText(),
-                txtStaffSurname.getText(),
-                txtStaffContact.getText(),
-                txtStaffRole.getText(),
-                txtStaffPass.getText()
-            );
+                    txtStaffUser.getText(), // Username
+                    txtStaffPass.getText(), // Password
+                    txtStaffName.getText(),
+                    txtStaffSurname.getText(),
+                    txtStaffContact.getText(),
+                    txtStaffRole.getText()
+                );
             
             // Manager üzerinden güncelle
             // (Eski nesneyi referans olarak veriyoruz ki listedeki yerini bulsun)
@@ -220,7 +231,7 @@ public class AdminView {
                 updateStaffTable(); // Tabloyu yenile
                 
                 // Alanları temizle
-                txtStaffName.clear(); txtStaffSurname.clear(); 
+                txtStaffName.clear(); txtStaffSurname.clear(); txtStaffUser.clear();
                 txtStaffContact.clear(); txtStaffRole.clear(); txtStaffPass.clear();
             } else {
                 showAlert("Hata", "Güncelleme sırasında bir sorun oluştu.");
@@ -228,7 +239,7 @@ public class AdminView {
             clearStaffFields();
         });
 
-        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffPass, btnAddStaff, btnUpdateStaff,btnDelStaff);
+        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass, btnAddStaff, btnUpdateStaff,btnDelStaff);
         
         layout.getChildren().addAll(staffTable, new Label("Personel Yönetimi:"), formBox);
         
@@ -265,8 +276,13 @@ public class AdminView {
         
         TableColumn<Flight, String> timeColumn = new TableColumn<>("Saat");
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("hour"));
+        
+        TableColumn<Flight, String> colModel = new TableColumn<>("Uçak Modeli");
+        colModel.setCellValueFactory(cellData -> 
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getPlane().getPlaneModel()));
 
         flightTable.getColumns().add(colNum);
+        flightTable.getColumns().add(colModel);
         flightTable.getColumns().add(colRoute);
         flightTable.getColumns().add(colDist);
         flightTable.getColumns().add(dateColumn);
