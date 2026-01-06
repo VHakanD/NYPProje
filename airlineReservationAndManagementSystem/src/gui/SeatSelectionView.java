@@ -9,12 +9,14 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -206,7 +208,7 @@ public class SeatSelectionView {
         alert.showAndWait();
     }
     
-    private void handleBookingProcess() {
+    /*private void handleBookingProcess() {
         // 1. Koltuk Seçim Kontrolü
         if (selectedSeatNum == null) {
             showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen önce tablodan boş bir koltuk seçiniz!");
@@ -286,6 +288,90 @@ public class SeatSelectionView {
             }
         } else {
             showAlert(Alert.AlertType.WARNING, "İptal", "Bilgiler eksik girildiği için işlem yapılmadı.");
+        }
+    }*/
+    
+    private void handleBookingProcess() {
+        if (selectedSeatNum == null) {
+            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen önce tablodan boş bir koltuk seçiniz!");
+            return;
+        }
+
+        // --- Yolcu Bilgileri Dialogu ---
+        Dialog<Map<String, Object>> dialog = new Dialog<>();
+        dialog.setTitle("Yolcu ve Bagaj Bilgileri");
+        dialog.setHeaderText("Lütfen yolcu bilgilerini ve bagaj miktarını giriniz.");
+
+        ButtonType confirmButtonType = new ButtonType("Ödemeye Geç", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField txtName = new TextField(); txtName.setPromptText("Ad");
+        TextField txtSurname = new TextField(); txtSurname.setPromptText("Soyad");
+        TextField txtId = new TextField(); txtId.setPromptText("TC / Pasaport");
+        TextField txtPhone = new TextField(); txtPhone.setPromptText("5XX...");
+        TextField txtBaggage = new TextField(); txtBaggage.setPromptText("KG (Örn: 15)"); // YENİ ALAN
+
+        grid.add(new Label("Ad:"), 0, 0);       grid.add(txtName, 1, 0);
+        grid.add(new Label("Soyad:"), 0, 1);    grid.add(txtSurname, 1, 1);
+        grid.add(new Label("Kimlik No:"), 0, 2); grid.add(txtId, 1, 2);
+        grid.add(new Label("Telefon:"), 0, 3);  grid.add(txtPhone, 1, 3);
+        grid.add(new Label("Bagaj (kg):"), 0, 4); grid.add(txtBaggage, 1, 4); // YENİ ALAN EKLENDİ
+
+        dialog.getDialogPane().setContent(grid);
+        Platform.runLater(txtName::requestFocus);
+
+        // Sonuç Dönüştürücü
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == confirmButtonType) {
+                // Basit Validasyon
+                if (txtName.getText().isEmpty() || txtSurname.getText().isEmpty() || 
+                    txtId.getText().isEmpty() || txtPhone.getText().isEmpty() || txtBaggage.getText().isEmpty()) {
+                    return null;
+                }
+                
+                // Verileri paketle ve döndür
+                Map<String, Object> data = new HashMap<>();
+                data.put("passenger", new Passenger(txtId.getText(), txtName.getText(), txtSurname.getText(), txtPhone.getText()));
+                
+                // Bagaj kilosunu sayıya çevir (Hata kontrolü basit tutuldu)
+                try {
+                    data.put("baggage", Integer.parseInt(txtBaggage.getText()));
+                } catch (NumberFormatException e) {
+                    data.put("baggage", 0);
+                }
+                
+                return data;
+            }
+            return null;
+        });
+
+        Optional<Map<String, Object>> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            Map<String, Object> data = result.get();
+            Passenger passenger = (Passenger) data.get("passenger");
+            int baggageKg = (int) data.get("baggage");
+
+            // BURADAKİ DEĞİŞİKLİK:
+            // Artık direkt kaydetmiyoruz. PaymentView (Ödeme Ekranı) açıyoruz.
+            // Mevcut pencereyi (Koltuk Seçimi) kapatıp ödemeye geçiyoruz.
+            
+            closeWindow(); // Önce bu ekranı kapat
+            
+            // Ödeme Ekranını Aç
+            PaymentView paymentView = new PaymentView(mainApp, flight, passenger, selectedSeatNum, baggageKg, reservationManager);
+            Stage paymentStage = new Stage();
+            paymentStage.setTitle("Ödeme ve Biletleme");
+            paymentStage.setScene(new Scene(paymentView.getView(), 500, 600));
+            paymentStage.show();
+            
+        } else {
+            // İptal edildi veya eksik bilgi
         }
     }
     

@@ -72,6 +72,41 @@ public class ReservationManager {
         }
     }
     
+    private void savePassengerIfNew(Passenger passenger) {
+        boolean exists = false;
+        int i = 0;
+        
+        // Break yerine, döngü koşuluna (!exists) ekleyerek kontrolü sağlıyoruz
+        while (i < passengers.size() && !exists) {
+            Passenger p = passengers.get(i);
+            if (p.getPassengerID().equals(passenger.getPassengerID())) {
+                exists = true; // Bulunduğu anda döngü koşulu bozulacağı için döngüden çıkar
+            }
+            i++;
+        }
+        
+        // Eğer listede yoksa hem listeye hem dosyaya ekle
+        if (!exists) {
+            // Listeye ekle (RAM güncellemesi)
+            passengers.add(passenger);
+            
+            // Dosyaya ekle (Disk güncellemesi)
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("passengers.txt", true))) {
+                
+                writer.write(passenger.getPassengerID() + "," + 
+                             passenger.getName() + "," + 
+                             passenger.getSurname() + "," + 
+                             passenger.getContactInfo());
+                writer.newLine();
+                
+                System.out.println("Yeni yolcu sisteme kaydedildi: " + passenger.getName());
+                
+            } catch (IOException e) {
+                System.out.println("Yolcu kaydedilirken hata oluştu: " + e.getMessage());
+            }
+        }
+    }
+    
     public Reservation findReservationByCode(String reservationCode) {
     	int i = 0;
         boolean found = false;
@@ -134,6 +169,8 @@ public class ReservationManager {
     
     
     public synchronized boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
+    	savePassengerIfNew(passenger);
+    	
     	if (!plane.hasSeat(seatNum)) {
             System.out.println("Hata: Böyle bir koltuk yok: " + seatNum);
             return false;
