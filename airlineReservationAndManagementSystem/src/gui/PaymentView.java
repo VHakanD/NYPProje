@@ -26,6 +26,7 @@ public class PaymentView {
 	private MainApp mainApp;
     private Flight flight;
     private Passenger passenger;
+    private Passenger bookerPassenger;
     private String seatNum;
     private int baggageKg;
     private ReservationManager reservationManager;
@@ -36,16 +37,17 @@ public class PaymentView {
     private TextField txtYear;
     private TextField txtCvv;
 
-    public PaymentView(MainApp mainApp, Flight flight, Passenger passenger, String seatNum, int baggageKg, ReservationManager mgr) {
+    public PaymentView(MainApp mainApp, Flight flight, Passenger passenger, Passenger bookerPassenger, String seatNum, int baggageKg, ReservationManager mgr) {
         this.mainApp = mainApp;
         this.flight = flight;
         this.passenger = passenger;
+        this.bookerPassenger = bookerPassenger; // Kaydet
         this.seatNum = seatNum;
         this.baggageKg = baggageKg;
         this.reservationManager = mgr;
-        this.priceCalculator = new CalculatePrice(); // Backend hesaplayıcısını kullanıyoruz
+        this.priceCalculator = new CalculatePrice(); 
     }
-
+    
     public Parent getView() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(30));
@@ -147,7 +149,8 @@ public class PaymentView {
             flight.getPlane(), 
             flight, 
             passenger, 
-            seatNum
+            seatNum,
+            bookerPassenger.getPassengerID()
         );
 
         if (resSuccess) {
@@ -189,9 +192,10 @@ public class PaymentView {
         // Yolcunun rezervasyonları arasından bu uçuşa ait olanı bul
         // En güvenli yöntem PNR kodunu makeReservation'dan döndürmektir ama
         // mevcut metod boolean dönüyor. Bu yüzden listeyi tarıyoruz.
-        ArrayList<Reservation> list = reservationManager.getReservationsByPassenger(passenger.getPassengerID());
+        ArrayList<Reservation> list = reservationManager.getReservationsByBooker(bookerPassenger.getPassengerID());
         for (Reservation r : list) {
-            if (r.getFlight().getFlightNum().equals(flight.getFlightNum())) {
+            if (r.getFlight().getFlightNum().equals(flight.getFlightNum()) && 
+                    r.getSeat().getSeatNum().equals(seatNum)) {
                 // Çakışmayı önlemek için rezervasyon saati veya durumu da kontrol edilebilir
                 return r; 
             }

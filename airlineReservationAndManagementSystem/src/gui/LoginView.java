@@ -224,7 +224,7 @@ public class LoginView {
     private void handleRegistration(TextField name, TextField sur, TextField id, TextField phone, TextField user, PasswordField pass) {
         if(name.getText().isEmpty() || sur.getText().isEmpty() || id.getText().isEmpty() ||
            user.getText().isEmpty() || pass.getText().isEmpty()) {
-            showAlert("Hata", "Lütfen tüm alanları doldurunuz.");
+        	showAlert(Alert.AlertType.WARNING, "Eksik Bilgi", "Lütfen tüm alanları doldurunuz.");
             return;
         }
         
@@ -237,28 +237,36 @@ public class LoginView {
         // MainApp üzerinden kaydet
         mainApp.savePassengerToFile(newP);
         
-        showAlert("Başarılı", "Kayıt tamamlandı! Şimdi giriş yapabilirsiniz.");
+        showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Kayıt tamamlandı! Şimdi giriş yapabilirsiniz.");
         showLoginScreen();
     }
 
     private void handlePassengerLogin(String username, String password) {
-        List<Passenger> list = mainApp.getPassengerList();
+    	List<Passenger> list = mainApp.getPassengerList();
         Passenger foundPassenger = null;
+        boolean found = false; // Döngü kontrol bayrağı
+        int i = 0;
         
-        // Listede kullanıcı adı ve şifre ara
-        for(Passenger p : list) {
+        // break yerine while döngüsü ve found bayrağı kullanıyoruz
+        while (i < list.size() && !found) {
+            Passenger p = list.get(i);
+            
+            // Kullanıcı adı ve şifre kontrolü
             if (p.getUsername() != null && p.getUsername().equals(username) && 
                 p.getPassword() != null && p.getPassword().equals(password)) {
+                
                 foundPassenger = p;
-                break;
+                found = true; // Bulunduğunda bayrağı kaldırıyoruz, döngü sonlanıyor
             }
+            i++;
         }
 
-        if (foundPassenger != null) {
+        if (found) {
             System.out.println("Yolcu Girişi Başarılı: " + foundPassenger.getName());
             mainApp.showUserSearchScreen(foundPassenger); 
         } else {
-            showAlert("Hata", "Kullanıcı adı veya şifre hatalı. Kayıtlı değilseniz lütfen kayıt olun.");
+            // Bir önceki adımda düzelttiğimiz showAlert metodunu kullanıyoruz
+            showAlert(Alert.AlertType.ERROR, "Giriş Başarısız", "Kullanıcı adı veya şifre hatalı.");
         }
     }
 
@@ -266,13 +274,13 @@ public class LoginView {
         if (adminCredentials.containsKey(user) && adminCredentials.get(user).equals(pass)) {
              mainApp.showAdminDashboard(user);
         } else {
-             showAlert("Hata", "Yönetici bilgileri hatalı.");
+        	showAlert(Alert.AlertType.ERROR, "Hata", "Yönetici bilgileri hatalı.");
         }
     }
 
     // Uyarı mesajı göstermek için yardımcı metot
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type); // Gelen tipe göre ikon belirler
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

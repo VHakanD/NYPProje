@@ -228,6 +228,12 @@ public class SeatSelectionView {
             showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen önce tablodan boş bir koltuk seçiniz!");
             return;
         }
+        
+        Seat currentSeat = flight.getPlane().getSeatMatrix().get(selectedSeatNum);
+        int freeAllowance = (currentSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
+        
+        Label lblBaggageInfo = new Label("(Hak: " + freeAllowance + " kg)");
+        lblBaggageInfo.setStyle("-fx-font-size: 11px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;");
 
         // --- Yolcu Bilgileri Dialogu ---
         Dialog<Map<String, Object>> dialog = new Dialog<>();
@@ -254,7 +260,10 @@ public class SeatSelectionView {
         grid.add(new Label("Soyad:"), 0, 1);    grid.add(txtSurname, 1, 1);
         grid.add(new Label("Kimlik No:"), 0, 2); grid.add(txtId, 1, 2);
         grid.add(new Label("Telefon:"), 0, 3);  grid.add(txtPhone, 1, 3);
-        grid.add(new Label("Bagaj (kg):"), 0, 4); grid.add(txtBaggage, 1, 4); // YENİ ALAN EKLENDİ
+        
+        grid.add(new Label("Bagaj (kg):"), 0, 4); 
+        grid.add(txtBaggage, 1, 4); 
+        grid.add(lblBaggageInfo, 2, 4);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(txtBaggage::requestFocus);
@@ -287,18 +296,14 @@ public class SeatSelectionView {
         Optional<Map<String, Object>> result = dialog.showAndWait();
 
         if (result.isPresent()) {
-            Map<String, Object> data = result.get();
-            Passenger passenger = (Passenger) data.get("passenger");
+        	Map<String, Object> data = result.get();
+            Passenger flyerPassenger = (Passenger) data.get("passenger");
             int baggageKg = (int) data.get("baggage");
-
-            // BURADAKİ DEĞİŞİKLİK:
-            // Artık direkt kaydetmiyoruz. PaymentView (Ödeme Ekranı) açıyoruz.
-            // Mevcut pencereyi (Koltuk Seçimi) kapatıp ödemeye geçiyoruz.
             
             closeWindow(); // Önce bu ekranı kapat
             
             // Ödeme Ekranını Aç
-            PaymentView paymentView = new PaymentView(mainApp, flight, passenger, selectedSeatNum, baggageKg, reservationManager);
+            PaymentView paymentView = new PaymentView(mainApp, flight, flyerPassenger, loggedInPassenger, selectedSeatNum, baggageKg, reservationManager);
             Stage paymentStage = new Stage();
             paymentStage.setTitle("Ödeme ve Biletleme");
             paymentStage.setScene(new Scene(paymentView.getView(), 500, 600));

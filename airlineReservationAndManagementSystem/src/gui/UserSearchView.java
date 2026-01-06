@@ -60,7 +60,7 @@ public class UserSearchView {
         btnMyReservations.setOnAction(e -> mainApp.showReservationManagementScreen(loggedInPassenger));
         
         Button btnLogout = new Button("Çıkış");
-        btnLogout.setStyle("-fx-font-size: 11px;");
+        btnLogout.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
 
         headerBox.getChildren().addAll(lblTitle, spacer, lblWelcome, new Label("  "), btnMyReservations, new Label(" "), btnLogout);

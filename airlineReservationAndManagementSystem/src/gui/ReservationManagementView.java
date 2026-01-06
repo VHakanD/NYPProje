@@ -26,7 +26,9 @@ public class ReservationManagementView {
 	private MainApp mainApp;
     private ReservationManager reservationManager;
     private Passenger loggedInPassenger;
-    private TableView<Reservation> table;
+    
+    private TableView<Reservation> tableMyTickets;
+    private TableView<Reservation> tableOthersTickets;
 
     public ReservationManagementView(MainApp mainApp, ReservationManager reservationManager, Passenger loggedInPassenger) {
         this.mainApp = mainApp;
@@ -35,117 +37,132 @@ public class ReservationManagementView {
     }
 
     public Parent getView() {
-        BorderPane layout = new BorderPane();
+    	BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
-        // --- ÜST BAŞLIK ALANI ---
+        // --- ÜST BAŞLIK ---
         HBox topBar = new HBox(15);
         topBar.setAlignment(Pos.CENTER_LEFT);
-        
-        Label lblTitle = new Label("Rezervasyonlarım");
+        Label lblTitle = new Label("Rezervasyon Yönetimi");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         Button btnBack = new Button("← Uçuş Aramaya Dön");
         btnBack.setOnAction(e -> mainApp.showUserSearchScreen(loggedInPassenger));
-
         topBar.getChildren().addAll(lblTitle, spacer, btnBack);
         layout.setTop(topBar);
 
-        // --- TABLO OLUŞTURMA ---
-        table = new TableView<>();
-        createTableColumns();
-        refreshTableData(); // Verileri yükle
+        // --- ORTA KISIM (VBox içinde iki tablo) ---
+        VBox centerContent = new VBox(15);
+        centerContent.setPadding(new Insets(10, 0, 10, 0));
 
-        layout.setCenter(table);
+        // 1. Tablo: Kendi Biletlerim
+        Label lblMine = new Label("Kendi Adınıza Olan Biletler");
+        lblMine.setStyle("-fx-font-weight: bold; -fx-text-fill: #2980b9; -fx-font-size: 14px;");
+        tableMyTickets = new TableView<>();
+        tableMyTickets.setPrefHeight(200);
+        createTableColumns(tableMyTickets);
 
-        // --- ALT İŞLEM BUTONLARI ---
+        // 2. Tablo: Başkasına Aldıklarım
+        Label lblOthers = new Label("Sizin Adınıza Olmayan / Başkasına Aldığınız Biletler");
+        lblOthers.setStyle("-fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 14px;");
+        tableOthersTickets = new TableView<>();
+        tableOthersTickets.setPrefHeight(200);
+        createTableColumns(tableOthersTickets);
+
+        centerContent.getChildren().addAll(lblMine, tableMyTickets, new Separator(), lblOthers, tableOthersTickets);
+        layout.setCenter(centerContent);
+
+        // --- ALT KISIM ---
         HBox bottomBar = new HBox(15);
-        bottomBar.setPadding(new Insets(15, 0, 0, 0));
         bottomBar.setAlignment(Pos.CENTER_RIGHT);
-
+        
         Button btnCancel = new Button("Seçili Rezervasyonu İptal Et");
         btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         btnCancel.setPrefHeight(40);
-        
         btnCancel.setOnAction(e -> handleCancelReservation());
 
         bottomBar.getChildren().add(btnCancel);
         layout.setBottom(bottomBar);
+        
+        // Verileri Yükle
+        refreshTables();
 
         return layout;
     }
 
-    private void createTableColumns() {
-        // PNR Kodu
-        TableColumn<Reservation, String> colPNR = new TableColumn<>("PNR Kodu");
-        colPNR.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getReservationCode()));
+    private void createTableColumns(TableView<Reservation> table) {
+    	TableColumn<Reservation, String> colPNR = new TableColumn<>("PNR");
+        colPNR.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getReservationCode()));
 
-        // Uçuş No
-        TableColumn<Reservation, String> colFlightNum = new TableColumn<>("Uçuş No");
-        colFlightNum.setCellValueFactory(cell -> 
-            new SimpleStringProperty(cell.getValue().getFlight().getFlightNum()));
+        // Yolcu Adını da gösterelim
+        TableColumn<Reservation, String> colPass = new TableColumn<>("Yolcu");
+        colPass.setCellValueFactory(c -> new SimpleStringProperty(
+            c.getValue().getPassenger().getName() + " " + c.getValue().getPassenger().getSurname()
+        ));
 
-        // Rota
-        TableColumn<Reservation, String> colRoute = new TableColumn<>("Rota");
-        colRoute.setCellValueFactory(cell -> 
-            new SimpleStringProperty(cell.getValue().getFlight().getRoute().toString()));
-
-        // Tarih ve Saat
-        TableColumn<Reservation, String> colDate = new TableColumn<>("Uçuş Tarihi");
-        colDate.setCellValueFactory(cell -> 
-            new SimpleStringProperty(cell.getValue().getFlight().getFormattedDate() + " " + cell.getValue().getFlight().getHour()));
-
-        // Koltuk
-        TableColumn<Reservation, String> colSeat = new TableColumn<>("Koltuk");
-        colSeat.setCellValueFactory(cell -> 
-            new SimpleStringProperty(cell.getValue().getSeat().getSeatNum() + " (" + cell.getValue().getSeat().getSeatType() + ")"));
+        TableColumn<Reservation, String> colFlight = new TableColumn<>("Uçuş");
+        colFlight.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFlight().getFlightNum()));
         
-        // Rezervasyon Tarihi (İşlemin yapıldığı tarih)
-        TableColumn<Reservation, String> colResDate = new TableColumn<>("İşlem Tarihi");
-        colResDate.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getDateOfReservation()));
+        TableColumn<Reservation, String> colRoute = new TableColumn<>("Rota");
+        colRoute.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFlight().getRoute().toString()));
 
-        table.getColumns().addAll(colPNR, colFlightNum, colRoute, colDate, colSeat, colResDate);
+        TableColumn<Reservation, String> colDate = new TableColumn<>("Tarih");
+        colDate.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFlight().getFormattedDate()));
+        
+        TableColumn<Reservation, String> colSeat = new TableColumn<>("Koltuk");
+        colSeat.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getSeat().getSeatNum()));
+
+        table.getColumns().addAll(colPNR, colPass, colFlight, colRoute, colDate, colSeat);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void refreshTableData() {
-        // Sadece giriş yapan yolcunun rezervasyonlarını getir
-        ArrayList<Reservation> myReservations = reservationManager.getReservationsByPassenger(loggedInPassenger.getPassengerID());
-        ObservableList<Reservation> data = FXCollections.observableArrayList(myReservations);
-        table.setItems(data);
-        table.refresh();
-        
-        if (myReservations.isEmpty()) {
-            table.setPlaceholder(new Label("Henüz hiç rezervasyonunuz bulunmuyor."));
+    private void refreshTables() {
+    	// Giriş yapan kişinin (Booker) yaptığı tüm rezervasyonları al
+        ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
+
+        ArrayList<Reservation> listMine = new ArrayList<>();
+        ArrayList<Reservation> listOthers = new ArrayList<>();
+
+        // Listeyi ayıkla
+        for (Reservation r : allMyBookings) {
+            // Eğer uçan kişi ID == Giriş yapan ID ise "Benim"dir.
+            if (r.getPassenger().getPassengerID().equals(loggedInPassenger.getPassengerID())) {
+                listMine.add(r);
+            } else {
+                listOthers.add(r);
+            }
         }
+
+        tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
+        tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
     }
 
     private void handleCancelReservation() {
-        Reservation selected = table.getSelectionModel().getSelectedItem();
+    	// Hangi tablodan seçim yapıldığını bul
+        Reservation selected = tableMyTickets.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen iptal etmek istediğiniz rezervasyonu seçiniz.");
+            selected = tableOthersTickets.getSelectionModel().getSelectedItem();
+        }
+
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen iptal etmek için bir rezervasyon seçiniz.");
             return;
         }
 
-        // Onay Penceresi
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("İptal Onayı");
         alert.setHeaderText("Rezervasyon İptali: " + selected.getReservationCode());
-        alert.setContentText("Bu rezervasyonu iptal etmek istediğinize emin misiniz?\n(Uçuşa 24 saatten az kaldıysa iptal edilemez)");
+        alert.setContentText("Yolcu: " + selected.getPassenger().getName() + "\nBu işlemi onaylıyor musunuz?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Manager üzerinden iptal isteği gönder
             boolean success = reservationManager.cancelReservation(selected.getReservationCode());
-
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Rezervasyon başarıyla iptal edildi.");
-                refreshTableData(); // Tabloyu güncelle
+                showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Rezervasyon iptal edildi.");
+                refreshTables();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Hata", "İptal işlemi başarısız.\nUçuşa 24 saatten az kalmış olabilir veya sistem hatası.");
+                showAlert(Alert.AlertType.ERROR, "Hata", "İptal başarısız (Uçuşa 24 saatten az kalmış olabilir).");
             }
         }
     }

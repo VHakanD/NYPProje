@@ -4,3 +4,4 @@ Mehmet,Ozturk,05556667788,Pilot,3333
 Elif,Kaya,05557778899,KabinMemuru,4444
 Can,Yildiz,05558889900,Personel,5555
 Selin,Aras,05559990011,Admin,9999
+Hatice,Guven,5779992244,Hostes,2345

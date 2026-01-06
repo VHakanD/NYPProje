@@ -167,8 +167,17 @@ public class ReservationManager {
     	return found;
     }
     
+    public ArrayList<Reservation> getReservationsByBooker(String bookerID){
+        ArrayList<Reservation> bookerReservations = new ArrayList<>();
+        for(Reservation res: reservations) {
+            if(res != null && res.getBookerID().equals(bookerID)) {
+                bookerReservations.add(res);
+            }
+        }
+        return bookerReservations;
+    }
     
-    public synchronized boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
+    public synchronized boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum, String bookerID) {
     	savePassengerIfNew(passenger);
     	
     	if (!plane.hasSeat(seatNum)) {
@@ -189,7 +198,7 @@ public class ReservationManager {
     	}
     	
     	String resCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        Reservation newRes = new Reservation(resCode, flight, passenger, seat);
+    	Reservation newRes = new Reservation(resCode, flight, passenger, seat, bookerID);
     	
         reservations.add(newRes);
         seat.setReserveStatus(true);
@@ -223,6 +232,12 @@ public class ReservationManager {
         saveReservations();
         
         return true;
+    }
+    
+    //Kontrol için eklendi, yeni kodlarda kullanmıyoruz
+    public boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
+        // Eğer booker belirtilmezse, yolcunun kendisi booker sayılır.
+        return makeReservation(plane, flight, passenger, seatNum, passenger.getPassengerID());
     }
     
     
