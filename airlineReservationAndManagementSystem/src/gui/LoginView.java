@@ -2,6 +2,7 @@ package gui;
 
 import java.util.*;
 
+import flightManagement.Staff;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -10,25 +11,21 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import reservationAndTicketing.Passenger;
+import servicesAndManagers.StaffManager;
 
 public class LoginView {
 	private MainApp mainApp;
 	
-	private Map<String, String> adminCredentials;
+	private StaffManager staffManager;
 	
 	private VBox mainLayout;
     private VBox loginBox;
     private VBox registerBox;
 
     // Constructor: MainApp referansını alıyoruz ki ekran değiştirebilelim
-    public LoginView(MainApp mainApp) {
+    public LoginView(MainApp mainApp, StaffManager staffManager) {
         this.mainApp = mainApp;
-        
-        adminCredentials = new HashMap<>();
-        adminCredentials.put("VHakanD", "1234");
-        adminCredentials.put("zeyneppkts", "5678"); 
-        adminCredentials.put("root", "0000");
-        adminCredentials.put("a", "1");
+        this.staffManager = staffManager;
     }
 
     /*public Parent getView() {
@@ -270,11 +267,20 @@ public class LoginView {
         }
     }
 
-    private void handleAdminLogin(String user, String pass) {
-        if (adminCredentials.containsKey(user) && adminCredentials.get(user).equals(pass)) {
-             mainApp.showAdminDashboard(user);
+    private void handleAdminLogin(String username, String password) {
+        // StaffManager üzerinden kontrol et
+        Staff foundStaff = staffManager.validateLogin(username, password);
+
+        if (foundStaff != null) {
+            // Sadece 'Admin' rolündekiler panele girebilsin (İsteğe bağlı)
+            if (foundStaff.getRole().equalsIgnoreCase("Admin")) {
+                System.out.println("Personel Girişi Başarılı: " + foundStaff.getUsername());
+                mainApp.showAdminDashboard(foundStaff.getUsername());
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Yetkisiz Giriş", "Bu panele sadece yöneticiler erişebilir.");
+            }
         } else {
-        	showAlert(Alert.AlertType.ERROR, "Hata", "Yönetici bilgileri hatalı.");
+            showAlert(Alert.AlertType.ERROR, "Giriş Başarısız", "Kullanıcı adı veya şifre hatalı.");
         }
     }
 

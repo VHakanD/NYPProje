@@ -79,7 +79,7 @@ public class MainApp extends Application{
     }
     
     public void showLoginScreen() {
-        LoginView loginView = new LoginView(this);
+    	LoginView loginView = new LoginView(this, staffManager);
         Scene scene = new Scene(loginView.getView(), 400, 450);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Giriş Yap");
