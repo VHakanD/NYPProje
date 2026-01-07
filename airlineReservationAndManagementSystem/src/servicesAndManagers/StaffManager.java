@@ -55,14 +55,11 @@ public class StaffManager {
     }
     
     public boolean updateStaff(Staff oldStaff, Staff newStaffDetails) {
-        // Listede eski personelin sırasını (index) buluyoruz
         int index = staffList.indexOf(oldStaff);
         
         if (index >= 0) {
-            // Eski personelin yerine yeni bilgileri koyuyoruz
             staffList.set(index, newStaffDetails);
             
-            // Dosyayı güncelliyoruz
             saveStaff(); 
             return true;
         }

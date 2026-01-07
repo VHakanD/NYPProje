@@ -76,21 +76,18 @@ public class ReservationManager {
         boolean exists = false;
         int i = 0;
         
-        // Break yerine, döngü koşuluna (!exists) ekleyerek kontrolü sağlıyoruz
         while (i < passengers.size() && !exists) {
             Passenger p = passengers.get(i);
             if (p.getPassengerID().equals(passenger.getPassengerID())) {
-                exists = true; // Bulunduğu anda döngü koşulu bozulacağı için döngüden çıkar
+                exists = true;
             }
             i++;
         }
         
-        // Eğer listede yoksa hem listeye hem dosyaya ekle
+        
         if (!exists) {
-            // Listeye ekle (RAM güncellemesi)
             passengers.add(passenger);
             
-            // Dosyaya ekle (Disk güncellemesi)
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("passengers.txt", true))) {
                 
                 writer.write(passenger.getPassengerID() + "," + 
@@ -297,7 +294,8 @@ public class ReservationManager {
         
         saveReservations();
         
-        System.out.println("Başarılı: Rezervasyon iptal edildi. Ücret iadesi başlatılıyor...");
+        System.out.println("Başarılı: Rezervasyon iptal edildi. Ücret iadeniz bankanıza bağlı olarak "
+        		+ "1-7 iş günü içide hesabınıza yansıyacaktır...");
         return true;
     }
     
@@ -318,12 +316,10 @@ public class ReservationManager {
     } 
     
     public void cancelReservationsByFlightID(String flightNum) {
-        // Listeyi tersten dönüyoruz ki silme işlemi index hatası vermesin
         boolean removed = false;
         for (int i = reservations.size() - 1; i >= 0; i--) {
             Reservation r = reservations.get(i);
             if (r.getFlight().getFlightNum().equals(flightNum)) {
-                // Koltuk durumunu boşa çıkar (Gerçi uçuş silineceği için çok önemli değil ama temiz kod için)
                 if (r.getSeat() != null) {
                     r.getSeat().setReserveStatus(false);
                 }
@@ -337,8 +333,7 @@ public class ReservationManager {
         }
     }
 
-    // 2. Uçuş listesinde artık olmayan (süresi geçmiş veya silinmiş) uçuşların rezervasyonlarını temizler
-    // Program açılışında çalışır.
+    
     public void cleanUpOrphanReservations() {
         boolean removed = false;
         ArrayList<Flight> activeFlights = flightManager.getFlights();
@@ -347,7 +342,6 @@ public class ReservationManager {
             Reservation r = reservations.get(i);
             boolean flightStillExists = false;
             
-            // Rezervasyondaki uçuş, aktif uçuş listesinde var mı?
             for (Flight f : activeFlights) {
                 if (f.getFlightNum().equals(r.getFlight().getFlightNum())) {
                     flightStillExists = true;
@@ -355,7 +349,6 @@ public class ReservationManager {
                 }
             }
             
-            // Uçuş artık yoksa rezervasyonu da sil
             if (!flightStillExists) {
                 reservations.remove(i);
                 removed = true;

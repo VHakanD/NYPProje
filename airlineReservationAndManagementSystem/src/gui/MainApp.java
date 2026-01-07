@@ -8,6 +8,7 @@ import java.util.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import reservationAndTicketing.Passenger;
+import reservationAndTicketing.Reservation;
 import javafx.scene.Scene;
 
 public class MainApp extends Application{
@@ -128,6 +129,20 @@ public class MainApp extends Application{
         primaryStage.setTitle("Rezervasyonlarım - " + loggedInPassenger.getName());
         primaryStage.centerOnScreen();
     }
+    
+    public void showSeatChangeScreen(reservationAndTicketing.Reservation reservation) {
+        SeatChangeView changeView = new SeatChangeView(this, reservation, reservationManager);
+        
+        Stage stage = new Stage();
+        stage.setTitle("Koltuk Değiştirme");
+        stage.setScene(new Scene(changeView.getView(), 900, 650));
+        
+        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        stage.initOwner(primaryStage);
+        
+        stage.showAndWait(); 
+    }
+    
     
     public List<Passenger> getPassengerList() {
         return passengerList;

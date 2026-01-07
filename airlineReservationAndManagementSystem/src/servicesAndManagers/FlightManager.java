@@ -59,7 +59,6 @@ public class FlightManager {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
-                    // Plane.java'ya eklediğiniz fromFileFormat metodunu kullanıyoruz
                     Plane p = Plane.fromFileFormat(line);
                     if (p != null) {
                         availablePlanes.add(p);
@@ -99,23 +98,19 @@ public class FlightManager {
 	    Flight toRemove = null;
 	    boolean found = false;
 	    int i = 0;
-	    
-	    // BREAK KULLANMADAN ARAMA:
-	    // Listeyi tarıyoruz, bulduğumuz an 'found' true oluyor ve döngü duruyor.
+	   
 	    while (i < flights.size() && !found) {
 	        Flight f = flights.get(i);
-	        // ID'leri karşılaştırıyoruz
 	        if (f.getFlightNum().equals(flight.getFlightNum())) {
 	            toRemove = f;
-	            found = true; // Döngü koşulunu bozarak çıkışı sağlar
+	            found = true;
 	        }
 	        i++;
 	    }
 	    
-	    // Eğer bulunduysa listeden sil ve dosyayı güncelle
 	    if (found) {
 	        flights.remove(toRemove);
-	        saveFlights(); // Dosyaya yazma işlemi
+	        saveFlights();
 	        System.out.println("Uçuş başarıyla silindi ve kaydedildi: " + toRemove.getFlightNum());
 	    } else {
 	        System.out.println("Silinecek uçuş listede bulunamadı.");
@@ -140,20 +135,16 @@ public class FlightManager {
 	}
 	
 	public boolean updateFlight(Flight updatedFlight) {
-	    // 1. Önce listedeki (RAM'deki) eski kaydı bulup yenisiyle değiştirelim
 	    for (int i = 0; i < flights.size(); i++) {
 	        if (flights.get(i).getFlightNum().equals(updatedFlight.getFlightNum())) {
-	            
-	            // Listeyi güncelle (Eski objeyi sil, yenisini aynı yere koy)
 	            flights.set(i, updatedFlight);
 	            
-	            // 2. Şimdi dosyaya kaydet
 	            saveFlights();
 	            
-	            return true; // İşlem başarılı
+	            return true;
 	        }
 	    }
-	    return false; // Uçuş bulunamadı
+	    return false;
 	}
 	
 	/*public boolean updateFlight(Flight flight) {
@@ -198,7 +189,6 @@ public class FlightManager {
 	public Plane getPlaneTemplateByID(String planeID) {
         for (Plane p : availablePlanes) {
             if (p.getPlaneID().equalsIgnoreCase(planeID)) {
-                // Referansı değil, yeni bir kopyasını döndürüyoruz:
                 return new Plane(p.getPlaneID(), p.getPlaneModel(), p.getCapacity());
             }
         }
@@ -219,7 +209,7 @@ public class FlightManager {
 		return filteredFlights;
 	}
 	
-	//JUnit için removeExpiredFlights metodu tanımlanmalı
+	
 	public void removeExpiredFlights() {
 	    LocalDateTime now = LocalDateTime.now();
 	    //Tarihi geçenleri siler.
@@ -229,6 +219,7 @@ public class FlightManager {
 	    saveFlights(); 
 	    System.out.println("Tarihi geçen uçuşlar temizlendi.");
 	}
+	
 	/*calculateTotalOccupancyRate asenkron raporlama için bu tarz bir metot eklememiz lazım sanırım
 	 tüm uçuşlar için doluluk oranını hesaplayan bir metod*/
 	

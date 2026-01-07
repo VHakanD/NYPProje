@@ -38,7 +38,7 @@ public class Passenger extends Person{
         return passengerID + "," + getName() + "," + getSurname() + "," + getContactInfo() + "," + username + "," + password;
     }
     
-    // Dosyadan okuma (Hem eski 4'lü hem yeni 6'lı formatı destekler)
+    
     public static Passenger fromFileFormat(String line) {
         String[] parts = line.split(",");
         if (parts.length >= 6) {

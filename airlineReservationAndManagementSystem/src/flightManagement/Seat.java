@@ -3,7 +3,6 @@ package flightManagement;
 public class Seat {
 	
 	public enum SeatType{ ECONOMY, BUSINESS}
-	//%10 business olacak şekilde ayarla
 	private String seatNum;
 	private boolean reserveStatus;
 	private double price;
@@ -53,7 +52,7 @@ public class Seat {
         if (this.reserveStatus) {
         	
             setReserveStatus(false);
-            System.out.println("Rezervasyon iptal edildi.");
+            System.out.println(this.seatNum + "numaralı koltuğun rezervasyonu iptal edildi.");
             
         }
     }

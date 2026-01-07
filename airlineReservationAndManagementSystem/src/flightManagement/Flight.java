@@ -108,9 +108,9 @@ public class Flight {
 		
 		double distance;
 	    try {
-	        distance = Double.parseDouble(data[6]); // Mesafeyi oku
+	        distance = Double.parseDouble(data[6]);
 	    } catch (NumberFormatException e) {
-	        distance = 0; // Hata olursa 0 yap
+	        distance = 0;
 	    }
 	    Route tempRoute = new Route(data[1], data[2], distance);
 	    flight.setRoute(tempRoute);

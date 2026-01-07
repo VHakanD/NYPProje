@@ -5,11 +5,10 @@ import java.util.*;
 
 public class Plane {
 	//planeID, planeModel, capacity (int), seatMatrix (2D array or Map structure)
-		private String planeID;
-		private String planeModel;
-		private int capacity;
-		private HashMap<String, Seat> seatMatrix = new HashMap<>(); 
-		//hashmap mi kullansak daha iyi array mi? 
+	private String planeID;
+	private String planeModel;
+	private int capacity;
+	private HashMap<String, Seat> seatMatrix = new HashMap<>(); 
 	
 	public Plane(String planeID, String planeModel, int capacity) {
 		this.planeID = planeID;
@@ -21,7 +20,7 @@ public class Plane {
         return planeID + "," + planeModel + "," + capacity;
     }
 
-    // Dosyadan okurken satırı nesneye çeviren yardımcı metot
+	
     public static Plane fromFileFormat(String line) {
         String[] data = line.split(",");
         

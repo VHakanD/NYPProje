@@ -77,12 +77,17 @@ public class ReservationManagementView {
         HBox bottomBar = new HBox(15);
         bottomBar.setAlignment(Pos.CENTER_RIGHT);
         
+        Button btnChangeSeat = new Button("Koltuk Değiştir");
+        btnChangeSeat.setStyle("-fx-base: #f39c12; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnChangeSeat.setPrefHeight(40);
+        btnChangeSeat.setOnAction(e -> handleChangeSeatAction());
+        
         Button btnCancel = new Button("Seçili Rezervasyonu İptal Et");
         btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         btnCancel.setPrefHeight(40);
         btnCancel.setOnAction(e -> handleCancelReservation());
 
-        bottomBar.getChildren().add(btnCancel);
+        bottomBar.getChildren().addAll(btnChangeSeat, btnCancel);
         layout.setBottom(bottomBar);
         
         // Verileri Yükle
@@ -165,6 +170,25 @@ public class ReservationManagementView {
                 showAlert(Alert.AlertType.ERROR, "Hata", "İptal başarısız (Uçuşa 24 saatten az kalmış olabilir).");
             }
         }
+    }
+    
+    private void handleChangeSeatAction() {
+        // Seçili rezervasyonu bul (Önce "Kendi Biletlerim" sonra "Diğerleri" tablosuna bak)
+        Reservation selected = tableMyTickets.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            selected = tableOthersTickets.getSelectionModel().getSelectedItem();
+        }
+
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Uyarı", "Lütfen koltuk değiştirmek istediğiniz rezervasyonu seçiniz.");
+            return;
+        }
+        
+        // MainApp üzerinden ekranı aç
+        mainApp.showSeatChangeScreen(selected);
+        
+        // Ekran kapandığında tabloyu yenile ki yeni koltuk numarası görünsün
+        refreshTables();
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

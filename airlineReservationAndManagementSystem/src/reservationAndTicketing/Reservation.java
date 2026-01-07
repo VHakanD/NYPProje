@@ -41,7 +41,6 @@ public class Reservation {
 	public static Reservation fromFileFormat(String line, FlightManager flightMngr, List<Passenger> passengers) {
 		String[] data = line.split(",");
 
-        // 1. Uçuşu Bul
         Flight foundFlight = null;
         List<Flight> allFlights = flightMngr.getFlights();
         int f = 0;
@@ -56,7 +55,7 @@ public class Reservation {
             f++;
         }
 
-        // 2. Yolcuyu Bul
+        
         Passenger foundPassenger = null;
         int p = 0;
         boolean passengerFound = false;
@@ -70,28 +69,24 @@ public class Reservation {
             p++;
         }
         
-        // Eğer yolcu listede yoksa (örn: elle silindiyse) geçici oluştur
+        
         if (foundPassenger == null) {
              foundPassenger = new Passenger(data[2], "Bilinmeyen", "Yolcu", "000");
         }
 
-        // 3. Koltuğu Bul
+        
         Seat foundSeat = null;
         if (foundFlight != null) {
             foundSeat = foundFlight.getPlane().getSeatMatrix().get(data[3]);
         }
         
-        // 4. Booker ID'yi Çözümle
-        // Eğer dosyada 5. sütun varsa onu al, yoksa (eski kayıtlar için) yolcuyu booker say.
         String foundBookerID = (data.length >= 5) ? data[4] : foundPassenger.getPassengerID();
 
         Reservation result = null;
         
         if (foundFlight != null && foundPassenger != null && foundSeat != null) {
             foundSeat.setReserveStatus(true);
-            // Yeni constructor ile oluştur
             result = new Reservation(data[0], foundFlight, foundPassenger, foundSeat, foundBookerID);
-            // Tarih ataması gerekirse burada yapılabilir, şu an constructor today atıyor.
         } else {
             System.out.println("Hata: Eksik veri bulundu. Satır: " + line);
         }

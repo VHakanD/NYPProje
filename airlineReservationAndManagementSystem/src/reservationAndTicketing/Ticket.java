@@ -77,10 +77,8 @@ public class Ticket {
 		if(this.passengerBaggage.getWeight()> this.baggageAllowance) {
 			return this.passengerBaggage.getWeight() - baggageAllowance;
 		}
-		else
-		{
-			return 0.0;	
-		}
+		
+		return 0.0;	
 	}
 	public double calculateExcessFee() {
 		if(passengerBaggage == null) {
