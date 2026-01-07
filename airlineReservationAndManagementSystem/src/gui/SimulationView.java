@@ -294,7 +294,9 @@ public class SimulationView {
                     lblResult.setText(lblResult.getText() + " (BAŞARILI)");
                 }
                 reservationManager.cancelReservationsByFlightID(SIM_FLIGHT_ID);
-                System.out.println("Simülasyon tamamlandı ve test verileri temizlendi.");
+                mainApp.cleanUpSimulationPassengers();
+                
+                System.out.println("Simülasyon verileri (Rezervasyonlar + Yolcular) temizlendi.");
                 
                 btnStart.setDisable(false);
                 btnReset.setDisable(false);

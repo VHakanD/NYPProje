@@ -155,6 +155,28 @@ public class MainApp extends Application{
         primaryStage.centerOnScreen();
     }
     
+    public void cleanUpSimulationPassengers() {
+        // 1. Hafızadaki listeden "SIM_" ile başlayanları sil
+        boolean removed = passengerList.removeIf(p -> p.getPassengerID().startsWith("SIM_"));
+        
+        if (removed) {
+            // 2. Dosyayı baştan aşağı yenile (Append modu kapalı)
+            rewritePassengerFile();
+            System.out.println("Simülasyon yolcuları dosýadan temizlendi.");
+        }
+    }
+    
+    private void rewritePassengerFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, false))) { // false = append kapalı
+            for (Passenger p : passengerList) {
+                writer.write(p.toFileFormat());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Yolcu dosyası güncellenirken hata: " + e.getMessage());
+        }
+    }
+    
     
     public List<Passenger> getPassengerList() {
         return passengerList;
