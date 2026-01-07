@@ -3,12 +3,14 @@ package gui;
 import flightManagement.Flight;
 import flightManagement.Plane;
 import flightManagement.Seat;
+import reservationAndTicketing.Passenger;
 import reservationAndTicketing.Reservation;
 import servicesAndManagers.CalculatePrice;
 import servicesAndManagers.ReservationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -23,15 +25,17 @@ public class SeatChangeView {
     private Reservation currentReservation; 
     private Flight flight;
     private ReservationManager reservationManager;
+    private Passenger loggedInPassenger;
     private String selectedSeatNum = null;
     private Label lblSelectionInfo;
     private Button btnConfirm;
 
-    public SeatChangeView(MainApp mainApp, Reservation reservation, ReservationManager reservationManager) {
+    public SeatChangeView(MainApp mainApp, Reservation reservation, ReservationManager reservationManager, Passenger loggedInPassenger) {
         this.mainApp = mainApp;
         this.currentReservation = reservation;
         this.flight = reservation.getFlight();
         this.reservationManager = reservationManager;
+        this.loggedInPassenger = loggedInPassenger; // Kaydet
     }
 
     public Parent getView() {
@@ -118,9 +122,12 @@ public class SeatChangeView {
         layout.setCenter(scroll);
 
         // --- ONAY BUTONU ---
-        btnConfirm = new Button("Koltuk Değişimini Onayla");
+        /*btnConfirm = new Button("Koltuk Değişimini Onayla");
         btnConfirm.setStyle("-fx-base: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;");
         btnConfirm.setPrefHeight(40);
+        btnConfirm.setOnAction(e -> handleSeatChange());*/
+        
+        btnConfirm = new Button("Koltuk Değişimini Onayla");
         btnConfirm.setOnAction(e -> handleSeatChange());
         
         VBox bottomContainer = new VBox(10);
@@ -138,66 +145,65 @@ public class SeatChangeView {
             return;
         }
 
-        // --- FİYAT FARKI KONTROLÜ (YENİ) ---
         CalculatePrice calculator = new CalculatePrice();
         Seat newSeat = flight.getPlane().getSeatMatrix().get(selectedSeatNum);
         
-        // Fiyatları karşılaştırmak için geçici rezervasyon nesneleri oluşturuyoruz
-        // (Eski rezervasyonun fiyatını o anki kura/tarihe göre değil, biletin alındığı fiyata göre yapmak daha doğru olurdu 
-        // ama Ticket nesnesine erişimimiz olmadığı için güncel fiyatlar üzerinden fark alıyoruz)
-        
-        // Eski Koltuğun Güncel Fiyatı
+        // Fiyat Farkı Hesapla
         Reservation tempOldRes = new Reservation("TEMP", flight, currentReservation.getPassenger(), currentReservation.getSeat());
         double oldPrice = calculator.calculateTicketPrice(tempOldRes);
         
-        // Yeni Koltuğun Güncel Fiyatı
         Reservation tempNewRes = new Reservation("TEMP", flight, currentReservation.getPassenger(), newSeat);
         double newPrice = calculator.calculateTicketPrice(tempNewRes);
         
         double priceDifference = newPrice - oldPrice;
 
-        // Kullanıcıya Onay Mesajı Hazırla
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Değişiklik Onayı");
-        alert.setHeaderText("Koltuk Değişikliği İşlemi");
-        
         if (priceDifference > 0) {
-            // Fark varsa ödeme iste
-            alert.setContentText(
-                "Eski Koltuk: " + currentReservation.getSeat().getSeatNum() + "\n" +
-                "Yeni Koltuk: " + selectedSeatNum + "\n\n" +
-                "Koltuk sınıf farkı nedeniyle " + String.format("%.2f", priceDifference) + " TL ödeme yapmanız gerekmektedir.\n" +
-                "İşlemi onaylıyor musunuz?"
-            );
-        } else {
-            // Fark yoksa veya daha ucuzsa (iade sistemi yoksa sadece değişim)
-            alert.setContentText(
-                "Eski Koltuk: " + currentReservation.getSeat().getSeatNum() + "\n" +
-                "Yeni Koltuk: " + selectedSeatNum + "\n\n" +
-                "Herhangi bir ek ücret bulunmamaktadır.\n" +
-                "Onaylıyor musunuz?"
-            );
-        }
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // FARK VAR -> ÖDEME EKRANINA GİT (PAYMENT VIEW)
             
-            // Eğer fark varsa ödeme alınmış varsayıyoruz (Simülasyon)
-            if (priceDifference > 0) {
-                System.out.println("Ekstra ücret ödendi: " + priceDifference + " TL");
-            }
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Ödeme Gerekiyor");
+            alert.setHeaderText("Koltuk Sınıf Farkı");
+            alert.setContentText(
+                "Yeni koltuk için " + String.format("%.2f", priceDifference) + " TL fark ödemeniz gerekmektedir.\n" +
+                "Ödeme ekranına yönlendiriliyorsunuz..."
+            );
 
-            // ReservationManager'daki metodu çağırıyoruz
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                //closeWindow(); // Şu anki pencreyi kapat
+                
+                // PaymentView'i "Koltuk Değişim Modu"nda aç
+                // loggedInPassenger hem uçan hem ödeyen olarak gönderildi (Basitlik için)
+                // existingReservation parametresi (currentReservation) dolu olduğu için mod değişecek.
+                PaymentView paymentView = new PaymentView(
+                    mainApp, 
+                    flight, 
+                    currentReservation.getPassenger(), 
+                    loggedInPassenger, 
+                    selectedSeatNum, 
+                    0, // Ekstra bagaj yok
+                    reservationManager, 
+                    currentReservation // BU PARAMETRE ÖNEMLİ
+                );
+                
+                Stage paymentStage = new Stage();
+                paymentStage.setTitle("Fark Ödemesi");
+                paymentStage.setScene(new Scene(paymentView.getView(), 500, 600));
+                paymentStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                paymentStage.initOwner(mainApp.getPrimaryStage());
+                paymentStage.showAndWait();
+                closeWindow();
+            }
+            
+        } else {
+            // FARK YOK VEYA İADE -> DİREKT DEĞİŞTİR (Eski Yöntem)
             boolean success = reservationManager.changeSeat(currentReservation.getReservationCode(), selectedSeatNum);
             
             if (success) {
-                String successMsg = (priceDifference > 0) 
-                    ? "Koltuk değiştirildi ve ödeme alındı." 
-                    : "Koltuk başarıyla değiştirildi.";
-                showAlert(Alert.AlertType.INFORMATION, "Başarılı", successMsg);
+                showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Koltuk değişiminiz ücretsiz olarak yapıldı.");
                 closeWindow();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Hata", "İşlem başarısız oldu. Koltuk dolmuş olabilir.");
+                showAlert(Alert.AlertType.ERROR, "Hata", "İşlem başarısız oldu.");
             }
         }
     }

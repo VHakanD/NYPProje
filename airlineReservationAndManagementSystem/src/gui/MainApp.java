@@ -5,6 +5,7 @@ import servicesAndManagers.*;
 import java.io.*;
 import java.util.*;
 
+import flightManagement.Staff;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import reservationAndTicketing.Passenger;
@@ -88,17 +89,17 @@ public class MainApp extends Application{
         primaryStage.setTitle("Giriş Yap");
     }
     
-    public void showAdminDashboard(String adminName) {
-        AdminDashboardView dashboard = new AdminDashboardView(this, adminName);
-        Scene scene = new Scene(dashboard.getView(), 600, 400); // Daha küçük, kompakt bir ekran
+    public void showAdminDashboard(Staff adminStaff) {
+    	AdminDashboardView dashboard = new AdminDashboardView(this, adminStaff, flightManager, reservationManager);
+        Scene scene = new Scene(dashboard.getView(), 600, 500); // Boyutu biraz artırdık
         primaryStage.setScene(scene);
         primaryStage.setTitle("Yönetici Paneli - Ana Menü");
         primaryStage.centerOnScreen();
     }
     
-    public void showFlightScreen(String adminName) {
+    public void showFlightScreen(Staff adminStaff) {
         // AdminView'i oluşturuyoruz ama sadece Flight kısmını alacağız
-    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminName);
+    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminStaff);
     	Scene scene = new Scene(adminView.getFlightView(), 1000, 700);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Uçuş Yönetimi");
@@ -106,8 +107,8 @@ public class MainApp extends Application{
     }
 
     
-    public void showStaffScreen(String adminName) {
-    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminName);
+    public void showStaffScreen(Staff adminStaff) {
+    	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminStaff);
     	Scene scene = new Scene(adminView.getStaffView(), 900, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Personel Yönetimi");
@@ -130,8 +131,9 @@ public class MainApp extends Application{
         primaryStage.centerOnScreen();
     }
     
-    public void showSeatChangeScreen(reservationAndTicketing.Reservation reservation) {
-        SeatChangeView changeView = new SeatChangeView(this, reservation, reservationManager);
+    public void showSeatChangeScreen(Reservation reservation, Passenger loggedInPassenger) {
+        // loggedInPassenger'ı buraya da geçiriyoruz
+        SeatChangeView changeView = new SeatChangeView(this, reservation, reservationManager, loggedInPassenger);
         
         Stage stage = new Stage();
         stage.setTitle("Koltuk Değiştirme");
@@ -141,6 +143,16 @@ public class MainApp extends Application{
         stage.initOwner(primaryStage);
         
         stage.showAndWait(); 
+    }
+    
+    public void showSimulationScreen(Staff adminStaff) {
+        // Parametre olarak reservationManager'ı gönderiyoruz
+        SimulationView simView = new SimulationView(this, reservationManager, adminStaff);
+        
+        Scene scene = new Scene(simView.getView(), 800, 600);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Multithreading Simülasyonu");
+        primaryStage.centerOnScreen();
     }
     
     

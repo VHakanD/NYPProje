@@ -139,8 +139,14 @@ public class ReservationManagementView {
             }
         }
 
-        tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
-        tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
+        if (tableMyTickets != null) {
+            tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
+            tableMyTickets.refresh(); // <-- EKLENDİ: Görseli zorla yenile
+        }
+        if (tableOthersTickets != null) {
+            tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
+            tableOthersTickets.refresh(); // <-- EKLENDİ: Görseli zorla yenile
+        }
     }
 
     private void handleCancelReservation() {
@@ -173,7 +179,6 @@ public class ReservationManagementView {
     }
     
     private void handleChangeSeatAction() {
-        // Seçili rezervasyonu bul (Önce "Kendi Biletlerim" sonra "Diğerleri" tablosuna bak)
         Reservation selected = tableMyTickets.getSelectionModel().getSelectedItem();
         if (selected == null) {
             selected = tableOthersTickets.getSelectionModel().getSelectedItem();
@@ -184,10 +189,9 @@ public class ReservationManagementView {
             return;
         }
         
-        // MainApp üzerinden ekranı aç
-        mainApp.showSeatChangeScreen(selected);
+        // GÜNCELLEME: loggedInPassenger'ı da gönderiyoruz
+        mainApp.showSeatChangeScreen(selected, loggedInPassenger);
         
-        // Ekran kapandığında tabloyu yenile ki yeni koltuk numarası görünsün
         refreshTables();
     }
 

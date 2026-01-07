@@ -290,7 +290,7 @@ public class LoginView {
             // Sadece 'Admin' rolündekiler panele girebilsin (İsteğe bağlı)
             if (foundStaff.getRole().equalsIgnoreCase("Admin")) {
                 System.out.println("Personel Girişi Başarılı: " + foundStaff.getUsername());
-                mainApp.showAdminDashboard(foundStaff.getUsername());
+                mainApp.showAdminDashboard(foundStaff);
             } else {
                 showAlert(Alert.AlertType.WARNING, "Yetkisiz Giriş", "Bu panele sadece yöneticiler erişebilir.");
             }

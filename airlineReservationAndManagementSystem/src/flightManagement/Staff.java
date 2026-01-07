@@ -24,8 +24,13 @@ public class Staff extends Person{
         return null;
     }
 	
-	public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+	public String getRole() { 
+		return role; 
+	}
+	
+    public void setRole(String role) { 
+    	this.role = role; 
+    }
     
     public String getUsername() { 
     	return username; 

@@ -1,21 +1,33 @@
 package gui;
 
+import flightManagement.Flight;
+import flightManagement.Staff;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import servicesAndManagers.FlightManager;
+import servicesAndManagers.ReservationManager;
 
 public class AdminDashboardView {
 	private MainApp mainApp;
-    private String adminUsername;
+	private Staff adminStaff;
+    private FlightManager flightManager;
+    private ReservationManager reservationManager;
+    
 
-    public AdminDashboardView(MainApp mainApp, String adminUsername) {
+    public AdminDashboardView(MainApp mainApp, Staff adminStaff, FlightManager fm, ReservationManager rm) {
         this.mainApp = mainApp;
-        this.adminUsername = adminUsername;
+        this.adminStaff = adminStaff;
+        this.flightManager = fm;
+        this.reservationManager = rm;
     }
 
     public Parent getView() {
@@ -24,7 +36,7 @@ public class AdminDashboardView {
         layout.setAlignment(Pos.CENTER);
         
         // Başlık
-        Label lblWelcome = new Label("Hoşgeldiniz, " + adminUsername.toUpperCase());
+        Label lblWelcome = new Label("Hoşgeldiniz, " + adminStaff.getName().toUpperCase() + " " + adminStaff.getSurname().toUpperCase());
         lblWelcome.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         
         Label lblInstruction = new Label("Lütfen yapmak istediğiniz işlemi seçiniz:");
@@ -40,18 +52,84 @@ public class AdminDashboardView {
         btnStaff.setPrefHeight(50);
         btnStaff.setStyle("-fx-font-size: 16px; -fx-base: #50c878;");
         
+        Button btnSimulation = new Button("Thread Simülasyonu (Concurrency)");
+        btnSimulation.setPrefWidth(250);
+        btnSimulation.setStyle("-fx-font-size: 14px; -fx-base: #9b59b6; -fx-text-fill: black;");
+        btnSimulation.setOnAction(e -> mainApp.showSimulationScreen(adminStaff));
+
+        // --- YENİ: ASENKRON RAPOR BUTONU (Scenario 2) ---
+        Button btnReport = new Button("Doluluk Raporu Oluştur (Asenkron)");
+        btnReport.setPrefWidth(250);
+        btnReport.setStyle("-fx-font-size: 14px; -fx-base: #f39c12; -fx-text-fill: black;");
+        
+        Label lblStatus = new Label(""); // Durum mesajı için
+        lblStatus.setStyle("-fx-text-fill: blue; -fx-font-weight: bold;");
+
+        btnReport.setOnAction(e -> startAsynchronousReport(lblStatus));
+        
         Button btnLogout = new Button("Çıkış Yap (Logout)");
         btnLogout.setPrefWidth(200);
         btnLogout.setStyle("-fx-base: #e74c3c;");
         
         // Tıklama Olayları (Navigasyon)
-        btnFlights.setOnAction(e -> mainApp.showFlightScreen(adminUsername));
-        btnStaff.setOnAction(e -> mainApp.showStaffScreen(adminUsername));
+        btnFlights.setOnAction(e -> mainApp.showFlightScreen(adminStaff));
+        btnStaff.setOnAction(e -> mainApp.showStaffScreen(adminStaff));
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
         
-        layout.getChildren().addAll(lblWelcome, lblInstruction, btnFlights, btnStaff, btnLogout);
+        layout.getChildren().addAll(lblWelcome, lblInstruction, btnFlights, btnStaff, btnSimulation, btnReport, lblStatus, btnLogout);
         
         return layout;
+    }
+    
+    private void startAsynchronousReport(Label statusLabel) {
+        // Task oluşturuyoruz (Arka plan iş parçacığı)
+        Task<String> reportTask = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                updateMessage("Rapor Hazırlanıyor..."); // GUI'ye mesaj gönder
+                
+                StringBuilder report = new StringBuilder();
+                report.append("--- UÇUŞ DOLULUK RAPORU ---\n");
+                
+                // İşlemin uzun sürdüğünü simüle etmek için döngüde bekletme yapıyoruz
+                int count = 0;
+                int totalFlights = flightManager.getFlights().size();
+                
+                for (Flight f : flightManager.getFlights()) {
+                    // Yapay gecikme (Simülasyon gereği "lengthy process")
+                    Thread.sleep(500); 
+                    
+                    double rate = reservationManager.calculateOccupancyRate(f);
+                    report.append(String.format("Uçuş: %s | Doluluk: %%%.2f\n", f.getFlightNum(), rate));
+                    
+                    count++;
+                    updateMessage("Rapor Hazırlanıyor... (" + count + "/" + totalFlights + ")");
+                }
+                
+                return report.toString();
+            }
+        };
+
+        // Task durumlarını GUI'ye bağlama
+        statusLabel.textProperty().bind(reportTask.messageProperty());
+
+        // İşlem Bittiğinde
+        reportTask.setOnSucceeded(e -> {
+            statusLabel.textProperty().unbind();
+            statusLabel.setText("Rapor Tamamlandı!");
+            
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Rapor Sonucu");
+            alert.setHeaderText("Doluluk Oranları Hesaplanmıştır");
+            TextArea area = new TextArea(reportTask.getValue());
+            area.setEditable(false);
+            area.setWrapText(true);
+            alert.getDialogPane().setContent(area);
+            alert.showAndWait();
+        });
+
+        // İşlemi Başlat (Yeni Thread'de)
+        new Thread(reportTask).start();
     }
 
 }

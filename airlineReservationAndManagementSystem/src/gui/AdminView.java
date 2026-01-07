@@ -26,7 +26,7 @@ public class AdminView {
 	private MainApp mainApp;
     private FlightManager flightManager;
     private TableView<Flight> flightTable;
-    private String adminUsername;
+    private Staff adminStaff;
     private StaffManager staffManager;
     private ReservationManager reservationManager;
     
@@ -37,12 +37,12 @@ public class AdminView {
     private TableView<Staff> staffTable;
     private TextField txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass;
     
-    public AdminView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, StaffManager staffManager, String adminUsername) {
+    public AdminView(MainApp mainApp, FlightManager flightManager, ReservationManager reservationManager, StaffManager staffManager, Staff adminStaff) {
         this.mainApp = mainApp;
         this.flightManager = flightManager;
         this.reservationManager = reservationManager;
         this.staffManager = staffManager;
-        this.adminUsername = adminUsername;
+        this.adminStaff = adminStaff; // Nesneyi kaydet
     }
     
     public Parent getFlightView() {
@@ -78,12 +78,14 @@ public class AdminView {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
-        Label lblUser = new Label("Aktif Yönetici: " + adminUsername.toUpperCase());
+        String fullName = adminStaff.getName().toUpperCase() + " " + adminStaff.getSurname().toUpperCase();
+        Label lblUser = new Label("Aktif Yönetici: " + fullName);
         lblUser.setStyle("-fx-text-fill: #555; -fx-font-style: italic; -fx-font-weight: bold;");
         
         Button btnBack = new Button("← Ana Menüye Dön");
         btnBack.setStyle("-fx-base: #f0f0f0;");
-        btnBack.setOnAction(e -> mainApp.showAdminDashboard(adminUsername));
+        
+        btnBack.setOnAction(e -> mainApp.showAdminDashboard(adminStaff));
         
         HBox topMenu = new HBox(15, lblTitle, spacer, btnBack);
         topMenu.setAlignment(Pos.CENTER_LEFT);

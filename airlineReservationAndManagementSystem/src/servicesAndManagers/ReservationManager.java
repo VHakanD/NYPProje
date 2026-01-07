@@ -145,7 +145,17 @@ public class ReservationManager {
     }
     
     public double calculateOccupancyRate(Flight flight) {
-    	return 0.0;
+        if (flight == null || flight.getPlane() == null) return 0.0;
+
+        int totalCapacity = flight.getPlane().getCapacity();
+        if (totalCapacity == 0) return 0.0;
+
+        // O uçuşa ait rezervasyonları say
+        long occupiedCount = reservations.stream()
+                .filter(r -> r.getFlight().getFlightNum().equals(flight.getFlightNum()))
+                .count();
+
+        return (double) occupiedCount / totalCapacity * 100.0;
     }
     
     public boolean hasPassengerAlreadyBooked(String flightNum, String passengerID) {

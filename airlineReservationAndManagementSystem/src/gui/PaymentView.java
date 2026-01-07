@@ -32,6 +32,8 @@ public class PaymentView {
     private ReservationManager reservationManager;
     private CalculatePrice priceCalculator;
     
+    private Reservation existingReservation = null;
+    
     private TextField txtCardNum;
     private TextField txtMonth;
     private TextField txtYear;
@@ -45,6 +47,19 @@ public class PaymentView {
         this.seatNum = seatNum;
         this.baggageKg = baggageKg;
         this.reservationManager = mgr;
+        this.priceCalculator = new CalculatePrice(); 
+    }
+    
+    //Koltuk değişimi için overload yaptık
+    public PaymentView(MainApp mainApp, Flight flight, Passenger passenger, Passenger bookerPassenger, String seatNum, int baggageKg, ReservationManager mgr, Reservation existingReservation) {
+        this.mainApp = mainApp;
+        this.flight = flight;
+        this.passenger = passenger;
+        this.bookerPassenger = bookerPassenger;
+        this.seatNum = seatNum;
+        this.baggageKg = baggageKg;
+        this.reservationManager = mgr;
+        this.existingReservation = existingReservation; // Atama yapıldı
         this.priceCalculator = new CalculatePrice(); 
     }
     
@@ -65,8 +80,8 @@ public class PaymentView {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: #fdfdfd;");
 
-        // Başlık
-        Label lblTitle = new Label("Ödeme ve Biletleme");
+        String titleText = (existingReservation == null) ? "Ödeme ve Biletleme" : "Koltuk Değişimi ve Ödeme";
+        Label lblTitle = new Label(titleText);
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         // --- HESAPLAMALAR ---
@@ -83,11 +98,32 @@ public class PaymentView {
         
         // 4. Bagaj Ücreti Hesapla (Ticket.java mantığına göre)
         // Business: 30kg, Ekonomi: 15kg. Ekstra kg başı 50 TL.
-        int allowance = (selectedSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
+        /*int allowance = (selectedSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
         double excessWeight = Math.max(0, baggageKg - allowance);
         double baggageFee = excessWeight * 50.0;
         
-        double totalPrice = ticketBasePrice + baggageFee;
+        double totalPrice = ticketBasePrice + baggageFee;*/
+        
+        double finalPriceToPay;
+        double priceDiff = 0;
+        
+        if (existingReservation != null) {
+            // KOLTUK DEĞİŞİMİ MODU
+            // Eski koltuğun şu anki değerini hesapla (veya bilet fiyatını alabilirdik ama şu an hesaplıyoruz)
+            Reservation tempOldRes = new Reservation("TEMP_OLD", flight, passenger, existingReservation.getSeat());
+            double oldPrice = priceCalculator.calculateTicketPrice(tempOldRes);
+            
+            priceDiff = ticketBasePrice - oldPrice;
+            // Eğer fark negatifse (daha ucuz koltuk) ödeme 0 olur
+            finalPriceToPay = Math.max(0, priceDiff);
+            
+        } else {
+            // YENİ BİLET MODU
+            int allowance = (selectedSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
+            double excessWeight = Math.max(0, baggageKg - allowance);
+            double baggageFee = excessWeight * 50.0;
+            finalPriceToPay = ticketBasePrice + baggageFee;
+        }
 
         // --- GÖRÜNÜM ELEMANLARI ---
         
@@ -97,17 +133,41 @@ public class PaymentView {
         Label lblPass = new Label("Yolcu: " + passenger.getName() + " " + passenger.getSurname());
         Label lblFlight = new Label("Uçuş: " + flight.getFlightNum() + " | " + flight.getFormattedDate());
         Label lblSeat = new Label("Koltuk: " + seatNum + " (" + selectedSeat.getSeatType() + ")");
-        Label lblBaggage = new Label("Bagaj: " + baggageKg + " kg (Hak: " + allowance + " kg)");
+        //Label lblBaggage = new Label("Bagaj: " + baggageKg + " kg (Hak: " + allowance + " kg)");
         
-        summaryBox.getChildren().addAll(lblPass, lblFlight, lblSeat, lblBaggage);
+        summaryBox.getChildren().addAll(lblPass, lblFlight, lblSeat);
+        
+        if (existingReservation != null) {
+            // Değişim detayları
+            Label lblOldSeat = new Label("Eski Koltuk: " + existingReservation.getSeat().getSeatNum());
+            lblOldSeat.setStyle("-fx-text-fill: #7f8c8d;");
+            summaryBox.getChildren().add(lblOldSeat);
+            
+            Label lblDiffInfo = new Label(String.format("Fiyat Farkı: %.2f ₺", finalPriceToPay));
+            lblDiffInfo.setStyle("-fx-font-weight: bold;");
+            layout.getChildren().addAll(lblTitle, summaryBox, new Separator(), lblDiffInfo);
+        } else {
+            // Normal bilet detayları
+            Label lblBaggage = new Label("Bagaj: " + baggageKg + " kg");
+            summaryBox.getChildren().add(lblBaggage);
+            
+            Label lblBasePrice = new Label(String.format("Bilet Ücreti: %.2f ₺", ticketBasePrice));
+            Label lblTotal = new Label(String.format("TOPLAM TUTAR: %.2f ₺", finalPriceToPay));
+            layout.getChildren().addAll(lblTitle, summaryBox, new Separator(), lblBasePrice, lblTotal);
+        }
+        
+        Label lblTotalPay = new Label(String.format("ÖDENECEK TUTAR: %.2f ₺", finalPriceToPay));
+        lblTotalPay.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        lblTotalPay.setStyle("-fx-text-fill: #27ae60;");
+        layout.getChildren().add(lblTotalPay);
 
         // Fiyat Detayı
-        Label lblBasePrice = new Label(String.format("Bilet Ücreti: %.2f ₺", ticketBasePrice));
+        /*Label lblBasePrice = new Label(String.format("Bilet Ücreti: %.2f ₺", ticketBasePrice));
         Label lblBagPrice = new Label(String.format("Ekstra Bagaj Ücreti: %.2f ₺", baggageFee));
         
         Label lblTotal = new Label(String.format("TOPLAM TUTAR: %.2f ₺", totalPrice));
         lblTotal.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        lblTotal.setStyle("-fx-text-fill: #27ae60;");
+        lblTotal.setStyle("-fx-text-fill: #27ae60;");*/
 
         // Kart Bilgileri (Görsel)
         VBox cardForm = new VBox(10);
@@ -137,7 +197,7 @@ public class PaymentView {
         cardForm.getChildren().addAll(new Label("Kredi Kartı Bilgileri:"), txtCardNum, expiryBox);
         
         // Ödeme Butonu
-        Button btnPay = new Button("Ödemeyi Onayla (" + String.format("%.2f", totalPrice) + " ₺)");
+        Button btnPay = new Button("Ödemeyi Onayla (" + String.format("%.2f", finalPriceToPay) + " ₺)");
         btnPay.setStyle("-fx-base: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         btnPay.setPrefHeight(45);
         btnPay.setMaxWidth(Double.MAX_VALUE);
@@ -145,17 +205,17 @@ public class PaymentView {
         // Butona basılınca önce validasyon, sonra ödeme işlemi
         btnPay.setOnAction(e -> {
             if (validateInputs()) {
-                handlePayment(ticketBasePrice, totalPrice);
+            	handlePayment(finalPriceToPay);
             }
         });
 
-        layout.getChildren().addAll(lblTitle, summaryBox, new Separator(), lblBasePrice, lblBagPrice, lblTotal, new Separator(), cardForm, new Separator(), btnPay);
+        layout.getChildren().addAll(new Separator(), cardForm, new Separator(), btnPay);
         
         return layout;
     }
 
-    private void handlePayment(double basePrice, double totalPrice) {
-        // 1. Rezervasyonu Gerçekleştir (Make Reservation)
+    private void handlePayment(double amountPaid) {
+        /*// 1. Rezervasyonu Gerçekleştir (Make Reservation)
         boolean resSuccess = reservationManager.makeReservation(
             flight.getPlane(), 
             flight, 
@@ -196,6 +256,42 @@ public class PaymentView {
             }
         } else {
             showAlert("Hata", "Rezervasyon yapılamadı. Koltuk dolmuş olabilir.");
+        }*/
+    	
+    	// --- SENARYO 1: KOLTUK DEĞİŞİMİ ---
+        if (existingReservation != null) {
+            boolean success = reservationManager.changeSeat(existingReservation.getReservationCode(), seatNum);
+            
+            if (success) {
+                showAlert("İşlem Başarılı", 
+                        "Koltuk değişiminiz tamamlandı.\n" +
+                        "Yeni Koltuk: " + seatNum + "\n" +
+                        "Ödenen Fark: " + String.format("%.2f ₺", amountPaid));
+                closeAllWindows();
+            } else {
+                showAlert("Hata", "Koltuk değiştirilemedi (Başkası almış olabilir).");
+            }
+        } 
+        // --- SENARYO 2: YENİ REZERVASYON ---
+        else {
+            boolean resSuccess = reservationManager.makeReservation(
+                flight.getPlane(), flight, passenger, seatNum, bookerPassenger.getPassengerID()
+            );
+
+            if (resSuccess) {
+                Reservation targetRes = findMyReservation();
+                if (targetRes != null) {
+                    Ticket ticket = reservationManager.generateTicket(targetRes);
+                    if (baggageKg > 0) ticket.setPassengerBaggage(new Baggage(baggageKg));
+                    
+                    showAlert("Ödeme Başarılı", 
+                            "İşleminiz tamamlandı.\nPNR: " + targetRes.getReservationCode() + 
+                            "\nToplam Tutar: " + String.format("%.2f ₺", amountPaid));
+                    closeAllWindows();
+                }
+            } else {
+                showAlert("Hata", "Rezervasyon yapılamadı.");
+            }
         }
     }
 
