@@ -496,11 +496,14 @@ public class ReservationManager {
             Reservation r = reservations.get(i);
             boolean flightStillExists = false;
             
-            for (Flight f : activeFlights) {
+            int j = 0;
+            while (j < activeFlights.size() && !flightStillExists) {
+                Flight f = activeFlights.get(j);
+                
                 if (f.getFlightNum().equals(r.getFlight().getFlightNum())) {
                     flightStillExists = true;
-                    break;
                 }
+                j++;
             }
             
             if (!flightStillExists) {

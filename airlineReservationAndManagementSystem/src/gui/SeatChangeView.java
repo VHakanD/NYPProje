@@ -168,7 +168,6 @@ public class SeatChangeView {
             }
         }
         
-        grid.add(new Label("KORİDOR"), 3, 0);
 
         ScrollPane scroll = new ScrollPane(grid);
         scroll.setFitToWidth(true);

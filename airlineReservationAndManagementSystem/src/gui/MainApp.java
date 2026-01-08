@@ -19,7 +19,8 @@ public class MainApp extends Application{
     private StaffManager staffManager;
     private List<Passenger> passengerList;
     
-    private final String PASSENGER_FILE = "passengers.txt";
+    
+    private final PassengerFileHandler fileHandler = new PassengerFileHandler();
     
     private Stage primaryStage;
     
@@ -45,7 +46,7 @@ public class MainApp extends Application{
     	flightManager = new FlightManager();
     	staffManager = new StaffManager();
         passengerList = new ArrayList<>(); 
-        loadPassengers();
+        fileHandler.loadPassengers();;
         
         reservationManager = new ReservationManager(flightManager, passengerList);
         
@@ -53,33 +54,53 @@ public class MainApp extends Application{
         reservationManager.cleanUpOrphanReservations(); 
     }
     
-    private void loadPassengers() {
-        File file = new File(PASSENGER_FILE);
-        if (!file.exists()) return;
+    private class PassengerFileHandler {
+        private final String PASSENGER_FILE = "passengers.txt";
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    Passenger p = Passenger.fromFileFormat(line);
-                    if (p != null) {
-                        passengerList.add(p);
+        public void loadPassengers() {
+            File file = new File(PASSENGER_FILE);
+            if (!file.exists()) return;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        Passenger p = Passenger.fromFileFormat(line);
+                        if (p != null) {
+                            passengerList.add(p);
+                        }
                     }
                 }
+            } catch (IOException e) {
+                System.out.println("Yolcu dosyası okuma hatası: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.out.println("Yolcu dosyası okuma hatası: " + e.getMessage());
+        }
+
+        public void appendPassenger(Passenger p) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, true))) {
+                writer.write(p.toFileFormat());
+                writer.newLine();
+            } catch (IOException e) {
+                System.out.println("Yolcu kaydedilemedi: " + e.getMessage());
+            }
+        }
+
+        public void rewriteFile() {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, false))) {
+                for (Passenger p : passengerList) {
+                    writer.write(p.toFileFormat());
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.out.println("Yolcu dosyası güncellenirken hata: " + e.getMessage());
+            }
         }
     }
     
+    
     public void savePassengerToFile(Passenger p) {
-        passengerList.add(p);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, true))) {
-            writer.write(p.toFileFormat());
-            writer.newLine();
-        } catch (IOException e) {
-            System.out.println("Yolcu kaydedilemedi: " + e.getMessage());
-        }
+    	passengerList.add(p);
+        fileHandler.appendPassenger(p);
     }
     
     public void showLoginScreen() {
@@ -87,6 +108,7 @@ public class MainApp extends Application{
         Scene scene = new Scene(loginView.getView(), 400, 450);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Giriş Yap");
+        primaryStage.centerOnScreen();
     }
     
     public void showAdminDashboard(Staff adminStaff) {
@@ -141,6 +163,7 @@ public class MainApp extends Application{
         stage.initOwner(primaryStage);
         
         stage.showAndWait(); 
+        primaryStage.centerOnScreen();
     }
     
     public void showSimulationScreen(Staff adminStaff) {
@@ -153,25 +176,13 @@ public class MainApp extends Application{
     }
     
     public void cleanUpSimulationPassengers() {
-        boolean removed = passengerList.removeIf(p -> p.getPassengerID().startsWith("SIM_"));
+    	boolean removed = passengerList.removeIf(p -> p.getPassengerID().startsWith("SIM_"));
         
         if (removed) {
-            rewritePassengerFile();
-            System.out.println("Simülasyon yolcuları dosýadan temizlendi.");
+            fileHandler.rewriteFile();
+            System.out.println("Simülasyon yolcuları dosyadan temizlendi.");
         }
     }
-    
-    private void rewritePassengerFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, false))) {
-            for (Passenger p : passengerList) {
-                writer.write(p.toFileFormat());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Yolcu dosyası güncellenirken hata: " + e.getMessage());
-        }
-    }
-    
     
     public List<Passenger> getPassengerList() {
         return passengerList;

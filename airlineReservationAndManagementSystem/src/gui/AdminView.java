@@ -176,6 +176,10 @@ public class AdminView {
         Button btnAddStaff = new Button("Ekle");
         Button btnDelStaff = new Button("Sil");
         Button btnUpdateStaff = new Button("Güncelle");
+        
+        Button btnClearStaff = new Button("Temizle");
+        btnClearStaff.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); // Gri renk
+        btnClearStaff.setOnAction(e -> clearStaffFields());
 
         btnAddStaff.setOnAction(e -> {
             if (txtStaffName.getText().isEmpty() || txtStaffSurname.getText().isEmpty()) {
@@ -246,7 +250,7 @@ public class AdminView {
             clearStaffFields();
         });
 
-        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass, btnAddStaff, btnUpdateStaff,btnDelStaff);
+        formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass, btnAddStaff, btnUpdateStaff, btnDelStaff, btnClearStaff);
         
         layout.getChildren().addAll(searchBox, staffTable, new Label("Personel Yönetimi:"), formBox);
         
@@ -387,6 +391,10 @@ public class AdminView {
         Button btnClear = new Button("Temizle");
         btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;");
         btnClear.setOnAction(e -> clearFlightFields());
+        
+        Button btnShowDetails = new Button("📋 Yolcu Listesi ve Doluluk");
+        btnShowDetails.setStyle("-fx-base: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;"); // Mor Renk
+        btnShowDetails.setOnAction(e -> handleShowFlightDetails());
 
         btnAdd.setOnAction(e -> {
         	try {
@@ -465,10 +473,12 @@ public class AdminView {
             }
         });
 
+        HBox buttonBox = new HBox(10, btnAdd, btnUpdate, btnDelete, btnClear, btnShowDetails);
+        
         form.getChildren().addAll(
             new HBox(10, txtNum, txtPlaneId, txtDep, txtArr),
             new HBox(10, datePicker, new Label("Saat:"), spinHour, new Label(":"), spinMinute, txtDur, txtDist),
-            new HBox(10, btnAdd, btnUpdate, btnDelete, btnClear)
+            buttonBox
         );
         innerLayout.setBottom(form);
         
@@ -590,6 +600,63 @@ public class AdminView {
             
             txtPlaneId.setText(selected.getPlane().getPlaneID());
         }
+    }
+    
+    private void handleShowFlightDetails() {
+        Flight selected = flightTable.getSelectionModel().getSelectedItem();
+        
+        if (selected == null) {
+            showAlert("Uyarı", "Lütfen detaylarını görmek istediğiniz uçuşu tablodan seçiniz.");
+            return;
+        }
+        java.util.List<reservationAndTicketing.Reservation> resList = reservationManager.getReservationsByFlight(selected.getFlightNum());
+        
+        int capacity = selected.getPlane().getCapacity();
+        int occupiedCount = resList.size(); // Dolu koltuk sayısı listeden alınabilir
+        int emptyCount = capacity - occupiedCount;
+        
+        double occupancyRate = reservationManager.calculateOccupancyRate(selected);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("Uçuş: ").append(selected.getFlightNum()).append("\n");
+        sb.append("Rota: ").append(selected.getRoute().toString()).append("\n");
+        sb.append("Tarih: ").append(selected.getFormattedDate()).append(" ").append(selected.getHour()).append("\n\n");
+        
+        sb.append("--- DOLULUK DURUMU ---\n");
+        sb.append("Toplam Kapasite: ").append(capacity).append("\n");
+        sb.append("Dolu Koltuk: ").append(occupiedCount).append("\n");
+        sb.append("Boş Koltuk: ").append(emptyCount).append("\n");
+        sb.append(String.format("Doluluk Oranı: %% %.2f", occupancyRate)).append("\n\n");
+        
+        sb.append("--- YOLCU LİSTESİ ---\n");
+        if (resList.isEmpty()) {
+            sb.append("(Henüz yolcu yok)");
+        } else {
+            int count = 1;
+            for (reservationAndTicketing.Reservation r : resList) {
+                sb.append(count++).append(". ")
+                  .append(r.getPassenger().getName()).append(" ")
+                  .append(r.getPassenger().getSurname())
+                  .append(" [Koltuk: ").append(r.getSeat().getSeatNum()).append("]")
+                  .append("\n");
+            }
+        }
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Uçuş Detayları");
+        alert.setHeaderText(selected.getFlightNum() + " - Yolcu ve Kapasite Bilgisi");
+        
+        TextArea textArea = new TextArea(sb.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+        
+        alert.getDialogPane().setContent(textArea);
+        alert.setResizable(true);
+        alert.getDialogPane().setPrefSize(400, 500);
+        
+        alert.showAndWait();
     }
     
     private void filterFlights(String searchText, String searchType) {

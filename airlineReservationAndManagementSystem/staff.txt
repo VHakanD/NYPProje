@@ -3,7 +3,67 @@ zeyneppkts,5678,Zeynep,Pektas,0551978266,Admin
 ahmetyilmaz,1111,Ahmet,Yilmaz,05553334455,Personel
 aysedmr,2222,Ayse,Demir,05554445566,Personel
 mehmetozt,3333,Mehmet,Ozturk,05556667788,Pilot
-elifk,4444,Elif,Kaya,05557778899,KabinMemuru
+elifk,4444,Elif,Kaya,05557778899,Kabin Memuru
 canyildiz,5555,Can,Yildiz,05558889900,Personel
 selinars,9999,Selin,Aras,05559990011,Admin
 hguven,4536,Hatice,Guven,05779992244,Hostes
+ahmetk,pass1,Ahmet,Kaptan,05003334455,Pilot
+mehmety,pass2,Mehmet,Yardımcı,05004445566,Pilot
+aysek,pass3,Ayşe,Kabin,05005556677,Kabin Memuru
+fatmay,pass4,Fatma,Yılmaz,05006667788,Kabin Memuru
+alic,pass5,Ali,Can,05007778899,Yer Hizmetleri
+velid,pass6,Veli,Demir,05008889900,Yer Hizmetleri
+zeyneps,pass7,Zeynep,Şen,05009990011,Operasyon
+burako,pass8,Burak,Ok,05000001122,Operasyon
+gamzea,pass9,Gamze,Ak,05001112244,Admin
+canb,pass10,Can,Bey,05002223355,Pilot
+selinc,pass11,Selin,Can,05003334466,Kabin Memuru
+emred,pass12,Emre,Dağ,05004445577,Teknik
+pelinE,pass13,Pelin,Er,05005556688,Teknik
+hakanf,pass14,Hakan,Filiz,05006667799,Admin
+iremg,pass15,İrem,Gül,05007778800,İK
+kemalh,pass16,Kemal,Han,05008889911,Finans
+leylai,pass17,Leyla,İnce,05009990022,Pazarlama
+metinj,pass18,Murat,Jale,05000001133,Satış
+raymondh,cheddar123,Raymond,Holt,05321112233,Admin
+terryj,yogurt_luv,Terry,Jeffords,05322223344,Operasyon
+ranni_w,moon_dark,Ranni,Witch,05559998877,Admin
+blaidd,shadow_wolf,Blaidd,Halfwolf,05558887766,Yer Hizmetleri
+charlotte_l,tokyo_dream,Charlotte,L.,05421112211,Kabin Memuru
+john_h,photo_guy,John,Husband,05423334433,Pilot
+alex_mc,craft_table,Alex,Builder,05301234567,Teknik
+villager_no,hmmm_emerald,Villager,Trader,05309876543,Satış
+rons,meat_whisky,Ron,Swanson,05334445555,Admin
+april_l,i_hate_ppl,April,Ludgate,05336667777,Yer Hizmetleri
+king_arthur,camelot_1,Arthur,Pendragon,05415556666,Pilot
+morgana_f,magic_dark,Morgana,Pendragon,05417778888,Admin
+claire_f,haircut_bad,Claire,Finland,05391112233,Finans
+hot_priest,foxes_love,Hot,Priest,05394445566,Kabin Memuru
+helly_r,waffle_party,Helly,R.,05381231234,Operasyon
+irving_b,mac_melon,Irving,Bailiff,05384564567,Teknik
+foggy_n,avocados_law,Foggy,Nelson,05371112222,İK
+karen_p,ben_urich,Karen,Page,05373334444,Yer Hizmetleri
+alfred_p,penny_one,Alfred,Pennyworth,05365556666,Kabin Memuru
+jim_gordon,gcpd_cop,Jim,Gordon,05367778888,Operasyon
+homelander,milk_lover,John,Gillman,05351239876,Pilot
+hughie_c,billy_joel,Hughie,Campbell,05356543210,Teknik
+charlie_d,cheese_nom,Charlie,Dompler,05431112233,Yer Hizmetleri
+glep_s,gibberish_1,Glep,Small,05434445566,Teknik
+arthur_s,birmingham,Arthur,Shelby,05341234567,Operasyon
+polly_g,tarot_cards,Polly,Gray,05347654321,Finans
+wardo_s,chicken_cannibal,Eduardo,Saverin,05319998877,Finans
+sean_p,napster_cool,Sean,Parker,05317776655,Pazarlama
+lois_lane,pulitzer_prize,Lois,Lane,05325554433,Pazarlama
+lex_luthor,bald_genius,Lex,Luthor,05322221100,Admin
+vanessa_c,happy_univ,Vanessa,Carlysle,05451234567,Kabin Memuru
+colossus_x,steel_skin,Piotr,Rasputin,05459876543,Yer Hizmetleri
+peeta_m,bread_boy,Peeta,Mellark,05381110000,Kabin Memuru
+haymitch_a,white_liquor,Haymitch,Abernathy,05380001111,Pilot
+billy_d,honeycomb,Billy,Dunne,05419998888,Pilot
+camila_d,trust_me,Camila,Dunne,05417776666,İK
+mj_watson,tiger_jackpot,Mary Jane,Watson,05332223344,Kabin Memuru
+norman_o,goblin_green,Norman,Osborn,05335556677,Admin
+baroness_v,fashion_killa,Baroness,VonHellman,05306667788,Admin
+jasper_b,thief_one,Jasper,Badun,05304443322,Yer Hizmetleri
+aaron_burr,wait_for_it,Aaron,Burr,05398889900,Pilot
+eliza_sch,burn_letters,Eliza,Schuyler,05396665544,Kabin Memuru

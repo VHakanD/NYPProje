@@ -7,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -85,6 +86,41 @@ public class LoginView {
             }
         });
         
+        // 2. Görünür Şifre Alanı (Başlangıçta gizli)
+        TextField txtPassShown = new TextField();
+        txtPassShown.setPromptText("Şifre");
+        txtPassShown.setPrefWidth(250);
+        txtPassShown.setManaged(false); // Yer kaplamasın
+        txtPassShown.setVisible(false); // Görünmesin
+
+        // 3. İki alanı birbirine bağla (Senkronizasyon)
+        txtPass.textProperty().bindBidirectional(txtPassShown.textProperty());
+
+        // 4. StackPane ile üst üste koy
+        StackPane passStack = new StackPane(txtPass, txtPassShown);
+        passStack.setAlignment(Pos.CENTER);
+        passStack.setMaxWidth(250); // Hizalama bozulmasın diye genişlik sınırı
+
+        // 5. Şifreyi Göster Kutucuğu
+        CheckBox chkShowPass = new CheckBox("Şifreyi Göster");
+        chkShowPass.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+        
+        chkShowPass.setOnAction(e -> {
+            if (chkShowPass.isSelected()) {
+                // Göster moduna geç
+                txtPassShown.setManaged(true);
+                txtPassShown.setVisible(true);
+                txtPass.setManaged(false);
+                txtPass.setVisible(false);
+            } else {
+                // Gizle moduna geç
+                txtPass.setManaged(true);
+                txtPass.setVisible(true);
+                txtPassShown.setManaged(false);
+                txtPassShown.setVisible(false);
+            }
+        });
+        
         btnLogin.setOnAction(e -> {
             String role = cmbRole.getValue();
             if (role.contains("Admin")) {
@@ -94,7 +130,7 @@ public class LoginView {
             }
         });
 
-        loginBox.getChildren().addAll(lblHeader, cmbRole, txtUser, txtPass, btnLogin, linkRegister);
+        loginBox.getChildren().addAll(lblHeader, cmbRole, txtUser, passStack, chkShowPass, btnLogin, linkRegister);
     }
     
     private void createRegisterBox() {
@@ -104,12 +140,46 @@ public class LoginView {
         Label lblHeader = new Label("Yeni Yolcu Kaydı");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
-        TextField regName = new TextField(); regName.setPromptText("Ad");
-        TextField regSurname = new TextField(); regSurname.setPromptText("Soyad");
-        TextField regID = new TextField(); regID.setPromptText("TC / Pasaport No");
-        TextField regPhone = new TextField(); regPhone.setPromptText("Telefon (05XX...)");
-        TextField regUser = new TextField(); regUser.setPromptText("Kullanıcı Adı Belirle");
-        PasswordField regPass = new PasswordField(); regPass.setPromptText("Şifre Belirle");
+        TextField regName = new TextField();
+        regName.setPromptText("Ad");
+        TextField regSurname = new TextField();
+        regSurname.setPromptText("Soyad");
+        TextField regID = new TextField();
+        regID.setPromptText("TC / Pasaport No");
+        TextField regPhone = new TextField();
+        regPhone.setPromptText("Telefon (05XX...)");
+        TextField regUser = new TextField();
+        regUser.setPromptText("Kullanıcı Adı Belirle");
+        
+        PasswordField regPass = new PasswordField(); 
+        regPass.setPromptText("Şifre Belirle");
+        
+        TextField regPassShown = new TextField();
+        regPassShown.setPromptText("Şifre Belirle");
+        regPassShown.setManaged(false);
+        regPassShown.setVisible(false);
+        
+        regPass.textProperty().bindBidirectional(regPassShown.textProperty());
+        
+        StackPane regPassStack = new StackPane(regPass, regPassShown);
+        regPassStack.setAlignment(Pos.CENTER);
+        
+        CheckBox chkShowRegPass = new CheckBox("Şifreyi Göster");
+        chkShowRegPass.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
+        
+        chkShowRegPass.setOnAction(e -> {
+            if (chkShowRegPass.isSelected()) {
+                regPassShown.setManaged(true);
+                regPassShown.setVisible(true);
+                regPass.setManaged(false);
+                regPass.setVisible(false);
+            } else {
+                regPass.setManaged(true);
+                regPass.setVisible(true);
+                regPassShown.setManaged(false);
+                regPassShown.setVisible(false);
+            }
+        });
         
         regName.setPrefWidth(250); regSurname.setPrefWidth(250); regID.setPrefWidth(250);
         regPhone.setPrefWidth(250); regUser.setPrefWidth(250); regPass.setPrefWidth(250);
@@ -123,7 +193,8 @@ public class LoginView {
 
         btnRegister.setOnAction(e -> handleRegistration(regName, regSurname, regID, regPhone, regUser, regPass));
 
-        registerBox.getChildren().addAll(lblHeader, regName, regSurname, regID, regPhone, new Separator(), regUser, regPass, btnRegister, linkBack);
+        // Layout'a ekleme sırasında stackpane ve checkbox'ı ekliyoruz
+        registerBox.getChildren().addAll(lblHeader, regName, regSurname, regID, regPhone, new Separator(), regUser, regPassStack, chkShowRegPass, btnRegister, linkBack);
     }
     
     private void showRegisterScreen() {

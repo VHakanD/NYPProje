@@ -41,7 +41,7 @@ public class Route {
 	}
 	
 	public String toString() {
-		return "Rota -> Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity; 
+		return "Kalkış Şehri: " + this.departureCity + " - Varış Şehri: " + this.arrivalCity; 
 	}
 	
 	public boolean equals(Object comparedObject) {
