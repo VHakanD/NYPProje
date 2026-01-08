@@ -43,14 +43,13 @@ public class PaymentView {
         this.mainApp = mainApp;
         this.flight = flight;
         this.passenger = passenger;
-        this.bookerPassenger = bookerPassenger; // Kaydet
+        this.bookerPassenger = bookerPassenger;
         this.seatNum = seatNum;
         this.baggageKg = baggageKg;
         this.reservationManager = mgr;
         this.priceCalculator = new CalculatePrice(); 
     }
     
-    //Koltuk değişimi için overload yaptık
     public PaymentView(MainApp mainApp, Flight flight, Passenger passenger, Passenger bookerPassenger, String seatNum, int baggageKg, ReservationManager mgr, Reservation existingReservation) {
         this.mainApp = mainApp;
         this.flight = flight;
@@ -59,7 +58,7 @@ public class PaymentView {
         this.seatNum = seatNum;
         this.baggageKg = baggageKg;
         this.reservationManager = mgr;
-        this.existingReservation = existingReservation; // Atama yapıldı
+        this.existingReservation = existingReservation;
         this.priceCalculator = new CalculatePrice(); 
     }
     
@@ -68,7 +67,6 @@ public class PaymentView {
     	long hoursUntilFlight = java.time.Duration.between(java.time.LocalDateTime.now(), flight.getDate()).toHours();
         
         if (hoursUntilFlight < 24 && hoursUntilFlight >= 0) {
-            // Platform.runLater kullanarak arayüz çizildikten hemen sonra çıkmasını sağlıyoruz
             javafx.application.Platform.runLater(() -> 
                 showAlert("Son Dakika Uçuşu", 
                           "Dikkat: Uçuşa 24 saatten az bir süre kaldığı için \nbilet fiyatlarına son dakika tarifesi uygulanmıştır.")
@@ -84,48 +82,32 @@ public class PaymentView {
         Label lblTitle = new Label(titleText);
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
-        // --- HESAPLAMALAR ---
         
-        // 1. Koltuk objesini bul
         Seat selectedSeat = flight.getPlane().getSeatMatrix().get(seatNum);
         
-        // 2. Geçici bir rezervasyon oluştur (Fiyat hesaplamak için)
-        // Not: Bu rezervasyon henüz listeye eklenmez, sadece hesaplayıcıya verilir.
+        
         Reservation tempRes = new Reservation("TEMP", flight, passenger, selectedSeat);
         
-        // 3. CalculatePrice sınıfı üzerinden bilet fiyatını al (Son dakika, mesafe vb. dahil)
         double ticketBasePrice = priceCalculator.calculateTicketPrice(tempRes);
         
-        // 4. Bagaj Ücreti Hesapla (Ticket.java mantığına göre)
-        // Business: 30kg, Ekonomi: 15kg. Ekstra kg başı 50 TL.
-        /*int allowance = (selectedSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
-        double excessWeight = Math.max(0, baggageKg - allowance);
-        double baggageFee = excessWeight * 50.0;
-        
-        double totalPrice = ticketBasePrice + baggageFee;*/
         
         double finalPriceToPay;
         double priceDiff = 0;
         
         if (existingReservation != null) {
-            // KOLTUK DEĞİŞİMİ MODU
-            // Eski koltuğun şu anki değerini hesapla (veya bilet fiyatını alabilirdik ama şu an hesaplıyoruz)
             Reservation tempOldRes = new Reservation("TEMP_OLD", flight, passenger, existingReservation.getSeat());
             double oldPrice = priceCalculator.calculateTicketPrice(tempOldRes);
             
             priceDiff = ticketBasePrice - oldPrice;
-            // Eğer fark negatifse (daha ucuz koltuk) ödeme 0 olur
             finalPriceToPay = Math.max(0, priceDiff);
             
         } else {
-            // YENİ BİLET MODU
             int allowance = (selectedSeat.getSeatType() == Seat.SeatType.BUSINESS) ? 30 : 15;
             double excessWeight = Math.max(0, baggageKg - allowance);
             double baggageFee = excessWeight * 50.0;
             finalPriceToPay = ticketBasePrice + baggageFee;
         }
 
-        // --- GÖRÜNÜM ELEMANLARI ---
         
         VBox summaryBox = new VBox(8);
         summaryBox.setStyle("-fx-background-color: #ecf0f1; -fx-padding: 15; -fx-background-radius: 5;");
@@ -133,12 +115,10 @@ public class PaymentView {
         Label lblPass = new Label("Yolcu: " + passenger.getName() + " " + passenger.getSurname());
         Label lblFlight = new Label("Uçuş: " + flight.getFlightNum() + " | " + flight.getFormattedDate());
         Label lblSeat = new Label("Koltuk: " + seatNum + " (" + selectedSeat.getSeatType() + ")");
-        //Label lblBaggage = new Label("Bagaj: " + baggageKg + " kg (Hak: " + allowance + " kg)");
         
         summaryBox.getChildren().addAll(lblPass, lblFlight, lblSeat);
         
         if (existingReservation != null) {
-            // Değişim detayları
             Label lblOldSeat = new Label("Eski Koltuk: " + existingReservation.getSeat().getSeatNum());
             lblOldSeat.setStyle("-fx-text-fill: #7f8c8d;");
             summaryBox.getChildren().add(lblOldSeat);
@@ -147,7 +127,6 @@ public class PaymentView {
             lblDiffInfo.setStyle("-fx-font-weight: bold;");
             layout.getChildren().addAll(lblTitle, summaryBox, new Separator(), lblDiffInfo);
         } else {
-            // Normal bilet detayları
             Label lblBaggage = new Label("Bagaj: " + baggageKg + " kg");
             summaryBox.getChildren().add(lblBaggage);
             
@@ -161,23 +140,14 @@ public class PaymentView {
         lblTotalPay.setStyle("-fx-text-fill: #27ae60;");
         layout.getChildren().add(lblTotalPay);
 
-        // Fiyat Detayı
-        /*Label lblBasePrice = new Label(String.format("Bilet Ücreti: %.2f ₺", ticketBasePrice));
-        Label lblBagPrice = new Label(String.format("Ekstra Bagaj Ücreti: %.2f ₺", baggageFee));
         
-        Label lblTotal = new Label(String.format("TOPLAM TUTAR: %.2f ₺", totalPrice));
-        lblTotal.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        lblTotal.setStyle("-fx-text-fill: #27ae60;");*/
-
-        // Kart Bilgileri (Görsel)
         VBox cardForm = new VBox(10);
         cardForm.setAlignment(Pos.CENTER_LEFT);
         
-        // Kart Numarası
+        
         txtCardNum = new TextField(); 
         txtCardNum.setPromptText("Kart Numarası (16 Hane)"); // PromptText kullanıldı!
         
-        // Son Kullanma Tarihi ve CVV Kutusu
         HBox expiryBox = new HBox(10);
         
         txtMonth = new TextField();
@@ -196,13 +166,11 @@ public class PaymentView {
         
         cardForm.getChildren().addAll(new Label("Kredi Kartı Bilgileri:"), txtCardNum, expiryBox);
         
-        // Ödeme Butonu
         Button btnPay = new Button("Ödemeyi Onayla (" + String.format("%.2f", finalPriceToPay) + " ₺)");
         btnPay.setStyle("-fx-base: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         btnPay.setPrefHeight(45);
         btnPay.setMaxWidth(Double.MAX_VALUE);
 
-        // Butona basılınca önce validasyon, sonra ödeme işlemi
         btnPay.setOnAction(e -> {
             if (validateInputs()) {
             	handlePayment(finalPriceToPay);
@@ -215,50 +183,6 @@ public class PaymentView {
     }
 
     private void handlePayment(double amountPaid) {
-        /*// 1. Rezervasyonu Gerçekleştir (Make Reservation)
-        boolean resSuccess = reservationManager.makeReservation(
-            flight.getPlane(), 
-            flight, 
-            passenger, 
-            seatNum,
-            bookerPassenger.getPassengerID()
-        );
-
-        if (resSuccess) {
-            // 2. Rezervasyonu Bul (Bilet üretmek için)
-            // En son eklenen veya ID ile eşleşen rezervasyonu buluyoruz
-            Reservation targetRes = findMyReservation();
-
-            if (targetRes != null) {
-                // 3. Bileti Oluştur (Generate Ticket)
-                // Manager, CalculatePrice kullanarak temel bileti oluşturup kaydeder.
-                Ticket ticket = reservationManager.generateTicket(targetRes);
-                
-                // 4. Bagaj Bilgisini ve Son Fiyatı Güncelle (Opsiyonel: Runtime objesini düzeltiyoruz)
-                // Ticket.java içinde Baggage objesi varsa:
-                if (baggageKg > 0) ticket.setPassengerBaggage(new Baggage(baggageKg));
-                
-                // NOT: Manager'daki generateTicket metodu bileti dosyaya hemen yazar.
-                // Eğer bagaj ücretini dosyaya da yansıtmak istiyorsanız Manager yapısında 
-                // değişiklik gerekir veya burada bileti tekrar kaydetmeniz gerekir.
-                // Ancak PaymentView sadece GUI olduğu için şimdilik kullanıcıya bilgi verip geçiyoruz.
-
-                showAlert("Ödeme Başarılı", 
-                        "İşleminiz tamamlandı.\n" +
-                        "PNR: " + targetRes.getReservationCode() + "\n" +
-                        "Bilet No: " + ticket.getTicketID() + "\n" +
-                        "Toplam Tutar: " + String.format("%.2f ₺", totalPrice));
-                
-                closeAllWindows();
-                
-            } else {
-                showAlert("Hata", "Rezervasyon yapıldı ancak bilet oluşturulamadı.");
-            }
-        } else {
-            showAlert("Hata", "Rezervasyon yapılamadı. Koltuk dolmuş olabilir.");
-        }*/
-    	
-    	// --- SENARYO 1: KOLTUK DEĞİŞİMİ ---
         if (existingReservation != null) {
             boolean success = reservationManager.changeSeat(existingReservation.getReservationCode(), seatNum);
             
@@ -271,9 +195,7 @@ public class PaymentView {
             } else {
                 showAlert("Hata", "Koltuk değiştirilemedi (Başkası almış olabilir).");
             }
-        } 
-        // --- SENARYO 2: YENİ REZERVASYON ---
-        else {
+        } else {
             boolean resSuccess = reservationManager.makeReservation(
                 flight.getPlane(), flight, passenger, seatNum, bookerPassenger.getPassengerID()
             );
@@ -303,7 +225,6 @@ public class PaymentView {
         for (Reservation r : list) {
             if (r.getFlight().getFlightNum().equals(flight.getFlightNum()) && 
                     r.getSeat().getSeatNum().equals(seatNum)) {
-                // Çakışmayı önlemek için rezervasyon saati veya durumu da kontrol edilebilir
                 return r; 
             }
         }
@@ -313,19 +234,16 @@ public class PaymentView {
     private boolean validateInputs() {
         String errorMsg = "";
         
-        // 1. Kart Numarası Kontrolü (Sadece rakam ve 16 hane)
         String cardNum = txtCardNum.getText().trim();
         if (!cardNum.matches("\\d{16}")) {
             errorMsg += "- Kart numarası 16 haneli rakamlardan oluşmalıdır.\n";
         }
         
-        // 2. CVV Kontrolü (3 hane)
         String cvv = txtCvv.getText().trim();
         if (!cvv.matches("\\d{3}")) {
             errorMsg += "- CVV kodu 3 haneli olmalıdır.\n";
         }
         
-        // 3. Tarih Kontrolü (Ay ve Yıl mantığı)
         String monthStr = txtMonth.getText().trim();
         String yearStr = txtYear.getText().trim();
         
@@ -333,12 +251,10 @@ public class PaymentView {
             int month = Integer.parseInt(monthStr);
             int year = Integer.parseInt(yearStr);
             
-            // Ay 1-12 arasında mı?
             if (month < 1 || month > 12) {
                 errorMsg += "- Ay bilgisi 1 ile 12 arasında olmalıdır.\n";
             }
             
-            // Geçmiş tarih kontrolü
             LocalDate now = LocalDate.now();
             int currentYear = now.getYear();
             int currentMonth = now.getMonthValue();
@@ -353,7 +269,6 @@ public class PaymentView {
             errorMsg += "- Ay ve Yıl alanlarına sadece sayı giriniz.\n";
         }
         
-        // Hata varsa göster ve false döndür
         if (!errorMsg.isEmpty()) {
             showAlert("Hatalı Giriş", "Lütfen bilgileri kontrol ediniz:\n\n" + errorMsg);
             return false;
@@ -371,7 +286,6 @@ public class PaymentView {
     }
 
     private void closeAllWindows() {
-        // Tüm açık popup pencereleri kapat
     	new ArrayList<>(Stage.getWindows()).stream()
         .filter(window -> window instanceof Stage && window != mainApp.getPrimaryStage())
         .forEach(window -> ((Stage) window).close());

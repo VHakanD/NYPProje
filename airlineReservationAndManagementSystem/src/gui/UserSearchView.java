@@ -35,7 +35,6 @@ public class UserSearchView {
     private TableView<Flight> table;
     private Passenger loggedInPassenger;
     
-    // Arama kutularını sınıf seviyesine taşıdık (Erişim için)
     private TextField txtFrom;
     private TextField txtTo;
 
@@ -52,13 +51,12 @@ public class UserSearchView {
         
         VBox topContainer = new VBox(15);
         
-        // --- 1. ÜST KISIM (HEADER - Kaybolan kısım burasıydı) ---
         HBox headerBox = new HBox();
         Label lblTitle = new Label("Uçuş Arama");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         
         Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS); // Araya boşluk at
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         
         Label lblWelcome = new Label("Hoşgeldiniz, Sayın " + loggedInPassenger.getName() + " " + loggedInPassenger.getSurname());
         lblWelcome.setStyle("-fx-text-fill: #2980b9; -fx-font-weight: bold; -fx-font-size: 14px;");
@@ -71,12 +69,11 @@ public class UserSearchView {
         btnLogout.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
 
-        // Header elemanlarını ekle
+        
         headerBox.getChildren().addAll(lblTitle, spacer, lblWelcome, new Label("  "), btnMyReservations, new Label(" "), btnLogout);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         
         
-        // --- 2. ARAMA KUTUSU (SEARCH BOX - Güncellenen Kısım) ---
         HBox searchBox = new HBox(10);
         searchBox.setPadding(new Insets(10));
         searchBox.setStyle("-fx-background-color: #ecf0f1; -fx-background-radius: 5;");
@@ -90,22 +87,19 @@ public class UserSearchView {
         txtTo.setPromptText("Nereye (Varış Şehri)");
         txtTo.setPrefWidth(200);
         
-        // Listener: Her harf basışında anlık filtreleme (Google gibi)
+        
         txtFrom.textProperty().addListener((observable, oldValue, newValue) -> filterFlights());
         txtTo.textProperty().addListener((observable, oldValue, newValue) -> filterFlights());
 
         Button btnSearch = new Button("Uçuş Ara");
         btnSearch.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
-        // Butona basınca da filtrelesin (Gerekirse)
         btnSearch.setOnAction(e -> filterFlights());
         
         Button btnShowAll = new Button("Tüm Uçuşları Listele");
         
-        // Temizleme ve Listeleme Fonksiyonu
         btnShowAll.setOnAction(e -> {
             txtFrom.clear();
             txtTo.clear();
-            // Tüm listeyi geri yükle
             if(flightManager.getFlights() != null) {
                 table.setItems(FXCollections.observableArrayList(flightManager.getFlights()));
             }
@@ -113,11 +107,9 @@ public class UserSearchView {
 
         searchBox.getChildren().addAll(new Label("Rota Ara:"), txtFrom, new Label("->"), txtTo, btnSearch, btnShowAll);
         
-        // Üst konteyner'a hem Header'ı hem Arama kutusunu ekle
         topContainer.getChildren().addAll(headerBox, searchBox);
         layout.setTop(topContainer);
 
-        // --- 3. TABLO KISMI ---
         table = new TableView<>();
         createTableColumns();
         
@@ -127,7 +119,6 @@ public class UserSearchView {
         
         layout.setCenter(table);
         
-        // --- 4. ALT KISIM (KOLTUK SEÇ BUTONU) ---
         Button btnSelectSeat = new Button("Seçili Uçuşta Koltuk Seç");
         btnSelectSeat.setStyle("-fx-font-size: 14px; -fx-base: #27ae60; -fx-text-fill: white;");
         btnSelectSeat.setPadding(new Insets(10, 20, 10, 20));
@@ -150,29 +141,23 @@ public class UserSearchView {
     }
     
     private void createTableColumns() {
-        // Uçuş No
         TableColumn<Flight, String> colNum = new TableColumn<>("Uçuş No");
         colNum.setCellValueFactory(new PropertyValueFactory<>("flightNum"));
 
-        // Kalkış Yeri
         TableColumn<Flight, String> colDep = new TableColumn<>("Kalkış");
         colDep.setCellValueFactory(cell -> 
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getRoute().getDepartureCity()));
 
-        // Varış Yeri
         TableColumn<Flight, String> colArr = new TableColumn<>("Varış");
         colArr.setCellValueFactory(cell -> 
             new javafx.beans.property.SimpleStringProperty(cell.getValue().getRoute().getArrivalCity()));
 
-        // Tarih
         TableColumn<Flight, String> colDate = new TableColumn<>("Tarih");
         colDate.setCellValueFactory(new PropertyValueFactory<>("formattedDate")); 
 
-        // Saat
         TableColumn<Flight, String> colTime = new TableColumn<>("Kalkış Saati");
         colTime.setCellValueFactory(new PropertyValueFactory<>("hour"));
 
-        // Süre
         TableColumn<Flight, String> colDur = new TableColumn<>("Uçuş Süresi");
         colDur.setCellValueFactory(cell -> {
             int rawMinutes = cell.getValue().getDuration();
@@ -182,12 +167,10 @@ public class UserSearchView {
             return new javafx.beans.property.SimpleStringProperty(formatted);
         });
         
-        // Mesafe
         TableColumn<Flight, Double> colDist = new TableColumn<>("Mesafe (KM)");
         colDist.setCellValueFactory(cell -> 
              new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getRoute().getDistanceKm()));
 
-        // FİYAT SÜTUNU (DÜZELTİLMİŞ HALİ)
         TableColumn<Flight, String> colPrice = new TableColumn<>("Tahmini Fiyat (Eco - Bus)");
         
         colPrice.setCellValueFactory(cell -> {
@@ -195,7 +178,6 @@ public class UserSearchView {
             if (f.getRoute() != null) {
                 CalculatePrice calculator = new CalculatePrice();
                 
-                // HATA DÜZELTME: Null yerine geçici (dummy) bir yolcu oluşturuyoruz.
                 Passenger dummyPassenger = new Passenger("TEMP_ID", "Fiyat", "Hesaplayici", "000");
                 
                 Seat dummyEcoSeat = new Seat("XX", Seat.SeatType.ECONOMY);
@@ -214,11 +196,17 @@ public class UserSearchView {
             }
         });
         
-        table.getColumns().addAll(colNum, colDep, colArr, colDate, colTime, colDur, colDist, colPrice);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getColumns().add(colNum);
+        table.getColumns().add(colDep);
+        table.getColumns().add(colArr);
+        table.getColumns().add(colDate);
+        table.getColumns().add(colTime);
+        table.getColumns().add(colDur);
+        table.getColumns().add(colDist);
+        table.getColumns().add(colPrice);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     }
 
-    // YENİ FİLTRELEME METODU (Listener tarafından çağrılır)
     private void filterFlights() {
         if (flightManager.getFlights() == null) return;
 
@@ -231,7 +219,6 @@ public class UserSearchView {
                     String depCity = flight.getRoute().getDepartureCity().toLowerCase(Locale.ENGLISH);
                     String arrCity = flight.getRoute().getArrivalCity().toLowerCase(Locale.ENGLISH);
                     
-                    // Logic: Arama kutusu boşsa veya eşleşiyorsa true
                     boolean matchFrom = searchFrom.isEmpty() || depCity.contains(searchFrom);
                     boolean matchTo = searchTo.isEmpty() || arrCity.contains(searchTo);
                     

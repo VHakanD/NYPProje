@@ -33,7 +33,6 @@ public class SimulationView {
 	private ReservationManager reservationManager;
 	private Staff adminStaff;
     
-    // Simülasyon Verileri
     private final int TOTAL_SEATS = 180;
     private final int PASSENGER_COUNT = 90;
     private final String SIM_FLIGHT_ID = "SIM_TEST_001";
@@ -41,7 +40,6 @@ public class SimulationView {
     private Flight simFlight;
     private List<String> seatNumbers;
     
-    // GUI Elemanları
     private Rectangle[] seatRects = new Rectangle[TOTAL_SEATS];
     private Label lblResult;
     private CheckBox chkSync;
@@ -52,7 +50,7 @@ public class SimulationView {
     public SimulationView(MainApp mainApp, ReservationManager reservationManager, Staff adminStaff) {
         this.mainApp = mainApp;
         this.reservationManager = reservationManager;
-        this.adminStaff = adminStaff; // Kaydet
+        this.adminStaff = adminStaff; 
         prepareSimulationEnvironment(); 
     }
 
@@ -60,7 +58,6 @@ public class SimulationView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(15));
 
-        // --- ÜST KISIM ---
         VBox topBox = new VBox(10);
         topBox.setAlignment(Pos.CENTER);
         
@@ -90,18 +87,14 @@ public class SimulationView {
         topBox.getChildren().addAll(lblTitle, lblInfo, controls);
         layout.setTop(topBox);
 
-        // --- ORTA KISIM (Koltuk Izgarası) ---
         GridPane seatGrid = new GridPane();
         seatGrid.setAlignment(Pos.CENTER);
-        seatGrid.setHgap(3); // Yatay boşluk (küçük)
-        seatGrid.setVgap(3); // Dikey boşluk (küçük)
+        seatGrid.setHgap(3);
+        seatGrid.setVgap(3);
         
-        // Sütun Başlıkları (A, B, C, D, E, F)
         char[] cols = {'A', 'B', 'C', 'D', 'E', 'F'};
         
-        // Sol üst köşe boş kalsın
         
-        // Harfleri yerleştir
         for (int i = 0; i < cols.length; i++) {
             Label lblCol = new Label(String.valueOf(cols[i]));
             lblCol.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -109,67 +102,47 @@ public class SimulationView {
             lblCol.setAlignment(Pos.CENTER);
             lblCol.setStyle("-fx-text-fill: black;");
             
-            // Grid sütun indeksi hesabı: 
-            // 0: Sıra No
-            // 1,2,3: A,B,C
-            // 4: Koridor Boşluğu (Görsel)
-            // 5,6,7: D,E,F
             int gridColIndex = i + 1; 
-            if (i >= 3) gridColIndex++; // C'den sonra 1 sütun atla (Koridor)
+            if (i >= 3) gridColIndex++;
             
-            seatGrid.add(lblCol, gridColIndex, 0); // 0. Satıra ekle
+            seatGrid.add(lblCol, gridColIndex, 0);
         }
         
-        // Koridor Etiketi (Opsiyonel)
         Label lblAisle = new Label("|");
         lblAisle.setStyle("-fx-text-fill: #ccc;");
         seatGrid.add(lblAisle, 4, 0);
 
-        // Koltukları ve Sıra Numaralarını Yerleştir
         seatRects = new Rectangle[seatNumbers.size()];
         
-        // SeatNumbers listesini tarayıp her koltuğu doğru yere koyacağız.
-        // Listede "1A", "1B"... "30F" gibi stringler var.
         for (int i = 0; i < seatNumbers.size(); i++) {
             String seatNum = seatNumbers.get(i);
             
-            // String ayrıştırma (Parsing) "12A" -> row=12, colChar='A'
             String rowPart = seatNum.substring(0, seatNum.length() - 1);
             char colChar = seatNum.charAt(seatNum.length() - 1);
             
             int rowNum = Integer.parseInt(rowPart);
             
-            // Eğer bu satırın numarası henüz eklenmediyse ekle (Her satır için 1 kere)
-            // (seatNumbers sıralı değilse bu mantık karışabilir, ama görseli düzgün kurmak için
-            //  doğrudan rowNum kullanıp 0. sütuna label eklemek daha güvenli)
             Label lblRow = new Label(String.valueOf(rowNum));
             lblRow.setFont(Font.font("Arial", 10));
             lblRow.setMinWidth(20);
             lblRow.setAlignment(Pos.CENTER_RIGHT);
             lblRow.setStyle("-fx-text-fill: black;");
-            // Aynı hücreye birden fazla eklememek için grid kontrolü zor, 
-            // JavaFX'te üst üste eklerse sorun olmaz veya node lookup yapılabilir.
-            // En temizi: Sadece 'A' sütununu işlerken sıra numarasını ekle.
             if (colChar == 'A') {
-                seatGrid.add(lblRow, 0, rowNum); // rowNum, grid satırı olarak kullanılabilir
+                seatGrid.add(lblRow, 0, rowNum);
             }
 
-            // Koltuk Karesi
-            Rectangle rect = new Rectangle(14, 14); // 14x14 px (Küçük boyut)
+            Rectangle rect = new Rectangle(14, 14);
             rect.setFill(Color.LIGHTGREEN);
             rect.setStroke(Color.DARKGRAY);
             rect.setStrokeWidth(0.5);
             
-            // Array'e kaydet (Thread'ler indeks ile erişecek)
             seatRects[i] = rect; 
             
-            // Grid Konumu
             int colIndex = -1;
             switch(colChar) {
                 case 'A': colIndex = 1; break;
                 case 'B': colIndex = 2; break;
                 case 'C': colIndex = 3; break;
-                // 4 boş (koridor)
                 case 'D': colIndex = 5; break;
                 case 'E': colIndex = 6; break;
                 case 'F': colIndex = 7; break;
@@ -186,14 +159,12 @@ public class SimulationView {
         scroll.setPadding(new Insets(5));
         layout.setCenter(scroll);
 
-        // --- ALT KISIM ---
         lblResult = new Label("Durum: Hazır - " + seatNumbers.size() + " koltuk yüklendi.");
         lblResult.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         HBox bottomBox = new HBox(lblResult);
         bottomBox.setAlignment(Pos.CENTER);
         layout.setBottom(bottomBox);
 
-        // Başlangıç temizliği
         resetSimulation();
 
         return layout;
@@ -211,7 +182,6 @@ public class SimulationView {
     }
 
     private void startSimulation() {
-        // Önce temizlik yap
         resetSimulation();
         
         btnStart.setDisable(true);
@@ -221,14 +191,12 @@ public class SimulationView {
         lblResult.setText("Simülasyon Çalışıyor... Mod: " + (isSafeMode ? "GÜVENLİ (Synchronized)" : "GÜVENSİZ (Race Condition)"));
         lblResult.setStyle("-fx-text-fill: blue;");
 
-        // Thread Havuzu
         ExecutorService executor = Executors.newFixedThreadPool(PASSENGER_COUNT);
 
         for (int i = 0; i < PASSENGER_COUNT; i++) {
             final int passengerIndex = i;
             executor.execute(() -> {
                 boolean success = false;
-                // --- DÜZELTME BURADA: Yolcu pes etmeden koltuk arayacak ---
                 while (!success) {
                     try {
                         Random random = new Random();
@@ -261,20 +229,16 @@ public class SimulationView {
                         e.printStackTrace();
                     }
                 }
-                // ----------------------------------------------------------
             });
         }
 
         executor.shutdown();
         
-        // Sonuçları Bekleme ve Raporlama Thread'i
         new Thread(() -> {
             try {
-                // İşlemlerin bitmesi için bekle
-                Thread.sleep(1000); 
+                Thread.sleep(2000); 
             } catch (InterruptedException e) { }
 
-            // Sonuçları Analiz Et
             long actualBookings = 0;
             Map<String, Seat> matrix = simFlight.getPlane().getSeatMatrix();
             for(Seat s : matrix.values()) {
@@ -285,7 +249,6 @@ public class SimulationView {
             Platform.runLater(() -> {
                 lblResult.setText("Toplam Rezervasyon: " + finalCount + " / 90 Hedeflenen");
                 
-                // Eğer güvensiz moddaysa ve çakışma olduysa (veya safe modda hepsi başarılıysa)
                 if (finalCount < 90) {
                     lblResult.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
                     lblResult.setText(lblResult.getText() + " (ÇAKIŞMA / BAŞARISIZLIK)");
@@ -305,15 +268,12 @@ public class SimulationView {
     }
 
     private void resetSimulation() {
-        // 1. Backend Temizliği: Bu uçuşa ait tüm rezervasyonları sil
         reservationManager.cancelReservationsByFlightID(SIM_FLIGHT_ID);
         
-        // 2. Uçak Koltuklarını Resetle
         for(Seat s : simFlight.getPlane().getSeatMatrix().values()) {
             s.setReserveStatus(false);
         }
         
-        // 3. GUI Temizliği
         if(seatRects != null) {
             for (Rectangle rect : seatRects) {
                 rect.setFill(Color.LIGHTGREEN);

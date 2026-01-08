@@ -42,17 +42,16 @@ public class AdminView {
         this.flightManager = flightManager;
         this.reservationManager = reservationManager;
         this.staffManager = staffManager;
-        this.adminStaff = adminStaff; // Nesneyi kaydet
+        this.adminStaff = adminStaff;
     }
     
     public Parent getFlightView() {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
         
-        // Üst Bar (Geri Butonu ile)
         layout.setTop(createTopBar("Uçuş İşlemleri"));
         
-        // Orta ve Alt Kısım (Flight İçeriği)
+        
         layout.setCenter(createFlightContent());
         
         return layout;
@@ -62,10 +61,8 @@ public class AdminView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
         
-        // Üst Bar (Geri Butonu ile)
         layout.setTop(createTopBar("Personel İşlemleri"));
         
-        // Orta ve Alt Kısım (Staff İçeriği)
         layout.setCenter(createStaffContent());
         
         return layout;
@@ -96,12 +93,27 @@ public class AdminView {
     private VBox createStaffContent() {
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(10));
+        
+        HBox searchBox = new HBox(10);
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        searchBox.setPadding(new Insets(0, 0, 10, 0));
+        
+        Label lblSearch = new Label("Görev Filtrele:");
+        lblSearch.setStyle("-fx-font-weight: bold; -fx-text-fill: #2980b9;");
+        
+        TextField txtSearchRole = new TextField();
+        txtSearchRole.setPromptText("Örn: Pilot, Hostes, Admin...");
+        txtSearchRole.setPrefWidth(250);
+        
+        txtSearchRole.textProperty().addListener((obs, oldVal, newVal) -> {
+            filterStaffByRole(newVal);
+        });
+        
+        searchBox.getChildren().addAll(lblSearch, txtSearchRole);
 
-        // 1. Tabloyu Oluştur
         staffTable = new TableView<>();
         updateStaffTable();
 
-        // Person sınıfından gelenler (name, surname, contactInfo)
         TableColumn<Staff, String> colName = new TableColumn<>("Ad");
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
@@ -111,7 +123,6 @@ public class AdminView {
         TableColumn<Staff, String> colContact = new TableColumn<>("İletişim");
         colContact.setCellValueFactory(new PropertyValueFactory<>("contactInfo"));
 
-        // Staff sınıfından gelenler (role, password)
         TableColumn<Staff, String> colRole = new TableColumn<>("Görevi");
         colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
         
@@ -131,15 +142,14 @@ public class AdminView {
         staffTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 txtStaffName.setText(newVal.getName());
-                txtStaffSurname.setText(newVal.getSurname()); // Eğer surname private ise getSurname() kullanın
-                txtStaffContact.setText(newVal.getContactInfo()); // getter kullanın
-                txtStaffRole.setText(newVal.getRole()); // getter kullanın
+                txtStaffSurname.setText(newVal.getSurname());
+                txtStaffContact.setText(newVal.getContactInfo());
+                txtStaffRole.setText(newVal.getRole());
                 txtStaffUser.setText(newVal.getUsername());
-                txtStaffPass.setText(newVal.getPassword()); // getter kullanın
+                txtStaffPass.setText(newVal.getPassword());
             }
         });
 
-        // 2. Form Alanları (Yeni Staff Constructor yapısına uygun)
         HBox formBox = new HBox(10);
         formBox.setAlignment(Pos.CENTER_LEFT);
         
@@ -151,14 +161,12 @@ public class AdminView {
         txtStaffPass.setPromptText("Şifre");
         txtStaffPass.setPrefWidth(80);
         
-        // Yeni input alanları
         txtStaffName = new TextField(); txtStaffName.setPromptText("Ad");
         txtStaffSurname = new TextField(); txtStaffSurname.setPromptText("Soyad");
         txtStaffContact = new TextField(); txtStaffContact.setPromptText("Tel/Email");
         txtStaffRole = new TextField(); txtStaffRole.setPromptText("Rol");
         txtStaffPass = new TextField(); txtStaffPass.setPromptText("Şifre");
         
-        // TextField genişliklerini ayarlama (isteğe bağlı, daha düzgün görünür)
         txtStaffName.setPrefWidth(100);
         txtStaffSurname.setPrefWidth(100);
         txtStaffContact.setPrefWidth(120);
@@ -169,18 +177,15 @@ public class AdminView {
         Button btnDelStaff = new Button("Sil");
         Button btnUpdateStaff = new Button("Güncelle");
 
-        // Ekleme İşlemi
         btnAddStaff.setOnAction(e -> {
-            // Basit doğrulama: Ad ve Soyad boş olmamalı
             if (txtStaffName.getText().isEmpty() || txtStaffSurname.getText().isEmpty()) {
                 showAlert("Uyarı", "Ad ve Soyad alanları zorunludur.");
                 return;
             }
             
-            // YENİ STAFF CONSTRUCTOR: (name, surname, contactInfo, role, password)
             Staff newStaff = new Staff(
-                    txtStaffUser.getText(), // Username
-                    txtStaffPass.getText(), // Password
+                    txtStaffUser.getText(),
+                    txtStaffPass.getText(),
                     txtStaffName.getText(),
                     txtStaffSurname.getText(),
                     txtStaffContact.getText(),
@@ -193,7 +198,6 @@ public class AdminView {
             clearStaffFields();
         });
 
-        // Silme İşlemi
         btnDelStaff.setOnAction(e -> {
             Staff selected = staffTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -213,31 +217,27 @@ public class AdminView {
                 return;
             }
             
-            // Boş alan kontrolü
             if (txtStaffName.getText().isEmpty() || txtStaffSurname.getText().isEmpty()) {
                 showAlert("Uyarı", "Ad ve Soyad alanları boş bırakılamaz.");
                 return;
             }
             
-            // Yeni bilgilerle geçici bir nesne oluştur
             Staff updatedStaffInfo = new Staff(
-                    txtStaffUser.getText(), // Username
-                    txtStaffPass.getText(), // Password
+                    txtStaffUser.getText(), 
+                    txtStaffPass.getText(),
                     txtStaffName.getText(),
                     txtStaffSurname.getText(),
                     txtStaffContact.getText(),
                     txtStaffRole.getText()
                 );
             
-            // Manager üzerinden güncelle
-            // (Eski nesneyi referans olarak veriyoruz ki listedeki yerini bulsun)
+            
             boolean success = staffManager.updateStaff(selected, updatedStaffInfo);
             
             if (success) {
                 showAlert("Başarılı", "Personel bilgileri güncellendi.");
-                updateStaffTable(); // Tabloyu yenile
+                updateStaffTable();
                 
-                // Alanları temizle
                 txtStaffName.clear(); txtStaffSurname.clear(); txtStaffUser.clear();
                 txtStaffContact.clear(); txtStaffRole.clear(); txtStaffPass.clear();
             } else {
@@ -248,7 +248,7 @@ public class AdminView {
 
         formBox.getChildren().addAll(txtStaffName, txtStaffSurname, txtStaffContact, txtStaffRole, txtStaffUser, txtStaffPass, btnAddStaff, btnUpdateStaff,btnDelStaff);
         
-        layout.getChildren().addAll(staffTable, new Label("Personel Yönetimi:"), formBox);
+        layout.getChildren().addAll(searchBox, staffTable, new Label("Personel Yönetimi:"), formBox);
         
         
         return layout;
@@ -262,6 +262,27 @@ public class AdminView {
         }
     }
     
+    private void filterStaffByRole(String roleQuery) {
+        if (staffManager == null || staffManager.getAllStaff() == null) return;
+
+        if (roleQuery == null || roleQuery.trim().isEmpty()) {
+            updateStaffTable();
+            return;
+        }
+
+        String lowerQuery = roleQuery.toLowerCase(java.util.Locale.ENGLISH);
+        ObservableList<Staff> filteredList = FXCollections.observableArrayList();
+
+        for (Staff s : staffManager.getAllStaff()) {
+            if (s.getRole() != null && s.getRole().toLowerCase(java.util.Locale.ENGLISH).contains(lowerQuery)) {
+                filteredList.add(s);
+            }
+        }
+        
+        staffTable.setItems(filteredList);
+        staffTable.refresh();
+    }
+    
     private BorderPane createFlightContent() {
         BorderPane innerLayout = new BorderPane();
         
@@ -269,19 +290,19 @@ public class AdminView {
         searchBox.setAlignment(Pos.CENTER_LEFT);
         searchBox.setPadding(new Insets(0, 0, 10, 0));
 
-        Label lblSearch = new Label("🔍 Ara:");
+        Label lblSearch = new Label("Ara:");
         
         ComboBox<String> cmbSearchType = new ComboBox<>();
         cmbSearchType.getItems().addAll("Tümü", "Uçuş No", "Kalkış Yeri", "Varış Yeri", "Uçak Modeli");
-        cmbSearchType.setValue("Tümü"); // Varsayılan
+        cmbSearchType.setValue("Tümü");
         cmbSearchType.setPrefWidth(120);
 
-        // Arama Metni
+        
         TextField txtSearchFlight = new TextField();
         txtSearchFlight.setPromptText("Aranacak kelime...");
         txtSearchFlight.setPrefWidth(250);
         
-        // --- Listener'lar (Hem yazı hem seçim değişince filtrele) ---
+        
         txtSearchFlight.textProperty().addListener((obs, oldVal, newVal) -> 
             filterFlights(newVal, cmbSearchType.getValue()));
             
@@ -329,7 +350,6 @@ public class AdminView {
         VBox centerBox = new VBox(searchBox, flightTable);
         innerLayout.setCenter(centerBox);
 
-        // --- FORM ---
         VBox form = new VBox(10);
         form.setPadding(new Insets(10));
         form.setStyle("-fx-border-color: #ddd; -fx-border-width: 1px; -fx-background-color: #f9f9f9;");
@@ -344,15 +364,14 @@ public class AdminView {
         datePicker = new DatePicker();
         
         spinHour = new Spinner<>(0, 23, 12);
-        spinHour.setEditable(true); // Elle yazmaya izin ver
+        spinHour.setEditable(true);
         spinHour.setPrefWidth(70);
 
-        // Dakika: 0-59 arası, varsayılan 00
         spinMinute = new Spinner<>(0, 59, 0);
         spinMinute.setEditable(true);
         spinMinute.setPrefWidth(70);
 
-        // Değerler döngüsel olsun (59'dan sonra 0'a geçsin)
+        
         SpinnerValueFactory.IntegerSpinnerValueFactory hourFactory = 
             (SpinnerValueFactory.IntegerSpinnerValueFactory) spinHour.getValueFactory();
         hourFactory.setWrapAround(true);
@@ -366,7 +385,7 @@ public class AdminView {
         Button btnDelete = new Button("Sil");
         
         Button btnClear = new Button("Temizle");
-        btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); // Gri renk
+        btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;");
         btnClear.setOnAction(e -> clearFlightFields());
 
         btnAdd.setOnAction(e -> {
@@ -376,7 +395,6 @@ public class AdminView {
                     showAlert("Hata", "Bu Uçuş No zaten var."); return; 
                 }
                 
-                // 1. UÇAĞI BUL (YENİ KISIM)
                 String planeIdInput = txtPlaneId.getText().trim();
                 Plane selectedPlane = flightManager.getPlaneTemplateByID(planeIdInput);
                 
@@ -385,11 +403,8 @@ public class AdminView {
                     return;
                 }
 
-                // 2. KOLTUKLARI DÖŞE (SeatManager ile)
-                // Uçağın kapasitesi planes.txt'den geldiği için (örn: 240), koltuklar ona göre oluşacak.
                 new SeatManager().seatingArrangements(selectedPlane);
 
-                // 3. UÇUŞU OLUŞTUR
                 String timeStr = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
                 Route route = new Route(txtDep.getText(), txtArr.getText(), Integer.parseInt(txtDist.getText()));
                 
@@ -406,7 +421,7 @@ public class AdminView {
                 }
                 
                 Flight newFlight = new Flight(fNum, route, ldt, Integer.parseInt(txtDur.getText()));
-                newFlight.setPlane(selectedPlane); // Bulduğumuz uçağı atadık
+                newFlight.setPlane(selectedPlane);
                 
                 flightManager.addFlight(newFlight);
                 updateFlightTable();
@@ -432,16 +447,13 @@ public class AdminView {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Uçuş Sil");
                 alert.setHeaderText("Uçuş Siliniyor: " + selected.getFlightNum());
-                // Uyarıyı güçlendirdik
                 alert.setContentText("DİKKAT: Bu uçuşu silerseniz, uçuşa ait TÜM BİLETLER de silinecektir!\nOnaylıyor musunuz?");
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     
-                    // 1. Önce bu uçuşa ait rezervasyonları sil
                     reservationManager.cancelReservationsByFlightID(selected.getFlightNum());
                     
-                    // 2. Sonra uçuşu sil
                     flightManager.deleteFlight(selected);
                     
                     updateFlightTable();
@@ -485,7 +497,6 @@ public class AdminView {
         try {
         	String newTime = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
         	
-            // Formdaki verileri al
             LocalDate newDate = datePicker.getValue();  
             String newDurationStr = txtDur.getText();
             String newPlaneID = txtPlaneId.getText();
@@ -494,22 +505,20 @@ public class AdminView {
             String arr = txtArr.getText();
             String distStr = txtDist.getText();
 
-            // Format dönüşümleri
             LocalDateTime newDateTime = LocalDateTime.of(newDate, LocalTime.parse(newTime));
             int newDuration = Integer.parseInt(newDurationStr);
             double newDistance = Double.parseDouble(distStr);
 
-            // Güncelleme nesnesi oluştur
+            
             Flight updatedInfo = new Flight();
             updatedInfo.setFlightNum(selectedFlight.getFlightNum());
             updatedInfo.setDate(newDateTime);
             updatedInfo.setDuration(newDuration);
             
-            // Rota Güncellemesi
             Route newRoute = new Route(dep, arr, newDistance);
             updatedInfo.setRoute(newRoute);
             
-            String inputPlaneID = txtPlaneId.getText().trim();
+            String inputPlaneID = newPlaneID.trim();
             
             if (selectedFlight.getPlane() == null || !selectedFlight.getPlane().getPlaneID().equals(inputPlaneID)) {
                 Plane newPlane = flightManager.getPlaneTemplateByID(inputPlaneID);
@@ -519,15 +528,12 @@ public class AdminView {
                     return;
                 }
                 
-                // Yeni uçağın koltuklarını hazırla
                 new SeatManager().seatingArrangements(newPlane);
                 updatedInfo.setPlane(newPlane);
             } else {
-                // ID değişmediyse mevcut uçağı koru (Koltuk düzenini bozma)
                 updatedInfo.setPlane(selectedFlight.getPlane());
             }
 
-            // Manager'a gönder
             boolean success = flightManager.updateFlight(updatedInfo);
 
             if (success) {
@@ -553,22 +559,21 @@ public class AdminView {
     void handleFlightRowSelect() {
     	Flight selected = flightTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            // Null check ekledik
             if(selected.getDate() != null)
                 datePicker.setValue(selected.getDate().toLocalDate());
            
-            String timeStr = selected.getHour(); // "14:30" döner
+            String timeStr = selected.getHour();
             if (timeStr != null && timeStr.contains(":")) {
                 try {
                     String[] parts = timeStr.split(":");
                     int h = Integer.parseInt(parts[0]);
                     int m = Integer.parseInt(parts[1]);
                     
-                    // Spinner değerlerini set et
+                    
                     spinHour.getValueFactory().setValue(h);
                     spinMinute.getValueFactory().setValue(m);
                 } catch (NumberFormatException e) {
-                    // Format hatası varsa varsayılan 12:00 olsun
+                	
                     spinHour.getValueFactory().setValue(12);
                     spinMinute.getValueFactory().setValue(0);
                 }
@@ -577,7 +582,6 @@ public class AdminView {
             txtDur.setText(String.valueOf(selected.getDuration()));
             txtNum.setText(selected.getFlightNum());
             
-            // Eğer rota null değilse onları da dolduralım
             if (selected.getRoute() != null) {
                 txtDep.setText(selected.getRoute().getDepartureCity());
                 txtArr.setText(selected.getRoute().getArrivalCity());
@@ -590,7 +594,6 @@ public class AdminView {
     
     private void filterFlights(String searchText, String searchType) {
         if (searchText == null || searchText.isEmpty()) {
-            // Arama boşsa hepsini göster
             updateFlightTable();
             return;
         }
@@ -601,7 +604,6 @@ public class AdminView {
         for (Flight f : flightManager.getFlights()) {
             boolean match = false;
             
-            // Seçilen tipe göre arama yap
             switch (searchType) {
                 case "Uçuş No":
                     match = f.getFlightNum().toLowerCase().contains(lowerSearch);

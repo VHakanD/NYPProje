@@ -22,63 +22,10 @@ public class LoginView {
     private VBox loginBox;
     private VBox registerBox;
 
-    // Constructor: MainApp referansını alıyoruz ki ekran değiştirebilelim
     public LoginView(MainApp mainApp, StaffManager staffManager) {
         this.mainApp = mainApp;
         this.staffManager = staffManager;
     }
-
-    /*public Parent getView() {
-        // 1. DÜZEN (LAYOUT) OLUŞTURMA
-        VBox layout = new VBox(15); // Elemanlar arası 15px boşluk
-        layout.setPadding(new Insets(40)); // Kenarlardan 40px boşluk
-        layout.setAlignment(Pos.CENTER); // Her şeyi ortala
-        layout.setStyle("-fx-background-color: #f0f2f5;"); // Hafif gri arka plan
-
-        // 2. GÖRSEL BİLEŞENLERİ TANIMLAMA
-        
-        // Başlık
-        Label lblTitle = new Label("Havayolu Rezervasyon Sistemi");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        lblTitle.setStyle("-fx-text-fill: #2c3e50;");
-
-        // Rol Seçimi (Admin mi Yolcu mu?)
-        Label lblRole = new Label("Giriş Türü:");
-        ComboBox<String> cmbRole = new ComboBox<>();
-        cmbRole.getItems().addAll("Yönetici (Admin)", "Yolcu (Passenger)");
-        cmbRole.setValue("Yönetici (Admin)"); // Varsayılan seçili gelsin
-        cmbRole.setPrefWidth(250);
-
-        // Kullanıcı Adı / ID
-        TextField txtUsername = new TextField();
-        txtUsername.setPromptText("Kullanıcı Adı veya ID");
-        txtUsername.setPrefWidth(250);
-
-        // Şifre
-        PasswordField txtPassword = new PasswordField();
-        txtPassword.setPromptText("Şifre");
-        txtPassword.setPrefWidth(250);
-
-        // Giriş Butonu
-        Button btnLogin = new Button("Giriş Yap");
-        btnLogin.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px;");
-        btnLogin.setPrefWidth(250);
-        btnLogin.setPrefHeight(40);
-
-        // 3. BUTON TIKLAMA OLAYI (ACTION)
-        btnLogin.setOnAction(e -> {
-            String role = cmbRole.getValue();
-            String username = txtUsername.getText();
-            String password = txtPassword.getText();
-
-            handleLogin(role, username, password);
-        });
-
-        // 4. BİLEŞENLERİ DÜZENE EKLEME
-        layout.getChildren().addAll(lblTitle, new Separator(), lblRole, cmbRole, txtUsername, txtPassword, btnLogin);
-
-        return layout;
-    }*/
     
     public Parent getView() {
         mainLayout = new VBox(15);
@@ -89,50 +36,15 @@ public class LoginView {
         Label lblTitle = new Label("Havayolu Rezervasyon Sistemi");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
-        // --- GİRİŞ KUTUSU ---
         createLoginBox();
         
-        // --- KAYIT KUTUSU ---
         createRegisterBox();
 
-        // Varsayılan olarak Giriş ekranı görünür
         mainLayout.getChildren().addAll(lblTitle, new Separator(), loginBox);
         
         return mainLayout;
     }
 
-    // Giriş kontrolü yapan yardımcı metot
-    /*private void handleLogin(String role, String username, String password) {
-        if (username.isEmpty() || password.isEmpty()) {
-            showAlert("Hata", "Lütfen tüm alanları doldurunuz!");
-            return;
-        }
-
-        if (role.contains("Admin")) {
-        	if (adminCredentials.containsKey(username)) {
-                String correctPass = adminCredentials.get(username);
-                
-                if (correctPass.equals(password)) {
-                    System.out.println("Giriş Başarılı: " + username);
-                    
-                    // KRİTİK NOKTA: Giriş yapan admin ismini MainApp'e gönderiyoruz!
-                    mainApp.showAdminDashboard(username); 
-                    
-                } else {
-                    showAlert("Giriş Başarısız", "Şifre hatalı!");
-                }
-            } else {
-                showAlert("Giriş Başarısız", "Böyle bir admin kullanıcısı bulunamadı!");
-            }
-        } 
-        else {
-            // Yolcu Girişi
-            // Gerçek senaryoda passengerList içinde ID kontrolü yapılabilir.
-            // Şimdilik herkesi kabul ediyoruz.
-            System.out.println("Yolcu girişi: " + username);
-            mainApp.showUserSearchScreen(username); // Yolcu ekranına geç
-        }
-    }*/
     
     private void createLoginBox() {
         loginBox = new VBox(10);
@@ -158,22 +70,18 @@ public class LoginView {
         btnLogin.setStyle("-fx-base: #3498db; -fx-text-fill: white;");
         btnLogin.setPrefWidth(250);
 
-        // Kayıt Ol Linki
         Hyperlink linkRegister = new Hyperlink("Hesabınız yok mu? Kayıt Olun");
         linkRegister.setOnAction(e -> showRegisterScreen());
         
         linkRegister.setVisible(false);
-        //linkRegister.setManaged(false); // Yer kaplamasın
 
-        // 2. Seçim değiştiğinde kontrol et
+        
         cmbRole.setOnAction(e -> {
             String selected = cmbRole.getValue();
             if (selected.contains("Admin")) {
                 linkRegister.setVisible(false);
-                //linkRegister.setManaged(false);
             } else {
                 linkRegister.setVisible(true);
-                //linkRegister.setManaged(true);
             }
         });
         
@@ -203,7 +111,6 @@ public class LoginView {
         TextField regUser = new TextField(); regUser.setPromptText("Kullanıcı Adı Belirle");
         PasswordField regPass = new PasswordField(); regPass.setPromptText("Şifre Belirle");
         
-        // Genişlik ayarı
         regName.setPrefWidth(250); regSurname.setPrefWidth(250); regID.setPrefWidth(250);
         regPhone.setPrefWidth(250); regUser.setPrefWidth(250); regPass.setPrefWidth(250);
 
@@ -240,13 +147,11 @@ public class LoginView {
             return;
         }
         
-        // Yeni Yolcu Oluştur
         Passenger newP = new Passenger(
             id.getText(), name.getText(), sur.getText(), 
             phone.getText(), user.getText(), pass.getText()
         );
         
-        // MainApp üzerinden kaydet
         mainApp.savePassengerToFile(newP);
         
         showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Kayıt tamamlandı! Şimdi giriş yapabilirsiniz.");
@@ -256,19 +161,17 @@ public class LoginView {
     private void handlePassengerLogin(String username, String password) {
     	List<Passenger> list = mainApp.getPassengerList();
         Passenger foundPassenger = null;
-        boolean found = false; // Döngü kontrol bayrağı
+        boolean found = false;
         int i = 0;
         
-        // break yerine while döngüsü ve found bayrağı kullanıyoruz
         while (i < list.size() && !found) {
             Passenger p = list.get(i);
             
-            // Kullanıcı adı ve şifre kontrolü
             if (p.getUsername() != null && p.getUsername().equals(username) && 
                 p.getPassword() != null && p.getPassword().equals(password)) {
                 
                 foundPassenger = p;
-                found = true; // Bulunduğunda bayrağı kaldırıyoruz, döngü sonlanıyor
+                found = true;
             }
             i++;
         }
@@ -277,17 +180,14 @@ public class LoginView {
             System.out.println("Yolcu Girişi Başarılı: " + foundPassenger.getName());
             mainApp.showUserSearchScreen(foundPassenger); 
         } else {
-            // Bir önceki adımda düzelttiğimiz showAlert metodunu kullanıyoruz
             showAlert(Alert.AlertType.ERROR, "Giriş Başarısız", "Kullanıcı adı veya şifre hatalı.");
         }
     }
 
     private void handleAdminLogin(String username, String password) {
-        // StaffManager üzerinden kontrol et
         Staff foundStaff = staffManager.validateLogin(username, password);
 
         if (foundStaff != null) {
-            // Sadece 'Admin' rolündekiler panele girebilsin (İsteğe bağlı)
             if (foundStaff.getRole().equalsIgnoreCase("Admin")) {
                 System.out.println("Personel Girişi Başarılı: " + foundStaff.getUsername());
                 mainApp.showAdminDashboard(foundStaff);
@@ -299,9 +199,8 @@ public class LoginView {
         }
     }
 
-    // Uyarı mesajı göstermek için yardımcı metot
     private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type); // Gelen tipe göre ikon belirler
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

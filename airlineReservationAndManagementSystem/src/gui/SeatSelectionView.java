@@ -1,7 +1,6 @@
 package gui;
 
 import flightManagement.Flight;
-import flightManagement.Plane;
 import flightManagement.Seat;
 import reservationAndTicketing.Passenger;
 import reservationAndTicketing.Reservation;
@@ -48,118 +47,13 @@ public class SeatSelectionView {
         this.loggedInPassenger = loggedInPassenger;
     }
     
-    /*public Parent getView() {
-        BorderPane layout = new BorderPane();
-        layout.setPadding(new Insets(20));
-
-        Label lblHeader = new Label("Uçuş: " + flight.getFlightNum() + " - " + flight.getRoute().toString());
-        layout.setTop(lblHeader);
-
-        // --- KOLTUK MATRİSİ (GRID) ---
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setAlignment(Pos.CENTER);
-
-        Plane plane = flight.getPlane();
-        Map<String, Seat> seats = plane.getSeatMatrix();
-
-        int totalRows = plane.getCapacity() / 6;
-        char[] cols = {'A', 'B', 'C', 'D', 'E', 'F'};
-        lblSelectionInfo = new Label("Lütfen bir koltuk seçiniz.");
-        lblSelectionInfo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
-
-        for (int row = 1; row <= totalRows; row++) {
-            for (int c = 0; c < cols.length; c++) {
-                char colChar = cols[c];
-                String seatNum = row + String.valueOf(colChar);
-                Seat seat = seats.get(seatNum);
-
-                if (seat != null) {
-                    Button btn = new Button(seatNum);
-                    btn.setPrefSize(55, 45); // Butonları biraz büyüttük (Sehpa yazısı sığsın diye)
-
-                    // --- Backend'den Gelen Gerçek Tipe Bakıyoruz ---
-                    boolean isBusiness = (seat.getSeatType() == Seat.SeatType.BUSINESS);
-                    
-                    // Business Class'ta Orta Koltuklar (B ve E) Sehpa Olsun
-                    boolean isTable = isBusiness && (colChar == 'B' || colChar == 'E');
-
-                    if (isTable) {
-                        // --- SEHPA / MASAL (Business Orta Koltuk) ---
-                        btn.setText("SEHPA");
-                        btn.setStyle("-fx-background-color: #000000; -fx-text-fill: white; -fx-font-size: 10px;");
-                        btn.setDisable(true); // Tıklanamaz
-                    } 
-                    else if (seat.isReserved()) {
-                        // --- DOLU KOLTUK ---
-                        btn.setStyle("-fx-background-color: #ff6b6b; -fx-text-fill: white;"); 
-                        btn.setDisable(true);
-                    } 
-                    else {
-                        // --- RENK AYARLARI ---
-                        if (isBusiness) {
-                            btn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
-                        } else {
-                            btn.setStyle("-fx-background-color: #51cf66; -fx-text-fill: white;");
-                        }
-                        
-                        // --- 3. TIKLAMA OLAYI GÜNCELLEMESİ ---
-                        // Hem Business hem Ekonomi için ortak tıklama mantığı
-                        btn.setOnAction(e -> {
-                            selectedSeatNum = seatNum;
-                            
-                            // Label'ı güncelle
-                            String typeStr = isBusiness ? "Business" : "Ekonomi";
-                            lblSelectionInfo.setText("Seçilen Koltuk: " + seatNum + " (" + typeStr + ")");
-                            lblSelectionInfo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"); // Yeşil renk yap
-                        });
-                    }
-
-                    // Arayüzde koridor boşluğu bırakmak için sütun indeksi ayarlama
-                    int colIndex = c;
-                    if (c >= 3) colIndex++; // A,B,C (boşluk) D,E,F
-                    
-                    grid.add(btn, colIndex, row);
-                }
-            }
-        }
-        
-        // Koridor Etiketi
-        Label lblKoridor = new Label("KORİDOR");
-        lblKoridor.setStyle("-fx-font-weight: bold; -fx-text-fill: #7f8c8d;");
-        grid.add(lblKoridor, 3, 0);
-
-        ScrollPane scroll = new ScrollPane(grid);
-        scroll.setFitToWidth(true);
-        // ScrollPane arka planını temizle
-        scroll.setStyle("-fx-background-color:transparent;");
-        layout.setCenter(scroll);
-
-        // --- REZERVASYONU TAMAMLA ---
-        btnBook = new Button("Bilgileri Gir ve Rezervasyonu Tamamla");
-        btnBook.setStyle("-fx-base: #f39c12; -fx-font-size: 14px; -fx-font-weight: bold;");
-        btnBook.setPrefHeight(45);
-        btnBook.setOnAction(e -> handleBookingProcess());
-        
-        VBox bottomContainer = new VBox(10); // Aralarında 10px boşluk
-        bottomContainer.setAlignment(Pos.CENTER);
-        bottomContainer.setPadding(new Insets(15));
-        bottomContainer.getChildren().addAll(lblSelectionInfo, btnBook);
-        layout.setBottom(bottomContainer);
-
-        return layout;
-    }*/
-    
     public Parent getView() {
-        // --- 1. ANA KATMAN (StackPane - Hostes için) ---
         StackPane rootOverlay = new StackPane();
         rootOverlay.setAlignment(Pos.CENTER);
 
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
-        // --- 2. ÜST BİLGİ ---
         VBox topBox = new VBox(10);
         topBox.setAlignment(Pos.CENTER);
         Label lblTitle = new Label("Koltuk Seçimi: " + flight.getFlightNum());
@@ -168,26 +62,20 @@ public class SeatSelectionView {
         topBox.getChildren().addAll(lblTitle, lblRoute);
         layout.setTop(topBox);
 
-        // --- 3. ORTA KISIM (Koltuk Izgarası) ---
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(20));
         gridPane.setHgap(8); // Koltuklar arası boşluk
         gridPane.setVgap(8);
         gridPane.setAlignment(Pos.TOP_CENTER);
         
-        // --- KORİDOR GENİŞLİĞİ AYARI ---
-        // Sütunların genişliklerini ayarlayarak koridoru açıyoruz.
-        // İndeksler: 0(SıraNo), 1(Pencere), 2(A), 3(B), 4(C), 5(KORİDOR), 6(D), 7(E), 8(F), 9(Pencere)
-        ColumnConstraints colNormal = new ColumnConstraints(); // Normal sütunlar
+        //ColumnConstraints colNormal = new ColumnConstraints();
         ColumnConstraints colAisle = new ColumnConstraints(); 
-        colAisle.setMinWidth(40); // Koridor için 40px ekstra boşluk (Genişletildi)
+        colAisle.setMinWidth(50);
         
-        // GridPane'e sütun kısıtlamalarını ekleyelim (Opsiyonel ama garanti çözüm)
-        // 5. indekse kadar normal, 5. indeks koridor, sonrası normal
         gridPane.getColumnConstraints().addAll(
             new ColumnConstraints(), new ColumnConstraints(), // 0, 1
             new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(), // 2, 3, 4
-            colAisle // 5 (Koridor)
+            colAisle
         );
 
         Map<String, Seat> seatMatrix = flight.getPlane().getSeatMatrix();
@@ -197,7 +85,6 @@ public class SeatSelectionView {
         ToggleGroup seatGroup = new ToggleGroup();
 
         for (int row = 1; row <= totalRows; row++) {
-            // Sıra Numarası (En Sol)
             Label lblRow = new Label(String.valueOf(row));
             lblRow.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
             gridPane.add(lblRow, 0, row - 1);
@@ -210,41 +97,30 @@ public class SeatSelectionView {
                     ToggleButton btnSeat = new ToggleButton(seatNum);
                     btnSeat.setPrefSize(55, 45); 
                     btnSeat.setToggleGroup(seatGroup);
-
-                    // --- MANTIK BİRLEŞTİRME ---
                     boolean isBusiness = (seat.getSeatType() == Seat.SeatType.BUSINESS);
-                    // Business ise ve B veya E sütunu ise -> SEHPA
                     boolean isTable = isBusiness && (col == 'B' || col == 'E');
                     
-                    // --- STİL DÜZELTMESİ (-fx-base KULLANIMI) ---
-                    // -fx-base kullanınca JavaFX'in 3D buton efekti ve seçim gölgelendirmesi geri gelir.
                     
                     if (isTable) {
-                        // SEHPA (Siyah - Tıklanamaz)
                         btnSeat.setText("SEHPA");
                         btnSeat.setStyle("-fx-base: #000000; -fx-text-fill: white; -fx-font-size: 9px; -fx-font-weight: bold;");
                         btnSeat.setDisable(true); 
                     } 
                     else if (seat.isReserved()) {
-                        // DOLU (Kırmızı)
                         btnSeat.setStyle("-fx-base: #e74c3c; -fx-text-fill: white;"); 
                         btnSeat.setDisable(true);
                     } 
                     else if (isBusiness) {
-                        // BUSINESS (Mor)
                         btnSeat.setStyle("-fx-base: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
                     } 
                     else {
-                        // EKONOMİ (Yeşil)
                         btnSeat.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"); 
                     }
                     
-                    // --- SEÇİM VE FİYAT ---
                     btnSeat.setOnAction(e -> {
                         if (btnSeat.isSelected()) {
                             selectedSeatNum = seatNum;
                             
-                            // Fiyat Hesaplama
                             CalculatePrice calculator = new CalculatePrice();
                             Reservation tempRes = new Reservation("TEMP", flight, loggedInPassenger, seat);
                             double realPrice = calculator.calculateTicketPrice(tempRes);
@@ -254,8 +130,6 @@ public class SeatSelectionView {
                             lblSelectionInfo.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
                             btnBook.setDisable(false);
                             
-                            // NOT: ToggleButton seçilince JavaFX otomatik olarak rengi koyulaştırır (-fx-base sayesinde).
-                            // Ekstra bir stil vermemize gerek yok, kullanıcı seçili olduğunu butonun "basılı" halinden anlar.
                         } else {
                             selectedSeatNum = null;
                             lblSelectionInfo.setText("Lütfen bir koltuk seçiniz.");
@@ -264,20 +138,16 @@ public class SeatSelectionView {
                         }
                     });
 
-                    // --- PENCERELER VE GRID YERLEŞİMİ ---
                     int gridColIndex = calculateGridColumn(col);
 
-                    // Sol Pencere (Açık Mavi)
                     if (col == 'A') {
-                        Rectangle leftWindow = new Rectangle(8, 45, Color.LIGHTBLUE); // İnce uzun cam
+                        Rectangle leftWindow = new Rectangle(8, 45, Color.LIGHTBLUE);
                         leftWindow.setArcWidth(5); leftWindow.setArcHeight(5);
                         gridPane.add(leftWindow, gridColIndex - 1, row - 1);
                     }
 
-                    // Koltuğu Ekle
                     gridPane.add(btnSeat, gridColIndex, row - 1);
 
-                    // Sağ Pencere (Açık Mavi)
                     if (col == 'F') {
                         Rectangle rightWindow = new Rectangle(8, 45, Color.LIGHTBLUE);
                         rightWindow.setArcWidth(5); rightWindow.setArcHeight(5);
@@ -287,13 +157,11 @@ public class SeatSelectionView {
             }
         }
         
-        // ScrollPane (Kaydırma Çubuğu)
         ScrollPane scrollPane = new ScrollPane(gridPane);
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: #f0f2f5;");
         layout.setCenter(scrollPane);
 
-        // --- 4. ALT KISIM ---
         VBox bottomBox = new VBox(15);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setPadding(new Insets(20, 0, 0, 0));
@@ -307,7 +175,6 @@ public class SeatSelectionView {
         Button btnCancel = new Button("İptal");
         btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;"); // Kırmızı stil
         btnCancel.setOnAction(e -> {
-            // Pencereyi kapatma işlemi
             Stage stage = (Stage) btnCancel.getScene().getWindow();
             stage.close();
         });
@@ -321,26 +188,20 @@ public class SeatSelectionView {
         bottomBox.getChildren().addAll(lblSelectionInfo, btnBox);
         layout.setBottom(bottomBox);
 
-        // --- 5. HOSTES FİGÜRÜ ---
-        // Hostes görseli internetten çekiliyor
         Image stewardessImage = new Image("https://cdn-icons-png.flaticon.com/512/2534/2534690.png", 60, 150, true, true);
         ImageView stewardessView = new ImageView(stewardessImage);
         stewardessView.setOpacity(0.85);
-        StackPane.setAlignment(stewardessView, Pos.CENTER); // Tam ortaya sabitle
+        StackPane.setAlignment(stewardessView, Pos.CENTER);
         
-        // Hostesi en üste ekle
         rootOverlay.getChildren().addAll(layout, stewardessView);
 
         return rootOverlay;
     }
 
-    // Grid Hesaplama (Pencereler ve Koridor Boşluğu İçin)
     private int calculateGridColumn(char colChar) {
-        int baseIndex = colChar - 'A'; 
-        // 0:SıraNo, 1:Pencere, 2:A, 3:B, 4:C ...
+        int baseIndex = colChar - 'A';
         int gridIndex = baseIndex + 2; 
         
-        // C'den sonra (D, E, F) koridor boşluğu bırak (+1 Sütun Atla)
         if (colChar > 'C') {
             gridIndex++; 
         }
@@ -359,7 +220,6 @@ public class SeatSelectionView {
         Label lblBaggageInfo = new Label("(Hak: " + freeAllowance + " kg)");
         lblBaggageInfo.setStyle("-fx-font-size: 11px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;");
 
-        // --- Yolcu Bilgileri Dialogu ---
         Dialog<Map<String, Object>> dialog = new Dialog<>();
         dialog.setTitle("Yolcu ve Bagaj Bilgileri");
         dialog.setHeaderText("Lütfen yolcu bilgilerini ve bagaj miktarını giriniz.");
@@ -392,20 +252,16 @@ public class SeatSelectionView {
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(txtBaggage::requestFocus);
 
-        // Sonuç Dönüştürücü
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                // Basit Validasyon
                 if (txtName.getText().isEmpty() || txtSurname.getText().isEmpty() || 
                     txtId.getText().isEmpty() || txtPhone.getText().isEmpty() || txtBaggage.getText().isEmpty()) {
                     return null;
                 }
                 
-                // Verileri paketle ve döndür
                 Map<String, Object> data = new HashMap<>();
                 data.put("passenger", new Passenger(txtId.getText(), txtName.getText(), txtSurname.getText(), txtPhone.getText()));
                 
-                // Bagaj kilosunu sayıya çevir (Hata kontrolü basit tutuldu)
                 try {
                     data.put("baggage", Integer.parseInt(txtBaggage.getText()));
                 } catch (NumberFormatException e) {
@@ -424,21 +280,18 @@ public class SeatSelectionView {
             Passenger flyerPassenger = (Passenger) data.get("passenger");
             int baggageKg = (int) data.get("baggage");
             
-            closeWindow(); // Önce bu ekranı kapat
+            closeWindow();
             
-            // Ödeme Ekranını Aç
             PaymentView paymentView = new PaymentView(mainApp, flight, flyerPassenger, loggedInPassenger, selectedSeatNum, baggageKg, reservationManager);
             Stage paymentStage = new Stage();
             paymentStage.setTitle("Ödeme ve Biletleme");
             paymentStage.setScene(new Scene(paymentView.getView(), 500, 600));
             paymentStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             
-            // 2. Sahiplik: Ana pencereye bağla
             paymentStage.initOwner(mainApp.getPrimaryStage());
             paymentStage.show();
             
         } else {
-            // İptal edildi veya eksik bilgi
         	showAlert(Alert.AlertType.INFORMATION, "İşlem İptal Edildi", 
                     "Yolcu bilgileri eksik girildiği veya işlem iptal edildiği için ödeme adımına geçilemedi.\n\n" +
                     "Lütfen tekrar deneyiniz.");

@@ -12,9 +12,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.Map;
@@ -35,80 +44,126 @@ public class SeatChangeView {
         this.currentReservation = reservation;
         this.flight = reservation.getFlight();
         this.reservationManager = reservationManager;
-        this.loggedInPassenger = loggedInPassenger; // Kaydet
+        this.loggedInPassenger = loggedInPassenger;
     }
 
     public Parent getView() {
+    	StackPane rootOverlay = new StackPane();
+        rootOverlay.setAlignment(Pos.CENTER);
+        
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
+        
+        VBox topBox = new VBox(10);
+        topBox.setAlignment(Pos.CENTER);
 
         Label lblHeader = new Label("Koltuk Değişimi: " + flight.getFlightNum());
         lblHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        layout.setTop(lblHeader);
+        
+        Label lblCurrent = new Label("Mevcut Koltuğunuz: " + currentReservation.getSeat().getSeatNum());
+        lblCurrent.setStyle("-fx-font-size: 14px; -fx-text-fill: #e67e22; -fx-font-weight: bold;"); // Turuncu
+        
+        topBox.getChildren().addAll(lblHeader, lblCurrent);
+        layout.setTop(topBox);
 
-        // --- KOLTUK MATRİSİ ---
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setAlignment(Pos.CENTER);
-
+        grid.setPadding(new Insets(20));
+        grid.setHgap(8);
+        grid.setVgap(8);
+        grid.setAlignment(Pos.TOP_CENTER);
+        
+        //ColumnConstraints colNormal = new ColumnConstraints(); 
+        ColumnConstraints colAisle = new ColumnConstraints(); 
+        colAisle.setMinWidth(40);
+        
+        grid.getColumnConstraints().addAll(
+            new ColumnConstraints(), new ColumnConstraints(), // 0, 1
+            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(), // 2, 3, 4
+            colAisle
+        );
+        
         Plane plane = flight.getPlane();
         Map<String, Seat> seats = plane.getSeatMatrix();
 
         int totalRows = plane.getCapacity() / 6;
         char[] cols = {'A', 'B', 'C', 'D', 'E', 'F'};
         
-        lblSelectionInfo = new Label("Mevcut Koltuğunuz: " + currentReservation.getSeat().getSeatNum());
-        lblSelectionInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #2980b9; -fx-font-weight: bold;");
-
+        ToggleGroup seatGroup = new ToggleGroup();
+        
         for (int row = 1; row <= totalRows; row++) {
+            Label lblRow = new Label(String.valueOf(row));
+            lblRow.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
+            grid.add(lblRow, 0, row - 1);
+
             for (int c = 0; c < cols.length; c++) {
                 char colChar = cols[c];
                 String seatNum = row + String.valueOf(colChar);
                 Seat seat = seats.get(seatNum);
 
                 if (seat != null) {
-                    Button btn = new Button(seatNum);
-                    btn.setPrefSize(55, 45); 
+                    ToggleButton btnSeat = new ToggleButton(seatNum);
+                    btnSeat.setPrefSize(55, 45); 
+                    btnSeat.setToggleGroup(seatGroup);
 
                     boolean isBusiness = (seat.getSeatType() == Seat.SeatType.BUSINESS);
                     boolean isTable = isBusiness && (colChar == 'B' || colChar == 'E');
                     boolean isMySeat = seatNum.equals(currentReservation.getSeat().getSeatNum());
 
                     if (isTable) {
-                        btn.setText("SEHPA");
-                        btn.setStyle("-fx-background-color: #000000; -fx-text-fill: white; -fx-font-size: 10px;");
-                        btn.setDisable(true); 
+                        btnSeat.setText("SEHPA");
+                        btnSeat.setStyle("-fx-base: #000000; -fx-text-fill: white; -fx-font-size: 9px; -fx-font-weight: bold;");
+                        btnSeat.setDisable(true); 
                     } 
                     else if (isMySeat) {
-                        // Kendi mevcut koltuğumuz (Turuncu)
-                        btn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold;");
-                        btn.setDisable(true); 
-                        btn.setText("BEN");
+                        btnSeat.setText("BEN");
+                        btnSeat.setStyle("-fx-base: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;");
+                        btnSeat.setDisable(true); 
                     }
                     else if (seat.isReserved()) {
-                        // Başkasının koltuğu (Kırmızı)
-                        btn.setStyle("-fx-background-color: #ff6b6b; -fx-text-fill: white;"); 
-                        btn.setDisable(true);
+                        btnSeat.setStyle("-fx-base: #e74c3c; -fx-text-fill: white;"); 
+                        btnSeat.setDisable(true);
                     } 
                     else {
-                        // Boş Koltuklar (Yeşil/Mor)
                         if (isBusiness) {
-                            btn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white;");
+                            btnSeat.setStyle("-fx-base: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
                         } else {
-                            btn.setStyle("-fx-background-color: #51cf66; -fx-text-fill: white;");
+                            btnSeat.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
                         }
                         
-                        btn.setOnAction(e -> {
-                            selectedSeatNum = seatNum;
-                            lblSelectionInfo.setText("Yeni Seçilen: " + seatNum);
-                            lblSelectionInfo.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold; -fx-font-size: 14px;");
+                        btnSeat.setOnAction(e -> {
+                            if (btnSeat.isSelected()) {
+                                selectedSeatNum = seatNum;
+                                
+                                double diff = calculatePriceDifference(seat);
+                                String diffText = (diff > 0) ? String.format(" (+%.2f ₺)", diff) : " (Farksız/İade)";
+                                
+                                lblSelectionInfo.setText("Yeni Seçilen: " + seatNum + diffText);
+                                lblSelectionInfo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
+                                btnConfirm.setDisable(false);
+                            } else {
+                                selectedSeatNum = null;
+                                lblSelectionInfo.setText("Lütfen yeni bir koltuk seçiniz.");
+                                lblSelectionInfo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #555;");
+                                btnConfirm.setDisable(true);
+                            }
                         });
                     }
 
-                    int colIndex = c;
-                    if (c >= 3) colIndex++;
-                    grid.add(btn, colIndex, row);
+                    int gridColIndex = calculateGridColumn(colChar);
+
+                    if (colChar == 'A') {
+                        Rectangle leftWindow = new Rectangle(8, 45, Color.LIGHTBLUE);
+                        leftWindow.setArcWidth(5); leftWindow.setArcHeight(5);
+                        grid.add(leftWindow, gridColIndex - 1, row - 1);
+                    }
+
+                    grid.add(btnSeat, gridColIndex, row - 1);
+
+                    if (colChar == 'F') {
+                        Rectangle rightWindow = new Rectangle(8, 45, Color.LIGHTBLUE);
+                        rightWindow.setArcWidth(5); rightWindow.setArcHeight(5);
+                        grid.add(rightWindow, gridColIndex + 1, row - 1);
+                    }
                 }
             }
         }
@@ -117,26 +172,41 @@ public class SeatChangeView {
 
         ScrollPane scroll = new ScrollPane(grid);
         scroll.setFitToWidth(true);
-        // Saydam arka plan
         scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;"); 
         layout.setCenter(scroll);
+        
+        VBox bottomBox = new VBox(15);
+        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setPadding(new Insets(20, 0, 0, 0));
+        
+        lblSelectionInfo = new Label("Lütfen yeni bir koltuk seçiniz.");
+        lblSelectionInfo.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-        // --- ONAY BUTONU ---
-        /*btnConfirm = new Button("Koltuk Değişimini Onayla");
-        btnConfirm.setStyle("-fx-base: #2980b9; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnConfirm.setPrefHeight(40);
-        btnConfirm.setOnAction(e -> handleSeatChange());*/
+        HBox btnBox = new HBox(20);
+        btnBox.setAlignment(Pos.CENTER);
+        
+        Button btnCancel = new Button("İptal");
+        btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnCancel.setOnAction(e -> closeWindow());
         
         btnConfirm = new Button("Koltuk Değişimini Onayla");
+        btnConfirm.setStyle("-fx-base: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnConfirm.setDisable(true);
         btnConfirm.setOnAction(e -> handleSeatChange());
         
-        VBox bottomContainer = new VBox(10);
-        bottomContainer.setAlignment(Pos.CENTER);
-        bottomContainer.setPadding(new Insets(15));
-        bottomContainer.getChildren().addAll(lblSelectionInfo, btnConfirm);
-        layout.setBottom(bottomContainer);
+        btnBox.getChildren().addAll(btnCancel, btnConfirm);
+        bottomBox.getChildren().addAll(lblSelectionInfo, btnBox);
+        layout.setBottom(bottomBox);
+        
+       
+        Image stewardessImage = new Image("https://cdn-icons-png.flaticon.com/512/2534/2534690.png", 60, 150, true, true);
+        ImageView stewardessView = new ImageView(stewardessImage);
+        stewardessView.setOpacity(0.85);
+        StackPane.setAlignment(stewardessView, Pos.CENTER);
+        
+        rootOverlay.getChildren().addAll(layout, stewardessView);
 
-        return layout;
+        return rootOverlay;
     }
     
     private void handleSeatChange() {
@@ -148,7 +218,6 @@ public class SeatChangeView {
         CalculatePrice calculator = new CalculatePrice();
         Seat newSeat = flight.getPlane().getSeatMatrix().get(selectedSeatNum);
         
-        // Fiyat Farkı Hesapla
         Reservation tempOldRes = new Reservation("TEMP", flight, currentReservation.getPassenger(), currentReservation.getSeat());
         double oldPrice = calculator.calculateTicketPrice(tempOldRes);
         
@@ -158,7 +227,6 @@ public class SeatChangeView {
         double priceDifference = newPrice - oldPrice;
 
         if (priceDifference > 0) {
-            // FARK VAR -> ÖDEME EKRANINA GİT (PAYMENT VIEW)
             
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Ödeme Gerekiyor");
@@ -170,20 +238,15 @@ public class SeatChangeView {
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                //closeWindow(); // Şu anki pencreyi kapat
-                
-                // PaymentView'i "Koltuk Değişim Modu"nda aç
-                // loggedInPassenger hem uçan hem ödeyen olarak gönderildi (Basitlik için)
-                // existingReservation parametresi (currentReservation) dolu olduğu için mod değişecek.
                 PaymentView paymentView = new PaymentView(
                     mainApp, 
                     flight, 
                     currentReservation.getPassenger(), 
                     loggedInPassenger, 
                     selectedSeatNum, 
-                    0, // Ekstra bagaj yok
+                    0,
                     reservationManager, 
-                    currentReservation // BU PARAMETRE ÖNEMLİ
+                    currentReservation
                 );
                 
                 Stage paymentStage = new Stage();
@@ -196,7 +259,6 @@ public class SeatChangeView {
             }
             
         } else {
-            // FARK YOK VEYA İADE -> DİREKT DEĞİŞTİR (Eski Yöntem)
             boolean success = reservationManager.changeSeat(currentReservation.getReservationCode(), selectedSeatNum);
             
             if (success) {
@@ -206,6 +268,28 @@ public class SeatChangeView {
                 showAlert(Alert.AlertType.ERROR, "Hata", "İşlem başarısız oldu.");
             }
         }
+    }
+    
+    private int calculateGridColumn(char colChar) {
+        int baseIndex = colChar - 'A';
+        int gridIndex = baseIndex + 2; 
+        
+        if (colChar > 'C') {
+            gridIndex++;
+        }
+        return gridIndex;
+    }
+    
+    private double calculatePriceDifference(Seat newSeat) {
+        CalculatePrice calculator = new CalculatePrice();
+        
+        Reservation tempOldRes = new Reservation("TEMP", flight, currentReservation.getPassenger(), currentReservation.getSeat());
+        double oldPrice = calculator.calculateTicketPrice(tempOldRes);
+        
+        Reservation tempNewRes = new Reservation("TEMP", flight, currentReservation.getPassenger(), newSeat);
+        double newPrice = calculator.calculateTicketPrice(tempNewRes);
+        
+        return newPrice - oldPrice;
     }
     
     private void closeWindow() {

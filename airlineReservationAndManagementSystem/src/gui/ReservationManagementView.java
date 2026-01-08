@@ -2,7 +2,6 @@ package gui;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -18,7 +17,6 @@ import reservationAndTicketing.Passenger;
 import reservationAndTicketing.Reservation;
 import servicesAndManagers.ReservationManager;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -43,7 +41,6 @@ public class ReservationManagementView {
     	BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
-        // --- ÜST BAŞLIK ---
         HBox topBar = new HBox(15);
         topBar.setAlignment(Pos.CENTER_LEFT);
         Label lblTitle = new Label("Rezervasyon Yönetimi");
@@ -55,7 +52,6 @@ public class ReservationManagementView {
         topBar.getChildren().addAll(lblTitle, spacer, btnBack);
         layout.setTop(topBar);
 
-        // --- ORTA KISIM (VBox içinde iki tablo) ---
         VBox centerContent = new VBox(15);
         centerContent.setPadding(new Insets(10, 0, 10, 0));
         
@@ -73,7 +69,7 @@ public class ReservationManagementView {
         txtSearchRes.setPromptText("Aranacak kelime...");
         txtSearchRes.setMaxWidth(300);
         
-        // Listener'lar: Her iki bileşende de değişim olursa filtrele
+        
         txtSearchRes.textProperty().addListener((obs, oldVal, newVal) -> 
             filterReservations(newVal, cmbResSearchType.getValue()));
             
@@ -81,16 +77,15 @@ public class ReservationManagementView {
             filterReservations(txtSearchRes.getText(), newVal));
         
         searchBox.getChildren().addAll(lblSearch, cmbResSearchType, txtSearchRes);
-        // ------------------------------------------
-
-        // 1. Tablo: Kendi Biletlerim
+        
+        
         Label lblMine = new Label("Kendi Adınıza Olan Biletler");
         lblMine.setStyle("-fx-font-weight: bold; -fx-text-fill: #2980b9; -fx-font-size: 14px;");
         tableMyTickets = new TableView<>();
         tableMyTickets.setPrefHeight(200);
         createTableColumns(tableMyTickets);
 
-        // 2. Tablo: Başkasına Aldıklarım
+        
         Label lblOthers = new Label("Sizin Adınıza Olmayan / Başkasına Aldığınız Biletler");
         lblOthers.setStyle("-fx-font-weight: bold; -fx-text-fill: #e67e22; -fx-font-size: 14px;");
         tableOthersTickets = new TableView<>();
@@ -100,7 +95,7 @@ public class ReservationManagementView {
         centerContent.getChildren().addAll(searchBox, lblMine, tableMyTickets, new Separator(), lblOthers, tableOthersTickets);
         layout.setCenter(centerContent);
 
-        // --- ALT KISIM ---
+        
         HBox bottomBar = new HBox(15);
         bottomBar.setAlignment(Pos.CENTER_RIGHT);
         
@@ -117,7 +112,6 @@ public class ReservationManagementView {
         bottomBar.getChildren().addAll(btnChangeSeat, btnCancel);
         layout.setBottom(bottomBar);
         
-        // Verileri Yükle
         refreshTables();
 
         return layout;
@@ -127,7 +121,6 @@ public class ReservationManagementView {
     	TableColumn<Reservation, String> colPNR = new TableColumn<>("PNR");
         colPNR.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getReservationCode()));
 
-        // Yolcu Adını da gösterelim
         TableColumn<Reservation, String> colPass = new TableColumn<>("Yolcu");
         colPass.setCellValueFactory(c -> new SimpleStringProperty(
             c.getValue().getPassenger().getName() + " " + c.getValue().getPassenger().getSurname()
@@ -145,95 +138,20 @@ public class ReservationManagementView {
         TableColumn<Reservation, String> colSeat = new TableColumn<>("Koltuk");
         colSeat.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getSeat().getSeatNum()));
 
-        table.getColumns().addAll(colPNR, colPass, colFlight, colRoute, colDate, colSeat);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getColumns().add(colPNR);
+        table.getColumns().add(colPass);
+        table.getColumns().add(colFlight);
+        table.getColumns().add(colRoute);
+        table.getColumns().add(colDate);
+        table.getColumns().add(colSeat);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
     }
-
-    /*private void refreshTables() {
-    	// Giriş yapan kişinin (Booker) yaptığı tüm rezervasyonları al
-        ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
-
-        ArrayList<Reservation> listMine = new ArrayList<>();
-        ArrayList<Reservation> listOthers = new ArrayList<>();
-
-        // Listeyi ayıkla
-        for (Reservation r : allMyBookings) {
-            // Eğer uçan kişi ID == Giriş yapan ID ise "Benim"dir.
-            if (r.getPassenger().getPassengerID().equals(loggedInPassenger.getPassengerID())) {
-                listMine.add(r);
-            } else {
-                listOthers.add(r);
-            }
-        }
-
-        if (tableMyTickets != null) {
-            tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
-            tableMyTickets.refresh(); // <-- EKLENDİ: Görseli zorla yenile
-        }
-        if (tableOthersTickets != null) {
-            tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
-            tableOthersTickets.refresh(); // <-- EKLENDİ: Görseli zorla yenile
-        }
-    }*/
-    
-    /*private void refreshTables() {
-        // Önce tüm verileri çekiyoruz (filtresiz)
-        // Eğer arama kutusunda yazı varsa, filterReservations metodu zaten filtreleyerek ekrana basacak.
-        // Eğer kutu boşsa filterReservations hepsini gösterecek.
-    	if (txtSearchRes == null) return;
-        filterReservations(txtSearchRes.getText());
-    }
-    
-    private void filterReservations(String searchText) {
-        ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
-        
-        ArrayList<Reservation> listMine = new ArrayList<>();
-        ArrayList<Reservation> listOthers = new ArrayList<>();
-        
-        String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(java.util.Locale.ENGLISH);
-
-        for (Reservation r : allMyBookings) {
-            // Null verilerden kaçınmak için güvenli string alma
-            String pnr = (r.getReservationCode() != null) ? r.getReservationCode().toLowerCase() : "";
-            String flightNum = (r.getFlight() != null && r.getFlight().getFlightNum() != null) ? r.getFlight().getFlightNum().toLowerCase() : "";
-            String depCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getDepartureCity().toLowerCase() : "";
-            String arrCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getArrivalCity().toLowerCase() : "";
-            String passName = (r.getPassenger() != null) ? r.getPassenger().getName().toLowerCase() : "";
-
-            // Arama Kriterleri
-            boolean matches = lowerSearch.isEmpty() ||
-                              pnr.contains(lowerSearch) ||
-                              flightNum.contains(lowerSearch) ||
-                              depCity.contains(lowerSearch) ||
-                              arrCity.contains(lowerSearch) ||
-                              passName.contains(lowerSearch);
-            
-            if (matches) {
-                if (r.getPassenger().getPassengerID().equals(loggedInPassenger.getPassengerID())) {
-                    listMine.add(r);
-                } else {
-                    listOthers.add(r);
-                }
-            }
-        }
-
-        if (tableMyTickets != null) {
-            tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
-            tableMyTickets.refresh();
-        }
-        if (tableOthersTickets != null) {
-            tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
-            tableOthersTickets.refresh();
-        }
-    }*/
     
     private void refreshTables() {
         if (txtSearchRes == null || cmbResSearchType == null) return;
-        // Mevcut metni ve seçim türünü kullanarak filtrele
         filterReservations(txtSearchRes.getText(), cmbResSearchType.getValue());
     }
 
-    // YENİ FİLTRELEME METODU (Switch-Case ile)
     private void filterReservations(String searchText, String searchType) {
         ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
         
@@ -243,7 +161,6 @@ public class ReservationManagementView {
         String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(java.util.Locale.ENGLISH);
 
         for (Reservation r : allMyBookings) {
-            // Null check
             String pnr = (r.getReservationCode() != null) ? r.getReservationCode().toLowerCase() : "";
             String flightNum = (r.getFlight() != null) ? r.getFlight().getFlightNum().toLowerCase() : "";
             String depCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getDepartureCity().toLowerCase() : "";
@@ -251,7 +168,6 @@ public class ReservationManagementView {
 
             boolean matches = false;
             
-            // Seçilen kritere göre kontrol
             switch (searchType) {
                 case "PNR Kodu":
                     matches = pnr.contains(lowerSearch);
@@ -295,7 +211,6 @@ public class ReservationManagementView {
     }
 
     private void handleCancelReservation() {
-    	// Hangi tablodan seçim yapıldığını bul
         Reservation selected = tableMyTickets.getSelectionModel().getSelectedItem();
         if (selected == null) {
             selected = tableOthersTickets.getSelectionModel().getSelectedItem();
@@ -334,7 +249,6 @@ public class ReservationManagementView {
             return;
         }
         
-        // GÜNCELLEME: loggedInPassenger'ı da gönderiyoruz
         mainApp.showSeatChangeScreen(selected, loggedInPassenger);
         
         refreshTables();

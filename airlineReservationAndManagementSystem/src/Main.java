@@ -59,7 +59,7 @@ public class Main {
      * Mantık Testleri: Fiyat hesaplama, koltuk oluşturma vb.
      */
     public static void runLogicTests() {
-        FlightManager flightManager = new FlightManager();
+        //FlightManager flightManager = new FlightManager();
         CalculatePrice calculator = new CalculatePrice();
         SeatManager seatManager = new SeatManager();
 
@@ -196,7 +196,7 @@ public class Main {
         for (int i = 1; i <= numberOfThreads; i++) {
             final int userId = i;
             executor.submit(() -> {
-                String threadName = "Yolcu-" + userId;
+                //String threadName = "Yolcu-" + userId;
                 Passenger p = new Passenger("ID"+userId, "User", ""+userId, "555");
                 
                 boolean isBooked = false;
@@ -215,6 +215,7 @@ public class Main {
                         // System.out.println(">>> " + threadName + ": " + randomSeat + " aldı. (Deneme: " + attempts + ")");
                     }
                 }
+                System.out.println(attempts + " denemede sonuca ulaşıldı.");
             });
         }
 

@@ -31,17 +31,17 @@ public class AdminDashboardView {
     }
 
     public Parent getView() {
-        VBox layout = new VBox(20); // Elemanlar arası 20px boşluk
+        VBox layout = new VBox(20);
         layout.setPadding(new Insets(40));
         layout.setAlignment(Pos.CENTER);
         
-        // Başlık
+        
         Label lblWelcome = new Label("Hoşgeldiniz, " + adminStaff.getName().toUpperCase() + " " + adminStaff.getSurname().toUpperCase());
         lblWelcome.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         
         Label lblInstruction = new Label("Lütfen yapmak istediğiniz işlemi seçiniz:");
         
-        // Butonlar
+        
         Button btnFlights = new Button("Uçuş İşlemleri");
         btnFlights.setPrefWidth(200);
         btnFlights.setPrefHeight(50);
@@ -57,12 +57,12 @@ public class AdminDashboardView {
         btnSimulation.setStyle("-fx-font-size: 14px; -fx-base: #9b59b6; -fx-text-fill: black;");
         btnSimulation.setOnAction(e -> mainApp.showSimulationScreen(adminStaff));
 
-        // --- YENİ: ASENKRON RAPOR BUTONU (Scenario 2) ---
+        
         Button btnReport = new Button("Doluluk Raporu Oluştur (Asenkron)");
         btnReport.setPrefWidth(250);
         btnReport.setStyle("-fx-font-size: 14px; -fx-base: #f39c12; -fx-text-fill: black;");
         
-        Label lblStatus = new Label(""); // Durum mesajı için
+        Label lblStatus = new Label("");
         lblStatus.setStyle("-fx-text-fill: blue; -fx-font-weight: bold;");
 
         btnReport.setOnAction(e -> startAsynchronousReport(lblStatus));
@@ -71,7 +71,7 @@ public class AdminDashboardView {
         btnLogout.setPrefWidth(200);
         btnLogout.setStyle("-fx-base: #e74c3c;");
         
-        // Tıklama Olayları (Navigasyon)
+        
         btnFlights.setOnAction(e -> mainApp.showFlightScreen(adminStaff));
         btnStaff.setOnAction(e -> mainApp.showStaffScreen(adminStaff));
         btnLogout.setOnAction(e -> mainApp.showLoginScreen());
@@ -82,21 +82,17 @@ public class AdminDashboardView {
     }
     
     private void startAsynchronousReport(Label statusLabel) {
-        // Task oluşturuyoruz (Arka plan iş parçacığı)
         Task<String> reportTask = new Task<>() {
             @Override
             protected String call() throws Exception {
-                updateMessage("Rapor Hazırlanıyor..."); // GUI'ye mesaj gönder
+                updateMessage("Rapor Hazırlanıyor...");
                 
                 StringBuilder report = new StringBuilder();
                 report.append("--- UÇUŞ DOLULUK RAPORU ---\n");
-                
-                // İşlemin uzun sürdüğünü simüle etmek için döngüde bekletme yapıyoruz
                 int count = 0;
                 int totalFlights = flightManager.getFlights().size();
                 
                 for (Flight f : flightManager.getFlights()) {
-                    // Yapay gecikme (Simülasyon gereği "lengthy process")
                     Thread.sleep(500); 
                     
                     double rate = reservationManager.calculateOccupancyRate(f);
@@ -110,10 +106,9 @@ public class AdminDashboardView {
             }
         };
 
-        // Task durumlarını GUI'ye bağlama
         statusLabel.textProperty().bind(reportTask.messageProperty());
 
-        // İşlem Bittiğinde
+        
         reportTask.setOnSucceeded(e -> {
             statusLabel.textProperty().unbind();
             statusLabel.setText("Rapor Tamamlandı!");
@@ -128,7 +123,7 @@ public class AdminDashboardView {
             alert.showAndWait();
         });
 
-        // İşlemi Başlat (Yeni Thread'de)
+        
         new Thread(reportTask).start();
     }
 

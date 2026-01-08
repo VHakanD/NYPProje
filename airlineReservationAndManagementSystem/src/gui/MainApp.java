@@ -91,14 +91,13 @@ public class MainApp extends Application{
     
     public void showAdminDashboard(Staff adminStaff) {
     	AdminDashboardView dashboard = new AdminDashboardView(this, adminStaff, flightManager, reservationManager);
-        Scene scene = new Scene(dashboard.getView(), 600, 500); // Boyutu biraz artırdık
+        Scene scene = new Scene(dashboard.getView(), 600, 500);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Yönetici Paneli - Ana Menü");
         primaryStage.centerOnScreen();
     }
     
     public void showFlightScreen(Staff adminStaff) {
-        // AdminView'i oluşturuyoruz ama sadece Flight kısmını alacağız
     	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminStaff);
     	Scene scene = new Scene(adminView.getFlightView(), 1000, 700);
         primaryStage.setScene(scene);
@@ -132,7 +131,6 @@ public class MainApp extends Application{
     }
     
     public void showSeatChangeScreen(Reservation reservation, Passenger loggedInPassenger) {
-        // loggedInPassenger'ı buraya da geçiriyoruz
         SeatChangeView changeView = new SeatChangeView(this, reservation, reservationManager, loggedInPassenger);
         
         Stage stage = new Stage();
@@ -146,7 +144,6 @@ public class MainApp extends Application{
     }
     
     public void showSimulationScreen(Staff adminStaff) {
-        // Parametre olarak reservationManager'ı gönderiyoruz
         SimulationView simView = new SimulationView(this, reservationManager, adminStaff);
         
         Scene scene = new Scene(simView.getView(), 800, 600);
@@ -156,18 +153,16 @@ public class MainApp extends Application{
     }
     
     public void cleanUpSimulationPassengers() {
-        // 1. Hafızadaki listeden "SIM_" ile başlayanları sil
         boolean removed = passengerList.removeIf(p -> p.getPassengerID().startsWith("SIM_"));
         
         if (removed) {
-            // 2. Dosyayı baştan aşağı yenile (Append modu kapalı)
             rewritePassengerFile();
             System.out.println("Simülasyon yolcuları dosýadan temizlendi.");
         }
     }
     
     private void rewritePassengerFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, false))) { // false = append kapalı
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSENGER_FILE, false))) {
             for (Passenger p : passengerList) {
                 writer.write(p.toFileFormat());
                 writer.newLine();
