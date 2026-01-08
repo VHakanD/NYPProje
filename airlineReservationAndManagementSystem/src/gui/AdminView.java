@@ -265,6 +265,31 @@ public class AdminView {
     private BorderPane createFlightContent() {
         BorderPane innerLayout = new BorderPane();
         
+        HBox searchBox = new HBox(10);
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        searchBox.setPadding(new Insets(0, 0, 10, 0));
+
+        Label lblSearch = new Label("🔍 Ara:");
+        
+        ComboBox<String> cmbSearchType = new ComboBox<>();
+        cmbSearchType.getItems().addAll("Tümü", "Uçuş No", "Kalkış Yeri", "Varış Yeri", "Uçak Modeli");
+        cmbSearchType.setValue("Tümü"); // Varsayılan
+        cmbSearchType.setPrefWidth(120);
+
+        // Arama Metni
+        TextField txtSearchFlight = new TextField();
+        txtSearchFlight.setPromptText("Aranacak kelime...");
+        txtSearchFlight.setPrefWidth(250);
+        
+        // --- Listener'lar (Hem yazı hem seçim değişince filtrele) ---
+        txtSearchFlight.textProperty().addListener((obs, oldVal, newVal) -> 
+            filterFlights(newVal, cmbSearchType.getValue()));
+            
+        cmbSearchType.valueProperty().addListener((obs, oldVal, newVal) -> 
+            filterFlights(txtSearchFlight.getText(), newVal));
+        
+        searchBox.getChildren().addAll(lblSearch, cmbSearchType, txtSearchFlight);
+        
         flightTable = new TableView<>();
         
         TableColumn<Flight, String> colNum = new TableColumn<>("Uçuş No");
@@ -294,13 +319,15 @@ public class AdminView {
         flightTable.getColumns().add(colDist);
         flightTable.getColumns().add(dateColumn);
         flightTable.getColumns().add(timeColumn);
+        
         updateFlightTable();
         
         flightTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) handleFlightRowSelect();
         });
-
-        innerLayout.setCenter(flightTable);
+        
+        VBox centerBox = new VBox(searchBox, flightTable);
+        innerLayout.setCenter(centerBox);
 
         // --- FORM ---
         VBox form = new VBox(10);
@@ -365,7 +392,18 @@ public class AdminView {
                 // 3. UÇUŞU OLUŞTUR
                 String timeStr = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
                 Route route = new Route(txtDep.getText(), txtArr.getText(), Integer.parseInt(txtDist.getText()));
+                
+                if (datePicker.getValue() == null) { 
+                	showAlert("Hata", "Lütfen bir tarih seçiniz."); 
+                	return; 
+                }
+                
                 LocalDateTime ldt = LocalDateTime.of(datePicker.getValue(), LocalTime.parse(timeStr));
+                
+                if (ldt.isBefore(LocalDateTime.now())) {
+                    showAlert("Hata", "Geçmiş bir tarihe uçuş eklenemez!\nLütfen ileri bir tarih seçiniz.");
+                    return;
+                }
                 
                 Flight newFlight = new Flight(fNum, route, ldt, Integer.parseInt(txtDur.getText()));
                 newFlight.setPlane(selectedPlane); // Bulduğumuz uçağı atadık
@@ -381,39 +419,6 @@ public class AdminView {
         });
         
         btnUpdate.setOnAction(this::handleUpdateFlight);
-
-        /*btnDelete.setOnAction(e -> {
-        	Flight selected = flightTable.getSelectionModel().getSelectedItem();
-            
-            // 2. Eğer tablodan seçilmediyse ama ID kutusunda bir şey yazıyorsa, ID ile bulmaya çalış
-            if (selected == null && !txtNum.getText().trim().isEmpty()) {
-                String flightId = txtNum.getText().trim();
-                selected = flightManager.getFlightByID(flightId);
-            }
-
-            if (selected != null) {
-                // 3. Onay Penceresi (Güvenlik Önlemi)
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Uçuş Sil");
-                alert.setHeaderText("Uçuş Siliniyor: " + selected.getFlightNum());
-                alert.setContentText("Bu işlem geri alınamaz. Silmek istediğinize emin misiniz?");
-
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    
-                    // 4. Silme işlemini gerçekleştir
-                    flightManager.deleteFlight(selected);
-                    
-                    // 5. Tabloyu ve ekranı güncelle
-                    updateFlightTable();
-                    clearFlightFields();
-                    
-                    showAlert("Başarılı", "Uçuş başarıyla silindi.");
-                }
-            } else {
-                showAlert("Uyarı", "Lütfen silinecek uçuşu listeden seçiniz veya geçerli bir Uçuş No giriniz.");
-            }
-        });*/
         
         btnDelete.setOnAction(e -> {
             Flight selected = flightTable.getSelectionModel().getSelectedItem();
@@ -459,6 +464,10 @@ public class AdminView {
     }
 
     private void updateFlightTable() {
+    	flightManager.removeExpiredFlights();
+    	
+    	reservationManager.cleanUpOrphanReservations();
+    	
         ObservableList<Flight> data = FXCollections.observableArrayList(flightManager.getFlights());
         flightTable.setItems(data);
         flightTable.refresh();
@@ -577,6 +586,48 @@ public class AdminView {
             
             txtPlaneId.setText(selected.getPlane().getPlaneID());
         }
+    }
+    
+    private void filterFlights(String searchText, String searchType) {
+        if (searchText == null || searchText.isEmpty()) {
+            // Arama boşsa hepsini göster
+            updateFlightTable();
+            return;
+        }
+
+        String lowerSearch = searchText.toLowerCase(java.util.Locale.ENGLISH);
+        ObservableList<Flight> filteredList = FXCollections.observableArrayList();
+
+        for (Flight f : flightManager.getFlights()) {
+            boolean match = false;
+            
+            // Seçilen tipe göre arama yap
+            switch (searchType) {
+                case "Uçuş No":
+                    match = f.getFlightNum().toLowerCase().contains(lowerSearch);
+                    break;
+                case "Kalkış Yeri":
+                    match = f.getRoute().getDepartureCity().toLowerCase().contains(lowerSearch);
+                    break;
+                case "Varış Yeri":
+                    match = f.getRoute().getArrivalCity().toLowerCase().contains(lowerSearch);
+                    break;
+                case "Uçak Modeli":
+                    match = f.getPlane().getPlaneModel().toLowerCase().contains(lowerSearch);
+                    break;
+                case "Tümü":
+                default:
+                    match = f.getFlightNum().toLowerCase().contains(lowerSearch) || 
+                            f.getRoute().toString().toLowerCase().contains(lowerSearch) ||
+                            f.getPlane().getPlaneModel().toLowerCase().contains(lowerSearch);
+                    break;
+            }
+
+            if (match) {
+                filteredList.add(f);
+            }
+        }
+        flightTable.setItems(filteredList);
     }
     
     private void clearFlightFields() {

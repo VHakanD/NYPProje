@@ -27,6 +27,9 @@ public class ReservationManagementView {
     private ReservationManager reservationManager;
     private Passenger loggedInPassenger;
     
+    private TextField txtSearchRes;
+    private ComboBox<String> cmbResSearchType;
+    
     private TableView<Reservation> tableMyTickets;
     private TableView<Reservation> tableOthersTickets;
 
@@ -55,6 +58,30 @@ public class ReservationManagementView {
         // --- ORTA KISIM (VBox içinde iki tablo) ---
         VBox centerContent = new VBox(15);
         centerContent.setPadding(new Insets(10, 0, 10, 0));
+        
+        HBox searchBox = new HBox(10);
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        
+        Label lblSearch = new Label("🔍 Ara:");
+        
+        cmbResSearchType = new ComboBox<>();
+        cmbResSearchType.getItems().addAll("Tümü", "PNR Kodu", "Uçuş No", "Yolcu Adı", "Kalkış Yeri");
+        cmbResSearchType.setValue("Tümü");
+        cmbResSearchType.setPrefWidth(120);
+        
+        txtSearchRes = new TextField();
+        txtSearchRes.setPromptText("Aranacak kelime...");
+        txtSearchRes.setMaxWidth(300);
+        
+        // Listener'lar: Her iki bileşende de değişim olursa filtrele
+        txtSearchRes.textProperty().addListener((obs, oldVal, newVal) -> 
+            filterReservations(newVal, cmbResSearchType.getValue()));
+            
+        cmbResSearchType.valueProperty().addListener((obs, oldVal, newVal) -> 
+            filterReservations(txtSearchRes.getText(), newVal));
+        
+        searchBox.getChildren().addAll(lblSearch, cmbResSearchType, txtSearchRes);
+        // ------------------------------------------
 
         // 1. Tablo: Kendi Biletlerim
         Label lblMine = new Label("Kendi Adınıza Olan Biletler");
@@ -69,8 +96,8 @@ public class ReservationManagementView {
         tableOthersTickets = new TableView<>();
         tableOthersTickets.setPrefHeight(200);
         createTableColumns(tableOthersTickets);
-
-        centerContent.getChildren().addAll(lblMine, tableMyTickets, new Separator(), lblOthers, tableOthersTickets);
+        
+        centerContent.getChildren().addAll(searchBox, lblMine, tableMyTickets, new Separator(), lblOthers, tableOthersTickets);
         layout.setCenter(centerContent);
 
         // --- ALT KISIM ---
@@ -122,7 +149,7 @@ public class ReservationManagementView {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void refreshTables() {
+    /*private void refreshTables() {
     	// Giriş yapan kişinin (Booker) yaptığı tüm rezervasyonları al
         ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
 
@@ -146,6 +173,124 @@ public class ReservationManagementView {
         if (tableOthersTickets != null) {
             tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
             tableOthersTickets.refresh(); // <-- EKLENDİ: Görseli zorla yenile
+        }
+    }*/
+    
+    /*private void refreshTables() {
+        // Önce tüm verileri çekiyoruz (filtresiz)
+        // Eğer arama kutusunda yazı varsa, filterReservations metodu zaten filtreleyerek ekrana basacak.
+        // Eğer kutu boşsa filterReservations hepsini gösterecek.
+    	if (txtSearchRes == null) return;
+        filterReservations(txtSearchRes.getText());
+    }
+    
+    private void filterReservations(String searchText) {
+        ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
+        
+        ArrayList<Reservation> listMine = new ArrayList<>();
+        ArrayList<Reservation> listOthers = new ArrayList<>();
+        
+        String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(java.util.Locale.ENGLISH);
+
+        for (Reservation r : allMyBookings) {
+            // Null verilerden kaçınmak için güvenli string alma
+            String pnr = (r.getReservationCode() != null) ? r.getReservationCode().toLowerCase() : "";
+            String flightNum = (r.getFlight() != null && r.getFlight().getFlightNum() != null) ? r.getFlight().getFlightNum().toLowerCase() : "";
+            String depCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getDepartureCity().toLowerCase() : "";
+            String arrCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getArrivalCity().toLowerCase() : "";
+            String passName = (r.getPassenger() != null) ? r.getPassenger().getName().toLowerCase() : "";
+
+            // Arama Kriterleri
+            boolean matches = lowerSearch.isEmpty() ||
+                              pnr.contains(lowerSearch) ||
+                              flightNum.contains(lowerSearch) ||
+                              depCity.contains(lowerSearch) ||
+                              arrCity.contains(lowerSearch) ||
+                              passName.contains(lowerSearch);
+            
+            if (matches) {
+                if (r.getPassenger().getPassengerID().equals(loggedInPassenger.getPassengerID())) {
+                    listMine.add(r);
+                } else {
+                    listOthers.add(r);
+                }
+            }
+        }
+
+        if (tableMyTickets != null) {
+            tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
+            tableMyTickets.refresh();
+        }
+        if (tableOthersTickets != null) {
+            tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
+            tableOthersTickets.refresh();
+        }
+    }*/
+    
+    private void refreshTables() {
+        if (txtSearchRes == null || cmbResSearchType == null) return;
+        // Mevcut metni ve seçim türünü kullanarak filtrele
+        filterReservations(txtSearchRes.getText(), cmbResSearchType.getValue());
+    }
+
+    // YENİ FİLTRELEME METODU (Switch-Case ile)
+    private void filterReservations(String searchText, String searchType) {
+        ArrayList<Reservation> allMyBookings = reservationManager.getReservationsByBooker(loggedInPassenger.getPassengerID());
+        
+        ArrayList<Reservation> listMine = new ArrayList<>();
+        ArrayList<Reservation> listOthers = new ArrayList<>();
+        
+        String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(java.util.Locale.ENGLISH);
+
+        for (Reservation r : allMyBookings) {
+            // Null check
+            String pnr = (r.getReservationCode() != null) ? r.getReservationCode().toLowerCase() : "";
+            String flightNum = (r.getFlight() != null) ? r.getFlight().getFlightNum().toLowerCase() : "";
+            String depCity = (r.getFlight() != null && r.getFlight().getRoute() != null) ? r.getFlight().getRoute().getDepartureCity().toLowerCase() : "";
+            String passName = (r.getPassenger() != null) ? r.getPassenger().getName().toLowerCase() + " " + r.getPassenger().getSurname().toLowerCase() : "";
+
+            boolean matches = false;
+            
+            // Seçilen kritere göre kontrol
+            switch (searchType) {
+                case "PNR Kodu":
+                    matches = pnr.contains(lowerSearch);
+                    break;
+                case "Uçuş No":
+                    matches = flightNum.contains(lowerSearch);
+                    break;
+                case "Yolcu Adı":
+                    matches = passName.contains(lowerSearch);
+                    break;
+                case "Kalkış Yeri":
+                    matches = depCity.contains(lowerSearch);
+                    break;
+                case "Tümü":
+                default:
+                    matches = lowerSearch.isEmpty() ||
+                              pnr.contains(lowerSearch) ||
+                              flightNum.contains(lowerSearch) ||
+                              depCity.contains(lowerSearch) ||
+                              passName.contains(lowerSearch);
+                    break;
+            }
+            
+            if (matches) {
+                if (r.getPassenger().getPassengerID().equals(loggedInPassenger.getPassengerID())) {
+                    listMine.add(r);
+                } else {
+                    listOthers.add(r);
+                }
+            }
+        }
+
+        if (tableMyTickets != null) {
+            tableMyTickets.setItems(FXCollections.observableArrayList(listMine));
+            tableMyTickets.refresh();
+        }
+        if (tableOthersTickets != null) {
+            tableOthersTickets.setItems(FXCollections.observableArrayList(listOthers));
+            tableOthersTickets.refresh();
         }
     }
 

@@ -4,6 +4,8 @@ import flightManagement.Flight;
 import flightManagement.Plane;
 import flightManagement.Seat;
 import reservationAndTicketing.Passenger;
+import reservationAndTicketing.Reservation;
+import servicesAndManagers.CalculatePrice;
 import servicesAndManagers.ReservationManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -12,9 +14,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +36,7 @@ public class SeatSelectionView {
 	private MainApp mainApp;
     private Flight flight;
     private ReservationManager reservationManager;
-    private String selectedSeatNum = null; // Kullanıcının o an tıkladığı koltuk
+    private String selectedSeatNum = null; 
     private Button btnBook;
     private Label lblSelectionInfo;
     private Passenger loggedInPassenger;
@@ -34,93 +45,10 @@ public class SeatSelectionView {
         this.mainApp = mainApp;
         this.flight = flight;
         this.reservationManager = reservationManager;
-        this.loggedInPassenger = loggedInPassenger; // Kaydet
+        this.loggedInPassenger = loggedInPassenger;
     }
-
-    /*public Parent getView() {
-        BorderPane layout = new BorderPane();
-        layout.setPadding(new Insets(20));
-
-        Label lblHeader = new Label("Uçuş: " + flight.getFlightNum() + " - " + flight.getRoute().toString());
-        layout.setTop(lblHeader);
-
-        // --- KOLTUK MATRİSİ (GRID) ---
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setAlignment(Pos.CENTER);
-
-        Plane plane = flight.getPlane();
-        Map<String, Seat> seats = plane.getSeatMatrix();
-
-        // 30 Sıra x 6 Sütun (Sizin SeatManager yapınıza göre)
-        int totalRows = plane.getCapacity() / 6;
-        char[] cols = {'A', 'B', 'C', 'D', 'E', 'F'};
-
-        for (int row = 1; row <= totalRows; row++) {
-            for (int c = 0; c < cols.length; c++) {
-                String seatNum = row + String.valueOf(cols[c]);
-                Seat seat = seats.get(seatNum);
-
-                if (seat != null) {
-                    Button btn = new Button(seatNum);
-                    btn.setPrefSize(50, 40);
-                    
-                    boolean isBusiness = (row <= 4);
-                    
-                    
-
-                    // Duruma göre renk ver
-                    if (seat.isReserved()) {
-                        btn.setStyle("-fx-background-color: #ff6b6b;"); // Kırmızı (Dolu)
-                        btn.setDisable(true);
-                    } else if(isBusiness) {
-                    	btn.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
-                        
-                        // Tıklama olayını buraya da ekliyoruz
-                        btn.setOnAction(e -> {
-                            selectedSeatNum = seatNum;
-                            // Kullanıcıya Business seçtiğini belirtebiliriz
-                            new Alert(Alert.AlertType.INFORMATION, "Seçilen Business Koltuk: " + seatNum).show();
-                        });
-                    }else {
-                        btn.setStyle("-fx-background-color: #51cf66;"); // Yeşil (Boş)
-                        
-                        // Tıklama Olayı
-                        btn.setOnAction(e -> {
-                            selectedSeatNum = seatNum;
-                            new Alert(Alert.AlertType.INFORMATION, "Seçilen Koltuk: " + seatNum).show();
-                        });
-                    }
-                    int colIndex = c;
-                    if (c >= 3) colIndex++;
-                    
-                    grid.add(btn, colIndex, row); // (Sütun, Satır)
-                }
-            }
-        }
-        
-        grid.add(new Label("KORİDOR"), 3, 0);
-
-        ScrollPane scroll = new ScrollPane(grid);
-        scroll.setFitToWidth(true);
-        layout.setCenter(scroll);
-
-        // --- REZERVASYONU TAMAMLA ---
-        btnBook = new Button("Bilgileri Gir ve Rezervasyonu Tamamla");
-        btnBook.setStyle("-fx-base: #f39c12; -fx-font-size: 14px; -fx-font-weight: bold;");
-        btnBook.setPrefHeight(50);
-        btnBook.setOnAction(e -> handleBookingProcess());
-        
-        HBox bottomBar = new HBox(btnBook);
-        bottomBar.setAlignment(Pos.CENTER);
-        bottomBar.setPadding(new Insets(10));
-        layout.setBottom(bottomBar);
-
-        return layout;
-    }*/
     
-    public Parent getView() {
+    /*public Parent getView() {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
 
@@ -221,6 +149,202 @@ public class SeatSelectionView {
         layout.setBottom(bottomContainer);
 
         return layout;
+    }*/
+    
+    public Parent getView() {
+        // --- 1. ANA KATMAN (StackPane - Hostes için) ---
+        StackPane rootOverlay = new StackPane();
+        rootOverlay.setAlignment(Pos.CENTER);
+
+        BorderPane layout = new BorderPane();
+        layout.setPadding(new Insets(20));
+
+        // --- 2. ÜST BİLGİ ---
+        VBox topBox = new VBox(10);
+        topBox.setAlignment(Pos.CENTER);
+        Label lblTitle = new Label("Koltuk Seçimi: " + flight.getFlightNum());
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        Label lblRoute = new Label(flight.getRoute().toString() + " | " + flight.getFormattedDate());
+        topBox.getChildren().addAll(lblTitle, lblRoute);
+        layout.setTop(topBox);
+
+        // --- 3. ORTA KISIM (Koltuk Izgarası) ---
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(20));
+        gridPane.setHgap(8); // Koltuklar arası boşluk
+        gridPane.setVgap(8);
+        gridPane.setAlignment(Pos.TOP_CENTER);
+        
+        // --- KORİDOR GENİŞLİĞİ AYARI ---
+        // Sütunların genişliklerini ayarlayarak koridoru açıyoruz.
+        // İndeksler: 0(SıraNo), 1(Pencere), 2(A), 3(B), 4(C), 5(KORİDOR), 6(D), 7(E), 8(F), 9(Pencere)
+        ColumnConstraints colNormal = new ColumnConstraints(); // Normal sütunlar
+        ColumnConstraints colAisle = new ColumnConstraints(); 
+        colAisle.setMinWidth(40); // Koridor için 40px ekstra boşluk (Genişletildi)
+        
+        // GridPane'e sütun kısıtlamalarını ekleyelim (Opsiyonel ama garanti çözüm)
+        // 5. indekse kadar normal, 5. indeks koridor, sonrası normal
+        gridPane.getColumnConstraints().addAll(
+            new ColumnConstraints(), new ColumnConstraints(), // 0, 1
+            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(), // 2, 3, 4
+            colAisle // 5 (Koridor)
+        );
+
+        Map<String, Seat> seatMatrix = flight.getPlane().getSeatMatrix();
+        int totalRows = flight.getPlane().getCapacity() / 6; 
+        char lastColChar = 'F'; 
+
+        ToggleGroup seatGroup = new ToggleGroup();
+
+        for (int row = 1; row <= totalRows; row++) {
+            // Sıra Numarası (En Sol)
+            Label lblRow = new Label(String.valueOf(row));
+            lblRow.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
+            gridPane.add(lblRow, 0, row - 1);
+
+            for (char col = 'A'; col <= lastColChar; col++) {
+                String seatNum = row + String.valueOf(col);
+                Seat seat = seatMatrix.get(seatNum);
+
+                if (seat != null) {
+                    ToggleButton btnSeat = new ToggleButton(seatNum);
+                    btnSeat.setPrefSize(55, 45); 
+                    btnSeat.setToggleGroup(seatGroup);
+
+                    // --- MANTIK BİRLEŞTİRME ---
+                    boolean isBusiness = (seat.getSeatType() == Seat.SeatType.BUSINESS);
+                    // Business ise ve B veya E sütunu ise -> SEHPA
+                    boolean isTable = isBusiness && (col == 'B' || col == 'E');
+                    
+                    // --- STİL DÜZELTMESİ (-fx-base KULLANIMI) ---
+                    // -fx-base kullanınca JavaFX'in 3D buton efekti ve seçim gölgelendirmesi geri gelir.
+                    
+                    if (isTable) {
+                        // SEHPA (Siyah - Tıklanamaz)
+                        btnSeat.setText("SEHPA");
+                        btnSeat.setStyle("-fx-base: #000000; -fx-text-fill: white; -fx-font-size: 9px; -fx-font-weight: bold;");
+                        btnSeat.setDisable(true); 
+                    } 
+                    else if (seat.isReserved()) {
+                        // DOLU (Kırmızı)
+                        btnSeat.setStyle("-fx-base: #e74c3c; -fx-text-fill: white;"); 
+                        btnSeat.setDisable(true);
+                    } 
+                    else if (isBusiness) {
+                        // BUSINESS (Mor)
+                        btnSeat.setStyle("-fx-base: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold;");
+                    } 
+                    else {
+                        // EKONOMİ (Yeşil)
+                        btnSeat.setStyle("-fx-base: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"); 
+                    }
+                    
+                    // --- SEÇİM VE FİYAT ---
+                    btnSeat.setOnAction(e -> {
+                        if (btnSeat.isSelected()) {
+                            selectedSeatNum = seatNum;
+                            
+                            // Fiyat Hesaplama
+                            CalculatePrice calculator = new CalculatePrice();
+                            Reservation tempRes = new Reservation("TEMP", flight, loggedInPassenger, seat);
+                            double realPrice = calculator.calculateTicketPrice(tempRes);
+                            
+                            String typeStr = isBusiness ? "Business" : "Ekonomi";
+                            lblSelectionInfo.setText("Seçilen: " + seatNum + " (" + typeStr + ") - Tutar: " + String.format("%.2f", realPrice) + " ₺");
+                            lblSelectionInfo.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
+                            btnBook.setDisable(false);
+                            
+                            // NOT: ToggleButton seçilince JavaFX otomatik olarak rengi koyulaştırır (-fx-base sayesinde).
+                            // Ekstra bir stil vermemize gerek yok, kullanıcı seçili olduğunu butonun "basılı" halinden anlar.
+                        } else {
+                            selectedSeatNum = null;
+                            lblSelectionInfo.setText("Lütfen bir koltuk seçiniz.");
+                            lblSelectionInfo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+                            btnBook.setDisable(true);
+                        }
+                    });
+
+                    // --- PENCERELER VE GRID YERLEŞİMİ ---
+                    int gridColIndex = calculateGridColumn(col);
+
+                    // Sol Pencere (Açık Mavi)
+                    if (col == 'A') {
+                        Rectangle leftWindow = new Rectangle(8, 45, Color.LIGHTBLUE); // İnce uzun cam
+                        leftWindow.setArcWidth(5); leftWindow.setArcHeight(5);
+                        gridPane.add(leftWindow, gridColIndex - 1, row - 1);
+                    }
+
+                    // Koltuğu Ekle
+                    gridPane.add(btnSeat, gridColIndex, row - 1);
+
+                    // Sağ Pencere (Açık Mavi)
+                    if (col == 'F') {
+                        Rectangle rightWindow = new Rectangle(8, 45, Color.LIGHTBLUE);
+                        rightWindow.setArcWidth(5); rightWindow.setArcHeight(5);
+                        gridPane.add(rightWindow, gridColIndex + 1, row - 1);
+                    }
+                }
+            }
+        }
+        
+        // ScrollPane (Kaydırma Çubuğu)
+        ScrollPane scrollPane = new ScrollPane(gridPane);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: #f0f2f5;");
+        layout.setCenter(scrollPane);
+
+        // --- 4. ALT KISIM ---
+        VBox bottomBox = new VBox(15);
+        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setPadding(new Insets(20, 0, 0, 0));
+
+        lblSelectionInfo = new Label("Lütfen bir koltuk seçiniz.");
+        lblSelectionInfo.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+        HBox btnBox = new HBox(20);
+        btnBox.setAlignment(Pos.CENTER);
+        
+        Button btnCancel = new Button("İptal");
+        btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;"); // Kırmızı stil
+        btnCancel.setOnAction(e -> {
+            // Pencereyi kapatma işlemi
+            Stage stage = (Stage) btnCancel.getScene().getWindow();
+            stage.close();
+        });
+
+        btnBook = new Button("Bilgileri Gir ve Tamamla");
+        btnBook.setStyle("-fx-base: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnBook.setDisable(true);
+        btnBook.setOnAction(e -> handleBookingProcess());
+
+        btnBox.getChildren().addAll(btnCancel, btnBook);
+        bottomBox.getChildren().addAll(lblSelectionInfo, btnBox);
+        layout.setBottom(bottomBox);
+
+        // --- 5. HOSTES FİGÜRÜ ---
+        // Hostes görseli internetten çekiliyor
+        Image stewardessImage = new Image("https://cdn-icons-png.flaticon.com/512/2534/2534690.png", 60, 150, true, true);
+        ImageView stewardessView = new ImageView(stewardessImage);
+        stewardessView.setOpacity(0.85);
+        StackPane.setAlignment(stewardessView, Pos.CENTER); // Tam ortaya sabitle
+        
+        // Hostesi en üste ekle
+        rootOverlay.getChildren().addAll(layout, stewardessView);
+
+        return rootOverlay;
+    }
+
+    // Grid Hesaplama (Pencereler ve Koridor Boşluğu İçin)
+    private int calculateGridColumn(char colChar) {
+        int baseIndex = colChar - 'A'; 
+        // 0:SıraNo, 1:Pencere, 2:A, 3:B, 4:C ...
+        int gridIndex = baseIndex + 2; 
+        
+        // C'den sonra (D, E, F) koridor boşluğu bırak (+1 Sütun Atla)
+        if (colChar > 'C') {
+            gridIndex++; 
+        }
+        return gridIndex;
     }
     
     private void handleBookingProcess() {

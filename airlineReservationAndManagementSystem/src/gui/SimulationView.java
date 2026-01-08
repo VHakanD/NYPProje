@@ -271,7 +271,7 @@ public class SimulationView {
         new Thread(() -> {
             try {
                 // İşlemlerin bitmesi için bekle
-                Thread.sleep(4000); 
+                Thread.sleep(1000); 
             } catch (InterruptedException e) { }
 
             // Sonuçları Analiz Et

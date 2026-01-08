@@ -28,10 +28,14 @@ public class Ticket {
 	}
 	
 	public String toFileFormat() {
-        return ticketID + "," + 
-               aReservation.getReservationCode() + "," + 
-               price + "," + 
-               baggageAllowance;
+        return aReservation.getPassenger().getName() + "," +
+        		aReservation.getPassenger().getSurname() + "," +
+        		ticketID + "," + 
+        		aReservation.getReservationCode() + "," +
+        		aReservation.getFlight().getFlightNum() + "," +
+        		aReservation.getSeat().getSeatNum() + "," +
+        		price + "," + 
+        		baggageAllowance;
     }
 
 	public String getTicketID() {
