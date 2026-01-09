@@ -130,7 +130,7 @@ public class MainApp extends Application{
     
     public void showStaffScreen(Staff adminStaff) {
     	AdminView adminView = new AdminView(this, flightManager, reservationManager, staffManager, adminStaff);
-    	Scene scene = new Scene(adminView.getStaffView(), 900, 600);
+    	Scene scene = new Scene(adminView.getStaffView(), 1000, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Personel Yönetimi");
         primaryStage.centerOnScreen();
@@ -157,7 +157,7 @@ public class MainApp extends Application{
         
         Stage stage = new Stage();
         stage.setTitle("Koltuk Değiştirme");
-        stage.setScene(new Scene(changeView.getView(), 900, 650));
+        stage.setScene(new Scene(changeView.getView(), 1000, 700));
         
         stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
         stage.initOwner(primaryStage);

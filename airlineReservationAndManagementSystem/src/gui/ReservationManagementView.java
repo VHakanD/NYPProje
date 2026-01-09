@@ -58,7 +58,7 @@ public class ReservationManagementView {
         HBox searchBox = new HBox(10);
         searchBox.setAlignment(Pos.CENTER_LEFT);
         
-        Label lblSearch = new Label("🔍 Ara:");
+        Label lblSearch = new Label("Ara:");
         
         cmbResSearchType = new ComboBox<>();
         cmbResSearchType.getItems().addAll("Tümü", "PNR Kodu", "Uçuş No", "Yolcu Adı", "Kalkış Yeri");
@@ -230,7 +230,8 @@ public class ReservationManagementView {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             boolean success = reservationManager.cancelReservation(selected.getReservationCode());
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Rezervasyon iptal edildi.");
+                showAlert(Alert.AlertType.INFORMATION, "Başarılı", "Rezervasyon iptal edildi."
+                		+ "İadeniz 1-7 iş günü içinde hesabınıza yansıyacakıtır.");
                 refreshTables();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Hata", "İptal başarısız (Uçuşa 24 saatten az kalmış olabilir).");

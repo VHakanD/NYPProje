@@ -387,6 +387,7 @@ public class AdminView {
         Button btnAdd = new Button("Ekle");
         Button btnUpdate = new Button("Güncelle");
         Button btnDelete = new Button("Sil");
+        btnDelete.setStyle("-fx-base: #e74c3c; -fx-text-fill: white;");
         
         Button btnClear = new Button("Temizle");
         btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;");
@@ -717,6 +718,7 @@ public class AdminView {
         txtStaffSurname.clear();
         txtStaffContact.clear();
         txtStaffRole.clear();
+        txtStaffUser.clear();
         txtStaffPass.clear();
         staffTable.getSelectionModel().clearSelection();
     }
