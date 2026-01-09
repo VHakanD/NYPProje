@@ -174,8 +174,11 @@ public class AdminView {
         txtStaffPass.setPrefWidth(80);
 
         Button btnAddStaff = new Button("Ekle");
+        btnAddStaff.setStyle("-fx-base: #35f121; -fx-text-fill: white; -fx-font-weight: bold;");
         Button btnDelStaff = new Button("Sil");
+        btnDelStaff.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         Button btnUpdateStaff = new Button("Güncelle");
+        btnUpdateStaff.setStyle("-fx-base: #2372ea; -fx-text-fill: white; -fx-font-weight: bold;");
         
         Button btnClearStaff = new Button("Temizle");
         btnClearStaff.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); // Gri renk
@@ -385,12 +388,14 @@ public class AdminView {
         minFactory.setWrapAround(true);
 
         Button btnAdd = new Button("Ekle");
+        btnAdd.setStyle("-fx-base: #35f121; -fx-text-fill: white; -fx-font-weight: bold;");
         Button btnUpdate = new Button("Güncelle");
+        btnUpdate.setStyle("-fx-base: #2372ea; -fx-text-fill: white; -fx-font-weight: bold;");
         Button btnDelete = new Button("Sil");
-        btnDelete.setStyle("-fx-base: #e74c3c; -fx-text-fill: white;");
+        btnDelete.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         
         Button btnClear = new Button("Temizle");
-        btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;");
+        btnClear.setStyle("-fx-base: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold;");
         btnClear.setOnAction(e -> clearFlightFields());
         
         Button btnShowDetails = new Button("📋 Yolcu Listesi ve Doluluk");
@@ -497,7 +502,7 @@ public class AdminView {
     }
     
     
-    void handleUpdateFlight(ActionEvent event) {
+    /*void handleUpdateFlight(ActionEvent event) {
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         
         if (selectedFlight == null) {
@@ -564,6 +569,104 @@ public class AdminView {
             showAlert("Hata", "Beklenmedik hata: " + e.getMessage());
         }
     
+    }*/
+    
+    void handleUpdateFlight(ActionEvent event) {
+        Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
+        
+        if (selectedFlight == null) {
+            showAlert("Uyarı", "Lütfen güncellenecek bir uçuş seçin.");
+            return;
+        }
+
+        // --- 1. BOŞ ALAN KONTROLLERİ ---
+        String fNumInput = txtNum.getText().trim();
+        String planeIdInput = txtPlaneId.getText().trim();
+        String depInput = txtDep.getText().trim();
+        String arrInput = txtArr.getText().trim();
+        String durInput = txtDur.getText().trim();
+        String distInput = txtDist.getText().trim();
+
+        if (fNumInput.isEmpty() || planeIdInput.isEmpty() || depInput.isEmpty() || 
+            arrInput.isEmpty() || durInput.isEmpty() || distInput.isEmpty()) {
+            showAlert("Hata", "Lütfen tüm alanları doldurunuz! Boş alan bırakılamaz.");
+            return;
+        }
+        
+        if (datePicker.getValue() == null) {
+            showAlert("Hata", "Lütfen bir tarih seçiniz.");
+            return;
+        }
+
+        try {
+            // --- 2. UÇUŞ NUMARASI (ID) GÜNCELLEME MANTIĞI ---
+            String oldFlightNum = selectedFlight.getFlightNum();
+            
+            // Eğer kullanıcı uçuş numarasını değiştirdiyse:
+            if (!oldFlightNum.equalsIgnoreCase(fNumInput)) {
+                // Yeni girilen numara başka bir uçuşta kullanılıyor mu kontrol et
+                if (flightManager.getFlightByID(fNumInput) != null) {
+                    showAlert("Hata", "Bu Uçuş No (" + fNumInput + ") zaten kullanımda! Farklı bir numara giriniz.");
+                    return;
+                }
+                // ID Çakışması yoksa nesnenin ID'sini güncelle
+                selectedFlight.setFlightNum(fNumInput);
+            }
+
+            // --- 3. DİĞER BİLGİLERİN GÜNCELLENMESİ ---
+            // Uçak Kontrolü
+            if (!selectedFlight.getPlane().getPlaneID().equals(planeIdInput)) {
+                Plane newPlane = flightManager.getPlaneTemplateByID(planeIdInput);
+                if (newPlane == null) {
+                    // Hata durumunda ID'yi eski haline getir (Transaction rollback gibi)
+                    selectedFlight.setFlightNum(oldFlightNum); 
+                    showAlert("Hata", "Girilen Uçak ID (" + planeIdInput + ") sistemde bulunamadı!");
+                    return;
+                }
+                new SeatManager().seatingArrangements(newPlane);
+                selectedFlight.setPlane(newPlane);
+            }
+
+            // Tarih ve Saat
+            String newTime = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
+            LocalDate newDate = datePicker.getValue();
+            LocalDateTime newDateTime = LocalDateTime.of(newDate, LocalTime.parse(newTime));
+            
+            // Geçmiş tarih kontrolü (Opsiyonel, güncellemede bazen geçmişe izin verilebilir ama genelde engellenir)
+            // if (newDateTime.isBefore(LocalDateTime.now())) { ... }
+
+            selectedFlight.setDate(newDateTime);
+            selectedFlight.setDuration(Integer.parseInt(durInput));
+            
+            // Rota
+            Route newRoute = new Route(depInput, arrInput, Double.parseDouble(distInput));
+            selectedFlight.setRoute(newRoute);
+
+            // --- 4. KAYDETME ---
+            // Flight nesnesi referans tip olduğu için listemizde zaten güncellendi.
+            // Ancak Manager'ın dosyayı kaydetmesi için update metodunu çağırıyoruz.
+            // Not: Manager'daki updateFlight metodu ID üzerinden arama yapar. 
+            // Biz ID'yi yukarıda değiştirdiğimiz için (selectedFlight.setFlightNum), 
+            // Manager kendi listesinde bu YENİ ID'yi bulacaktır (çünkü nesne aynı).
+            boolean success = flightManager.updateFlight(selectedFlight);
+
+            if (success) {
+                showAlert("Başarılı", "Uçuş bilgileri güncellendi.");
+                updateFlightTable();
+                clearFlightFields();
+            } else {
+                // Beklenmedik bir durumda ID'yi geri al
+                selectedFlight.setFlightNum(oldFlightNum);
+                showAlert("Hata", "Güncelleme dosya sistemine yazılamadı.");
+            }
+
+        } catch (java.time.format.DateTimeParseException e) {
+            showAlert("Hata", "Saat formatı hatalı.");
+        } catch (NumberFormatException e) {
+            showAlert("Hata", "Mesafe ve Süre alanlarına sadece sayı giriniz.");
+        } catch (Exception e) {
+            showAlert("Hata", "Beklenmedik hata: " + e.getMessage());
+        }
     }
 
     
