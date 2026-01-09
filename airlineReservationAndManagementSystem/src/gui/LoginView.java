@@ -34,7 +34,7 @@ public class LoginView {
         mainLayout.setAlignment(Pos.CENTER);
         mainLayout.setStyle("-fx-background-color: #f0f2f5;");
 
-        Label lblTitle = new Label("Havayolu Rezervasyon Sistemi");
+        Label lblTitle = new Label("Hazerfen Airlines Rezervasyon Sistemi");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         createLoginBox();
@@ -55,8 +55,8 @@ public class LoginView {
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
         ComboBox<String> cmbRole = new ComboBox<>();
-        cmbRole.getItems().addAll("Yönetici (Admin)", "Yolcu (Passenger)");
-        cmbRole.setValue("Yönetici (Admin)");
+        cmbRole.getItems().addAll("Yönetici", "Yolcu");
+        cmbRole.setValue("Yönetici");
         cmbRole.setPrefWidth(250);
 
         TextField txtUser = new TextField(); 
@@ -117,7 +117,7 @@ public class LoginView {
         
         btnLogin.setOnAction(e -> {
             String role = cmbRole.getValue();
-            if (role.contains("Admin")) {
+            if (role.equals("Yönetici") || role.contains("Admin")) {
                 handleAdminLogin(txtUser.getText(), txtPass.getText());
             } else {
                 handlePassengerLogin(txtUser.getText(), txtPass.getText());

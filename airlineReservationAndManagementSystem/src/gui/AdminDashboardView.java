@@ -52,13 +52,13 @@ public class AdminDashboardView {
         btnStaff.setPrefHeight(50);
         btnStaff.setStyle("-fx-font-size: 16px; -fx-base: #50c878;");
         
-        Button btnSimulation = new Button("Thread Simülasyonu (Concurrency)");
+        Button btnSimulation = new Button("Thread Simülasyonu");
         btnSimulation.setPrefWidth(250);
         btnSimulation.setStyle("-fx-font-size: 14px; -fx-base: #9b59b6; -fx-text-fill: black;");
         btnSimulation.setOnAction(e -> mainApp.showSimulationScreen(adminStaff));
 
         
-        Button btnReport = new Button("Doluluk Raporu Oluştur (Asenkron)");
+        Button btnReport = new Button("Doluluk Raporu Oluştur");
         btnReport.setPrefWidth(250);
         btnReport.setStyle("-fx-font-size: 14px; -fx-base: #f39c12; -fx-text-fill: black;");
         
@@ -67,7 +67,7 @@ public class AdminDashboardView {
 
         btnReport.setOnAction(e -> startAsynchronousReport(lblStatus));
         
-        Button btnLogout = new Button("Çıkış Yap (Logout)");
+        Button btnLogout = new Button("Çıkış Yap");
         btnLogout.setPrefWidth(200);
         btnLogout.setStyle("-fx-base: #e74c3c;");
         

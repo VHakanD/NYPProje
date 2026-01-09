@@ -88,7 +88,7 @@ public class Reservation {
             foundSeat.setReserveStatus(true);
             result = new Reservation(data[0], foundFlight, foundPassenger, foundSeat, foundBookerID);
         } else {
-            System.out.println("Hata: Eksik veri bulundu. Satır: " + line);
+            System.out.println("Hata: Eksik reservasyon verisi bulundu. Satır: " + line);
         }
 
         return result;

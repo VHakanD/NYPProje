@@ -31,7 +31,7 @@ public class MainApp extends Application{
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Havayolu Rezervasyon Sistemi");
+        this.primaryStage.setTitle("Hazerfen Airlines Rezervasyon Sistemi");
         
         initManagers();
         

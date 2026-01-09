@@ -141,7 +141,7 @@ public class SeatChangeView {
                                 selectedSeatNum = seatNum;
                                 
                                 double diff = calculatePriceDifference(seat);
-                                String diffText = (diff > 0) ? String.format(" (+%.2f ₺)", diff) : " (Farksız/İade)";
+                                String diffText = (diff > 0) ? String.format(" (+%.2f ₺)", diff) : " (Fiyat farkı bulunmuyor.)";
                                 
                                 lblSelectionInfo.setText("Yeni Seçilen: " + seatNum + diffText);
                                 lblSelectionInfo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
@@ -379,7 +379,7 @@ public class SeatChangeView {
             new Separator(),
             createLegendItem("#2ecc71", "Ekonomi"),
             createLegendItem("#9b59b6", "Business"),
-            createLegendItem("#e67e22", "Siz (Mevcut)"),
+            createLegendItem("#e67e22", "Siz"),
             createLegendItem("#e74c3c", "Dolu"),
             createLegendItem("#000000", "Sehpa")
         );

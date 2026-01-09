@@ -184,7 +184,7 @@ public class SeatSelectionView {
         btnBox.setAlignment(Pos.CENTER);
         
         Button btnCancel = new Button("İptal");
-        btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;"); // Kırmızı stil
+        btnCancel.setStyle("-fx-base: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
         btnCancel.setOnAction(e -> {
             Stage stage = (Stage) btnCancel.getScene().getWindow();
             stage.close();

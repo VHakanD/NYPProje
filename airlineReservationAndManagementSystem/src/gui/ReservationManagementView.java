@@ -18,6 +18,7 @@ import reservationAndTicketing.Reservation;
 import servicesAndManagers.ReservationManager;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ReservationManagementView {
@@ -158,8 +159,9 @@ public class ReservationManagementView {
         ArrayList<Reservation> listMine = new ArrayList<>();
         ArrayList<Reservation> listOthers = new ArrayList<>();
         
-        String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(java.util.Locale.ENGLISH);
-
+        Locale trLocale = Locale.of("tr", "TR");
+        String lowerSearch = (searchText == null) ? "" : searchText.toLowerCase(trLocale);
+        
         for (Reservation r : allMyBookings) {
             String pnr = (r.getReservationCode() != null) ? r.getReservationCode().toLowerCase() : "";
             String flightNum = (r.getFlight() != null) ? r.getFlight().getFlightNum().toLowerCase() : "";

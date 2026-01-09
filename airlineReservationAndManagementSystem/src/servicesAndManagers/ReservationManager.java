@@ -384,7 +384,7 @@ public class ReservationManager {
         
         if (removed) {
             ioHandler.saveReservations();
-            System.out.println("Geçersiz (uçuşu silinmiş) rezervasyonlar temizlendi.");
+            System.out.println("Uçuşu silinmiş rezervasyonlar temizlendi.");
         }
     }
 

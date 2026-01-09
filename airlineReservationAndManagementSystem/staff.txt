@@ -67,3 +67,4 @@ baroness_v,fashion_killa,Baroness,VonHellman,05306667788,Admin
 jasper_b,thief_one,Jasper,Badun,05304443322,Yer Hizmetleri
 aaron_burr,wait_for_it,Aaron,Burr,05398889900,Pilot
 eliza_sch,burn_letters,Eliza,Schuyler,05396665544,Kabin Memuru
+admin,admin1,base,admin,05554443355,Admin

@@ -78,7 +78,7 @@ public class PaymentView {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: #fdfdfd;");
 
-        String titleText = (existingReservation == null) ? "Ödeme ve Biletleme" : "Koltuk Değişimi ve Ödeme";
+        String titleText = (existingReservation == null) ? "Ödeme ve Bilet Kesimi" : "Koltuk Değişimi ve Ödeme";
         Label lblTitle = new Label(titleText);
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
@@ -193,7 +193,7 @@ public class PaymentView {
                         "Ödenen Fark: " + String.format("%.2f ₺", amountPaid));
                 closeAllWindows();
             } else {
-                showAlert("Hata", "Koltuk değiştirilemedi (Başkası almış olabilir).");
+                showAlert("Hata", "Koltuk değiştirilemedi!\nBaşkası almış olabilir kontrol ediniz.");
             }
         } else {
             boolean resSuccess = reservationManager.makeReservation(

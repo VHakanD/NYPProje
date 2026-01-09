@@ -80,11 +80,11 @@ public class UserSearchView {
         searchBox.setAlignment(Pos.CENTER_LEFT);
 
         txtFrom = new TextField(); 
-        txtFrom.setPromptText("Nereden (Kalkış Şehri)");
+        txtFrom.setPromptText("Kalkış Şehri");
         txtFrom.setPrefWidth(200);
 
         txtTo = new TextField(); 
-        txtTo.setPromptText("Nereye (Varış Şehri)");
+        txtTo.setPromptText("Varış Şehri");
         txtTo.setPrefWidth(200);
         
         
@@ -171,7 +171,7 @@ public class UserSearchView {
         colDist.setCellValueFactory(cell -> 
              new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getRoute().getDistanceKm()));
 
-        TableColumn<Flight, String> colPrice = new TableColumn<>("Tahmini Fiyat (Eco - Bus)");
+        TableColumn<Flight, String> colPrice = new TableColumn<>("Eco - Bus Fiyatları");
         
         colPrice.setCellValueFactory(cell -> {
             Flight f = cell.getValue();
@@ -210,14 +210,15 @@ public class UserSearchView {
     private void filterFlights() {
         if (flightManager.getFlights() == null) return;
 
-        String searchFrom = txtFrom.getText().toLowerCase(Locale.ENGLISH);
-        String searchTo = txtTo.getText().toLowerCase(Locale.ENGLISH);
+        Locale trLocale = Locale.of("tr", "TR");
+        String searchFrom = txtFrom.getText().toLowerCase(trLocale);
+        String searchTo = txtTo.getText().toLowerCase(trLocale);
 
         ObservableList<Flight> filteredList = FXCollections.observableArrayList(
             flightManager.getFlights().stream()
                 .filter(flight -> {
-                    String depCity = flight.getRoute().getDepartureCity().toLowerCase(Locale.ENGLISH);
-                    String arrCity = flight.getRoute().getArrivalCity().toLowerCase(Locale.ENGLISH);
+                	String depCity = flight.getRoute().getDepartureCity().toLowerCase(trLocale);
+                    String arrCity = flight.getRoute().getArrivalCity().toLowerCase(trLocale);
                     
                     boolean matchFrom = searchFrom.isEmpty() || depCity.contains(searchFrom);
                     boolean matchTo = searchTo.isEmpty() || arrCity.contains(searchTo);

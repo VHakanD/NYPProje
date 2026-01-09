@@ -19,6 +19,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.time.*;
+import java.util.Locale;
 import java.util.Optional;
 
 public class AdminView {
@@ -79,7 +80,7 @@ public class AdminView {
         Label lblUser = new Label("Aktif Yönetici: " + fullName);
         lblUser.setStyle("-fx-text-fill: #555; -fx-font-style: italic; -fx-font-weight: bold;");
         
-        Button btnBack = new Button("← Ana Menüye Dön");
+        Button btnBack = new Button("Ana Menüye Dön");
         btnBack.setStyle("-fx-base: #f0f0f0;");
         
         btnBack.setOnAction(e -> mainApp.showAdminDashboard(adminStaff));
@@ -277,7 +278,8 @@ public class AdminView {
             return;
         }
 
-        String lowerQuery = roleQuery.toLowerCase(java.util.Locale.ENGLISH);
+        Locale trLocale = Locale.of("tr", "TR");
+        String lowerQuery = roleQuery.toLowerCase(trLocale);
         ObservableList<Staff> filteredList = FXCollections.observableArrayList();
 
         for (Staff s : staffManager.getAllStaff()) {
@@ -361,7 +363,7 @@ public class AdminView {
         form.setPadding(new Insets(10));
         form.setStyle("-fx-border-color: #ddd; -fx-border-width: 1px; -fx-background-color: #f9f9f9;");
 
-        txtNum = new TextField(); txtNum.setPromptText("Uçuş No (TK101)");
+        txtNum = new TextField(); txtNum.setPromptText("Uçuş No");
         txtDep = new TextField(); txtDep.setPromptText("Kalkış");
         txtArr = new TextField(); txtArr.setPromptText("Varış");
         txtDist = new TextField(); txtDist.setPromptText("KM");
@@ -501,7 +503,7 @@ public class AdminView {
         flightTable.refresh();
     }
     
-    void handleUpdateFlight(ActionEvent event) {
+    private void handleUpdateFlight(ActionEvent event) {
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         
         if (selectedFlight == null) {
@@ -579,7 +581,7 @@ public class AdminView {
     }
 
     
-    void handleFlightRowSelect() {
+    private void handleFlightRowSelect() {
     	Flight selected = flightTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             if(selected.getDate() != null)
@@ -678,7 +680,8 @@ public class AdminView {
             return;
         }
 
-        String lowerSearch = searchText.toLowerCase(java.util.Locale.ENGLISH);
+        Locale trLocale = Locale.of("tr", "TR");
+        String lowerSearch = searchText.toLowerCase(trLocale);
         ObservableList<Flight> filteredList = FXCollections.observableArrayList();
 
         for (Flight f : flightManager.getFlights()) {

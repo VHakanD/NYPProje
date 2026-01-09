@@ -61,7 +61,7 @@ public class SimulationView {
         VBox topBox = new VBox(10);
         topBox.setAlignment(Pos.CENTER);
         
-        Label lblTitle = new Label("Gerçek Backend ile Multithreading Testi");
+        Label lblTitle = new Label("Multithreading Testi");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         
         Label lblInfo = new Label("Bu ekran ReservationManager üzerindeki senkronize/senkronize olmayan metotları test eder.");
@@ -69,7 +69,7 @@ public class SimulationView {
         HBox controls = new HBox(15);
         controls.setAlignment(Pos.CENTER);
         
-        chkSync = new CheckBox("Güvenli Mod (Synchronized)");
+        chkSync = new CheckBox("Synchronized");
         chkSync.setSelected(true);
         
         btnStart = new Button("Başlat");
@@ -188,7 +188,7 @@ public class SimulationView {
         btnReset.setDisable(true);
         boolean isSafeMode = chkSync.isSelected();
         
-        lblResult.setText("Simülasyon Çalışıyor... Mod: " + (isSafeMode ? "GÜVENLİ (Synchronized)" : "GÜVENSİZ (Race Condition)"));
+        lblResult.setText("Simülasyon Çalışıyor... Mod: " + (isSafeMode ? "GÜVENLİ" : "GÜVENSİZ"));
         lblResult.setStyle("-fx-text-fill: blue;");
 
         ExecutorService executor = Executors.newFixedThreadPool(PASSENGER_COUNT);

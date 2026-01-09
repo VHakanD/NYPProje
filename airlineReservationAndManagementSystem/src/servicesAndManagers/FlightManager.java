@@ -37,7 +37,6 @@ public class FlightManager {
                 while ((line = reader.readLine()) != null) {
                     if(!line.trim().isEmpty()) {
                         Flight f = Flight.fromFileFormat(line);
-                        // Outer class'ın listesine erişebiliyoruz
                         f.getPlane().setCapacity(180); 
                         seatInit.seatingArrangements(f.getPlane());
                         flights.add(f);
