@@ -63,6 +63,7 @@ public class LoginView {
         txtUser.setPromptText("Kullanıcı Adı"); 
         txtUser.setPrefWidth(250);
         
+        
         PasswordField txtPass = new PasswordField(); 
         txtPass.setPromptText("Şifre"); 
         txtPass.setPrefWidth(250);
@@ -96,7 +97,6 @@ public class LoginView {
 
         StackPane passStack = new StackPane(txtPass, txtPassShown);
         passStack.setAlignment(Pos.CENTER);
-        passStack.setMaxWidth(250);
 
         CheckBox chkShowPass = new CheckBox("Şifreyi Göster");
         chkShowPass.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");

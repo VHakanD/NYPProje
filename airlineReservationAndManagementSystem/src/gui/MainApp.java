@@ -105,7 +105,7 @@ public class MainApp extends Application{
     
     public void showLoginScreen() {
     	LoginView loginView = new LoginView(this, staffManager);
-        Scene scene = new Scene(loginView.getView(), 400, 450);
+        Scene scene = new Scene(loginView.getView(), 500, 450);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Giriş Yap");
         primaryStage.centerOnScreen();
