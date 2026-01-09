@@ -44,7 +44,7 @@ irving_b,mac_melon,Irving,Bailiff,05384564567,Teknik
 foggy_n,avocados_law,Foggy,Nelson,05371112222,İK
 karen_p,ben_urich,Karen,Page,05373334444,Yer Hizmetleri
 alfred_p,penny_one,Alfred,Pennyworth,05365556666,Kabin Memuru
-jim_gordon,gcpd_cop,Jim,Gordon,05367778888,Operasyon
+jim_gordon,gcpd_det,Jim,Gordon,05367778888,Operasyon
 homelander,milk_lover,John,Gillman,05351239876,Pilot
 hughie_c,billy_joel,Hughie,Campbell,05356543210,Teknik
 charlie_d,cheese_nom,Charlie,Dompler,05431112233,Yer Hizmetleri
