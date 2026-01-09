@@ -34,13 +34,12 @@ public class ReservationManager {
         private final String TICKET_FILE = "tickets.txt";
         private final String PASSENGER_FILE = "passengers.txt";
 
-        // Rezervasyonları Yükle
+        
         public void loadReservations() {
             try (BufferedReader reader = new BufferedReader(new FileReader(RES_FILE))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (!line.trim().isEmpty()) {
-                        // Outer class değişkenlerine (flightManager, passengers) erişim
                         Reservation r = Reservation.fromFileFormat(line, flightManager, passengers);
                         if (r != null) {
                             reservations.add(r);
@@ -52,7 +51,6 @@ public class ReservationManager {
             }   
         }
 
-        // Rezervasyonları Kaydet
         public void saveReservations() {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(RES_FILE))) {
                 for (Reservation r : reservations) {
@@ -64,7 +62,6 @@ public class ReservationManager {
             }
         }
 
-        // Bilet Kaydet
         public void appendTicket(Ticket ticket) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(TICKET_FILE, true))) { 
                 writer.write(ticket.toFileFormat());
@@ -74,7 +71,6 @@ public class ReservationManager {
             }
         }
 
-        // Yolcu Kaydet (Sadece yoksa)
         public void appendPassengerIfNew(Passenger passenger) {
             boolean exists = passengers.stream().anyMatch(p -> p.getPassengerID().equals(passenger.getPassengerID()));
             
@@ -90,7 +86,6 @@ public class ReservationManager {
             }
         }
 
-        // Bilet Dosyasında Koltuk Güncelleme (Karmaşık İşlem)
         public void updateTicketSeatInFile(String resCode, String newSeatNum) {
             File file = new File(TICKET_FILE);
             if (!file.exists()) return;
@@ -102,7 +97,6 @@ public class ReservationManager {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
-                    // ResCode index: 3, SeatNum index: 5
                     if (parts.length >= 6 && parts[3].equals(resCode)) {
                         parts[5] = newSeatNum; 
                         String newLine = String.join(",", parts); 
@@ -129,82 +123,6 @@ public class ReservationManager {
             }
         }
     }
-    
-    /*private void loadReservations() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                   
-                    Reservation r = Reservation.fromFileFormat(line, flightManager, passengers);
-                    
-                    if (r != null) {
-                        reservations.add(r);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Okuma hatası: " + e.getMessage());
-        }   
-        
-    }
-    
-    private void saveReservations() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            
-            for (Reservation r : reservations) {
-                String line = r.toFileFormat();
-                
-                writer.write(line);
-                
-                writer.newLine();
-            }
-            
-        } catch (IOException e) {
-            System.out.println("Dosya yazma hatası oluştu: " + e.getMessage());
-        }
-    }
-    
-    private void saveTicketToFile(Ticket ticket) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("tickets.txt", true))) { 
-            writer.write(ticket.toFileFormat());
-            writer.newLine();
-        } catch (IOException e) {
-            System.out.println("Bilet kaydedilemedi: " + e.getMessage());
-        }
-    }
-    
-    private void savePassengerIfNew(Passenger passenger) {
-        boolean exists = false;
-        int i = 0;
-        
-        while (i < passengers.size() && !exists) {
-            Passenger p = passengers.get(i);
-            if (p.getPassengerID().equals(passenger.getPassengerID())) {
-                exists = true;
-            }
-            i++;
-        }
-        
-        
-        if (!exists) {
-            passengers.add(passenger);
-            
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("passengers.txt", true))) {
-                
-                writer.write(passenger.getPassengerID() + "," + 
-                             passenger.getName() + "," + 
-                             passenger.getSurname() + "," + 
-                             passenger.getContactInfo());
-                writer.newLine();
-                
-                System.out.println("Yeni yolcu sisteme kaydedildi: " + passenger.getName());
-                
-            } catch (IOException e) {
-                System.out.println("Yolcu kaydedilirken hata oluştu: " + e.getMessage());
-            }
-        }
-    }*/
     
     public Reservation findReservationByCode(String reservationCode) {
     	int i = 0;
@@ -252,7 +170,6 @@ public class ReservationManager {
         int totalCapacity = flight.getPlane().getCapacity();
         if (totalCapacity == 0) return 0.0;
 
-        // O uçuşa ait rezervasyonları say
         long occupiedCount = reservations.stream()
                 .filter(r -> r.getFlight().getFlightNum().equals(flight.getFlightNum()))
                 .count();
@@ -315,11 +232,7 @@ public class ReservationManager {
         ioHandler.saveReservations();
         
         System.out.println("Rezervasyon Başarılı! PNR: " + resCode);
-        return true;
-    	
-    	 //saveReservations();
-    	 //return false;
-    	
+        return true; 	
     }
     
     public boolean makeReservationUnsafe(Flight flight, Passenger passenger, String seatNum) {        
@@ -343,9 +256,7 @@ public class ReservationManager {
         return true;
     }
     
-    //Kontrol için eklendi, yeni kodlarda kullanmıyoruz
     public boolean makeReservation(Plane plane, Flight flight, Passenger passenger, String seatNum) {
-        // Eğer booker belirtilmezse, yolcunun kendisi booker sayılır.
         return makeReservation(plane, flight, passenger, seatNum, passenger.getPassengerID());
     }
     
@@ -372,47 +283,6 @@ public class ReservationManager {
         ioHandler.updateTicketSeatInFile(resCode, newSeatNum);
         return true;
     }
-    
-    /*private void updateTicketFileSeat(String resCode, String newSeatNum) {
-        File file = new File("tickets.txt");
-        if (!file.exists()) return;
-
-        List<String> lines = new ArrayList<>();
-        boolean updated = false;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Ticket formatı: Name, Surname, TicketID, ResCode, FlightNum, SeatNum, Price, Baggage
-                String[] parts = line.split(",");
-                
-                // ResCode index: 3, SeatNum index: 5 (Ticket.java toFileFormat sırasına göre)
-                if (parts.length >= 6 && parts[3].equals(resCode)) {
-                    parts[5] = newSeatNum; // Koltuk numarasını güncelle
-                    String newLine = String.join(",", parts); // Satırı tekrar birleştir
-                    lines.add(newLine);
-                    updated = true;
-                } else {
-                    lines.add(line);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Bilet dosyası okunurken hata: " + e.getMessage());
-            return;
-        }
-
-        // Eğer bir değişiklik yapıldıysa dosyayı yeniden yaz
-        if (updated) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (String l : lines) {
-                    writer.write(l);
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.out.println("Bilet dosyası güncellenirken hata: " + e.getMessage());
-            }
-        }
-    }*/
     
     public boolean cancelReservation(String reservationCode) {
     	Reservation targetRes = this.findReservationByCode(reservationCode);

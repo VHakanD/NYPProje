@@ -54,42 +54,18 @@ public class SeatChangeView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
         
-        /*StackPane topContainer = new StackPane();
-        
-        VBox titleBox= new VBox(10);
-        titleBox.setAlignment(Pos.CENTER);
-
-        Label lblHeader = new Label("Koltuk Değişimi: " + flight.getFlightNum());
-        lblHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        
-        Label lblCurrent = new Label("Mevcut Koltuğunuz: " + currentReservation.getSeat().getSeatNum());
-        lblCurrent.setStyle("-fx-font-size: 14px; -fx-text-fill: #e67e22; -fx-font-weight: bold;"); // Turuncu
-        
-        titleBox.getChildren().addAll(lblHeader, lblCurrent);
-        
-        VBox legendBox = createLegendBox();
-        legendBox.setMaxWidth(Region.USE_PREF_SIZE);
-        
-        topContainer.getChildren().addAll(titleBox, legendBox);
-        StackPane.setAlignment(titleBox, Pos.CENTER);      // Başlık Ortada
-        StackPane.setAlignment(legendBox, Pos.CENTER_RIGHT);
-        
-        layout.setTop(topContainer);*/
-        
         Label lblHeader = new Label("Koltuk Değişimi");
         lblHeader.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
         
         StackPane topBox = new StackPane(lblHeader);
         topBox.setPadding(new Insets(0, 0, 15, 0));
         layout.setTop(topBox);
-
-        // --- 2. SOL PANEL (UÇUŞ BİLGİSİ) ---
+        
         VBox leftBox = createLeftInfoPane();
         BorderPane.setAlignment(leftBox, Pos.TOP_CENTER);
         BorderPane.setMargin(leftBox, new Insets(10, 10, 10, 0));
         layout.setLeft(leftBox);
         
-        // --- 3. SAĞ PANEL (LEJANT) ---
         VBox rightBox = createRightLegendPane();
         BorderPane.setAlignment(rightBox, Pos.TOP_CENTER);
         BorderPane.setMargin(rightBox, new Insets(10, 0, 10, 10));
@@ -101,13 +77,12 @@ public class SeatChangeView {
         grid.setVgap(8);
         grid.setAlignment(Pos.TOP_CENTER);
         
-        //ColumnConstraints colNormal = new ColumnConstraints(); 
         ColumnConstraints colAisle = new ColumnConstraints(); 
         colAisle.setMinWidth(40);
         
         grid.getColumnConstraints().addAll(
-            new ColumnConstraints(), new ColumnConstraints(), // 0, 1
-            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(), // 2, 3, 4
+            new ColumnConstraints(), new ColumnConstraints(),
+            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(),
             colAisle
         );
         
@@ -234,12 +209,10 @@ public class SeatChangeView {
         stewardessView.setOpacity(0.85);
         stewardessView.setMouseTransparent(true);
 
-        // 3. StackPane ile üst üste bindir
         StackPane centerStack = new StackPane();
         StackPane.setAlignment(stewardessView, Pos.CENTER);
         centerStack.getChildren().addAll(scroll, stewardessView);
 
-        // 4. Layout'un ortasına ekle
         layout.setCenter(centerStack);
         
         rootOverlay.getChildren().addAll(layout);

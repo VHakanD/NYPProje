@@ -181,7 +181,7 @@ public class AdminView {
         btnUpdateStaff.setStyle("-fx-base: #2372ea; -fx-text-fill: white; -fx-font-weight: bold;");
         
         Button btnClearStaff = new Button("Temizle");
-        btnClearStaff.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); // Gri renk
+        btnClearStaff.setStyle("-fx-base: #95a5a6; -fx-text-fill: white;"); 
         btnClearStaff.setOnAction(e -> clearStaffFields());
 
         btnAddStaff.setOnAction(e -> {
@@ -399,7 +399,7 @@ public class AdminView {
         btnClear.setOnAction(e -> clearFlightFields());
         
         Button btnShowDetails = new Button("📋 Yolcu Listesi ve Doluluk");
-        btnShowDetails.setStyle("-fx-base: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;"); // Mor Renk
+        btnShowDetails.setStyle("-fx-base: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold;");
         btnShowDetails.setOnAction(e -> handleShowFlightDetails());
 
         btnAdd.setOnAction(e -> {
@@ -501,76 +501,6 @@ public class AdminView {
         flightTable.refresh();
     }
     
-    
-    /*void handleUpdateFlight(ActionEvent event) {
-        Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
-        
-        if (selectedFlight == null) {
-            showAlert("Uyarı", "Lütfen güncellenecek bir uçuş seçin.");
-            return;
-        }
-
-        try {
-        	String newTime = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
-        	
-            LocalDate newDate = datePicker.getValue();  
-            String newDurationStr = txtDur.getText();
-            String newPlaneID = txtPlaneId.getText();
-            
-            String dep = txtDep.getText();
-            String arr = txtArr.getText();
-            String distStr = txtDist.getText();
-
-            LocalDateTime newDateTime = LocalDateTime.of(newDate, LocalTime.parse(newTime));
-            int newDuration = Integer.parseInt(newDurationStr);
-            double newDistance = Double.parseDouble(distStr);
-
-            
-            Flight updatedInfo = new Flight();
-            updatedInfo.setFlightNum(selectedFlight.getFlightNum());
-            updatedInfo.setDate(newDateTime);
-            updatedInfo.setDuration(newDuration);
-            
-            Route newRoute = new Route(dep, arr, newDistance);
-            updatedInfo.setRoute(newRoute);
-            
-            String inputPlaneID = newPlaneID.trim();
-            
-            if (selectedFlight.getPlane() == null || !selectedFlight.getPlane().getPlaneID().equals(inputPlaneID)) {
-                Plane newPlane = flightManager.getPlaneTemplateByID(inputPlaneID);
-                
-                if (newPlane == null) {
-                    showAlert("Hata", "Güncellenen Uçak ID sistemde bulunamadı!");
-                    return;
-                }
-                
-                new SeatManager().seatingArrangements(newPlane);
-                updatedInfo.setPlane(newPlane);
-            } else {
-                updatedInfo.setPlane(selectedFlight.getPlane());
-            }
-
-            boolean success = flightManager.updateFlight(updatedInfo);
-
-            if (success) {
-                showAlert("Başarılı", "Uçuş bilgileri güncellendi.");
-                updateFlightTable();
-                clearFlightFields();
-            } else {
-                showAlert("Hata", "Güncelleme yapılamadı.");
-            }
-            clearFlightFields();
-
-        } catch (java.time.format.DateTimeParseException e) {
-            showAlert("Hata", "Saat formatı hatalı (Örn: 10:00 olmalı).");
-        } catch (NumberFormatException e) {
-            showAlert("Hata", "Mesafe ve Süre alanlarına sadece sayı giriniz.");
-        } catch (Exception e) {
-            showAlert("Hata", "Beklenmedik hata: " + e.getMessage());
-        }
-    
-    }*/
-    
     void handleUpdateFlight(ActionEvent event) {
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         
@@ -579,7 +509,6 @@ public class AdminView {
             return;
         }
 
-        // --- 1. BOŞ ALAN KONTROLLERİ ---
         String fNumInput = txtNum.getText().trim();
         String planeIdInput = txtPlaneId.getText().trim();
         String depInput = txtDep.getText().trim();
@@ -599,26 +528,19 @@ public class AdminView {
         }
 
         try {
-            // --- 2. UÇUŞ NUMARASI (ID) GÜNCELLEME MANTIĞI ---
             String oldFlightNum = selectedFlight.getFlightNum();
             
-            // Eğer kullanıcı uçuş numarasını değiştirdiyse:
             if (!oldFlightNum.equalsIgnoreCase(fNumInput)) {
-                // Yeni girilen numara başka bir uçuşta kullanılıyor mu kontrol et
                 if (flightManager.getFlightByID(fNumInput) != null) {
                     showAlert("Hata", "Bu Uçuş No (" + fNumInput + ") zaten kullanımda! Farklı bir numara giriniz.");
                     return;
                 }
-                // ID Çakışması yoksa nesnenin ID'sini güncelle
                 selectedFlight.setFlightNum(fNumInput);
             }
 
-            // --- 3. DİĞER BİLGİLERİN GÜNCELLENMESİ ---
-            // Uçak Kontrolü
             if (!selectedFlight.getPlane().getPlaneID().equals(planeIdInput)) {
                 Plane newPlane = flightManager.getPlaneTemplateByID(planeIdInput);
                 if (newPlane == null) {
-                    // Hata durumunda ID'yi eski haline getir (Transaction rollback gibi)
                     selectedFlight.setFlightNum(oldFlightNum); 
                     showAlert("Hata", "Girilen Uçak ID (" + planeIdInput + ") sistemde bulunamadı!");
                     return;
@@ -626,28 +548,16 @@ public class AdminView {
                 new SeatManager().seatingArrangements(newPlane);
                 selectedFlight.setPlane(newPlane);
             }
-
-            // Tarih ve Saat
             String newTime = String.format("%02d:%02d", spinHour.getValue(), spinMinute.getValue());
             LocalDate newDate = datePicker.getValue();
             LocalDateTime newDateTime = LocalDateTime.of(newDate, LocalTime.parse(newTime));
-            
-            // Geçmiş tarih kontrolü (Opsiyonel, güncellemede bazen geçmişe izin verilebilir ama genelde engellenir)
-            // if (newDateTime.isBefore(LocalDateTime.now())) { ... }
 
             selectedFlight.setDate(newDateTime);
             selectedFlight.setDuration(Integer.parseInt(durInput));
             
-            // Rota
             Route newRoute = new Route(depInput, arrInput, Double.parseDouble(distInput));
             selectedFlight.setRoute(newRoute);
 
-            // --- 4. KAYDETME ---
-            // Flight nesnesi referans tip olduğu için listemizde zaten güncellendi.
-            // Ancak Manager'ın dosyayı kaydetmesi için update metodunu çağırıyoruz.
-            // Not: Manager'daki updateFlight metodu ID üzerinden arama yapar. 
-            // Biz ID'yi yukarıda değiştirdiğimiz için (selectedFlight.setFlightNum), 
-            // Manager kendi listesinde bu YENİ ID'yi bulacaktır (çünkü nesne aynı).
             boolean success = flightManager.updateFlight(selectedFlight);
 
             if (success) {
@@ -655,7 +565,6 @@ public class AdminView {
                 updateFlightTable();
                 clearFlightFields();
             } else {
-                // Beklenmedik bir durumda ID'yi geri al
                 selectedFlight.setFlightNum(oldFlightNum);
                 showAlert("Hata", "Güncelleme dosya sistemine yazılamadı.");
             }
@@ -716,7 +625,7 @@ public class AdminView {
         java.util.List<reservationAndTicketing.Reservation> resList = reservationManager.getReservationsByFlight(selected.getFlightNum());
         
         int capacity = selected.getPlane().getCapacity();
-        int occupiedCount = resList.size(); // Dolu koltuk sayısı listeden alınabilir
+        int occupiedCount = resList.size();
         int emptyCount = capacity - occupiedCount;
         
         double occupancyRate = reservationManager.calculateOccupancyRate(selected);

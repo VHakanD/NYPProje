@@ -122,7 +122,4 @@ public class Plane {
 				+ "\nUçağın Doluluk Durumu: " + this.seatMatrix.size() + "/" + this.capacity;
 		return info;
 	}
-	
-	
-
 }

@@ -63,5 +63,4 @@ public class Staff implements Person{
 	public String getContactInfo() {
 		return contactInfo;
 	}
-
 }

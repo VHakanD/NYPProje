@@ -146,7 +146,7 @@ public class PaymentView {
         
         
         txtCardNum = new TextField(); 
-        txtCardNum.setPromptText("Kart Numarası (16 Hane)"); // PromptText kullanıldı!
+        txtCardNum.setPromptText("Kart Numarası (16 Hane)");
         
         HBox expiryBox = new HBox(10);
         
@@ -219,9 +219,6 @@ public class PaymentView {
     }
 
     private Reservation findMyReservation() {
-        // Yolcunun rezervasyonları arasından bu uçuşa ait olanı bul
-        // En güvenli yöntem PNR kodunu makeReservation'dan döndürmektir ama
-        // mevcut metod boolean dönüyor. Bu yüzden listeyi tarıyoruz.
         ArrayList<Reservation> list = reservationManager.getReservationsByBooker(bookerPassenger.getPassengerID());
         for (Reservation r : list) {
             if (r.getFlight().getFlightNum().equals(flight.getFlightNum()) && 

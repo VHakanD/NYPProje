@@ -86,34 +86,28 @@ public class LoginView {
             }
         });
         
-        // 2. Görünür Şifre Alanı (Başlangıçta gizli)
         TextField txtPassShown = new TextField();
         txtPassShown.setPromptText("Şifre");
         txtPassShown.setPrefWidth(250);
-        txtPassShown.setManaged(false); // Yer kaplamasın
-        txtPassShown.setVisible(false); // Görünmesin
+        txtPassShown.setManaged(false);
+        txtPassShown.setVisible(false);
 
-        // 3. İki alanı birbirine bağla (Senkronizasyon)
         txtPass.textProperty().bindBidirectional(txtPassShown.textProperty());
 
-        // 4. StackPane ile üst üste koy
         StackPane passStack = new StackPane(txtPass, txtPassShown);
         passStack.setAlignment(Pos.CENTER);
-        passStack.setMaxWidth(250); // Hizalama bozulmasın diye genişlik sınırı
+        passStack.setMaxWidth(250);
 
-        // 5. Şifreyi Göster Kutucuğu
         CheckBox chkShowPass = new CheckBox("Şifreyi Göster");
         chkShowPass.setStyle("-fx-font-size: 11px; -fx-text-fill: #555;");
         
         chkShowPass.setOnAction(e -> {
             if (chkShowPass.isSelected()) {
-                // Göster moduna geç
                 txtPassShown.setManaged(true);
                 txtPassShown.setVisible(true);
                 txtPass.setManaged(false);
                 txtPass.setVisible(false);
             } else {
-                // Gizle moduna geç
                 txtPass.setManaged(true);
                 txtPass.setVisible(true);
                 txtPassShown.setManaged(false);
@@ -193,7 +187,6 @@ public class LoginView {
 
         btnRegister.setOnAction(e -> handleRegistration(regName, regSurname, regID, regPhone, regUser, regPass));
 
-        // Layout'a ekleme sırasında stackpane ve checkbox'ı ekliyoruz
         registerBox.getChildren().addAll(lblHeader, regName, regSurname, regID, regPhone, new Separator(), regUser, regPassStack, chkShowRegPass, btnRegister, linkBack);
     }
     

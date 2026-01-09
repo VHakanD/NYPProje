@@ -83,61 +83,6 @@ public class FlightManager {
 		return flights;
 	}
 
-	/*private void loadFlights() {
-		File file = new File(FILE_NAME);
-        if (!file.exists()) {
-            return;
-        }
-        
-        SeatManager seatInit = new SeatManager();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if(!line.trim().isEmpty()) {
-                    Flight f = Flight.fromFileFormat(line);
-                    
-                    f.getPlane().setCapacity(180); 
-                    seatInit.seatingArrangements(f.getPlane());
-                    
-                    flights.add(f);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Dosya okuma hatası: " + e.getMessage());
-        }
-	}*/
-	
-	/*public void loadPlanes() {
-		File file = new File(PLANES_FILE);
-        if (!file.exists()) return;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    Plane p = Plane.fromFileFormat(line);
-                    if (p != null) {
-                        availablePlanes.add(p);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Uçak listesi yüklenemedi: " + e.getMessage());
-        }
-	}*/
-	
-	/*private void saveFlights() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Flight f : flights) {
-                writer.write(f.toFileFormat());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Dosya yazma hatası: " + e.getMessage());
-        }
-    }*/
-	
 	public void addFlight(Flight flight) {
 		if(!(flights.contains(flight))) {
 			flights.add(flight);
@@ -204,33 +149,6 @@ public class FlightManager {
 	    return false;
 	}
 	
-	/*public boolean updateFlight(Flight flight) {
-		
-		if (flight == null || flight.getFlightNum() == null || flights == null) {
-	        return false;
-	    }
-		
-		for(Flight aFlight: flights) {
-			if(aFlight != null && aFlight.getFlightNum().equals(flight.getFlightNum())) {
-				aFlight.setDate(flight.getDate());
-				aFlight.setDuration(flight.getDuration());
-				aFlight.setRoute(flight.getRoute());
-				if (flight.getRoute() != null) {
-                    aFlight.setRoute(flight.getRoute());
-                }
-				if (flight.getPlane() != null) {
-                    aFlight.setPlane(flight.getPlane());
-                }
-				
-				flights.set(i, flight);
-				saveFlights();
-				return true;
-			}
-		}
-		
-		return false;
-	}*/
-	
 	public Flight getFlightByID(String flightNum) {
 		Flight searchedFlight = null;
 		
@@ -269,17 +187,9 @@ public class FlightManager {
 	
 	public void removeExpiredFlights() {
 	    LocalDateTime now = LocalDateTime.now();
-	    //Tarihi geçenleri siler.
 	    flights.removeIf(flight -> flight.getDate().isBefore(now));
 	    
-	    // Dosyayı günceller.
 	    fileHandler.saveFlights(); 
 	    System.out.println("Tarihi geçen uçuşlar temizlendi.");
 	}
-	
-	/*calculateTotalOccupancyRate asenkron raporlama için bu tarz bir metot eklememiz lazım sanırım
-	 tüm uçuşlar için doluluk oranını hesaplayan bir metod*/
-	
-	/*GUI için uçuşları ucuzdan-pahalıya, erken tarihliden ileri tarihliye şeklinde sıralama için
-	 sortFlights diye bir metod ekleyebiliriz */
 }

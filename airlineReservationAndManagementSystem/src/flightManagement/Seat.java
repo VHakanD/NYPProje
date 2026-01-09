@@ -1,7 +1,6 @@
 package flightManagement;
 
 public class Seat {
-	
 	public enum SeatType{ ECONOMY, BUSINESS}
 	private String seatNum;
 	private boolean reserveStatus;

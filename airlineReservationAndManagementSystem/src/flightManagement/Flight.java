@@ -129,8 +129,4 @@ public class Flight {
 				+ this.hour + "\nUçuş Süresi: " + this.duration;
 		return info;
 	}
-	
-	
-	
-
 }

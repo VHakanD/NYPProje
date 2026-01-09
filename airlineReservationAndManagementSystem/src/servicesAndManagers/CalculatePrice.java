@@ -60,7 +60,6 @@ public class CalculatePrice {
 	    
 	    long daysLeft = ChronoUnit.DAYS.between(LocalDateTime.now(), flight.getDate());    
 	    if(daysLeft <= LAST_MINUTE_THRESHOLD_DAYS) {
-	    	//System.out.println("Son dakika bileti! Fiyat artırıldı.");
             finalPrice *= LAST_MINUTE_SURCHARGE;
 	    }
 	    

@@ -62,13 +62,11 @@ public class SeatSelectionView {
         topContainer.setPadding(new Insets(0, 0, 15, 0));
         layout.setTop(topContainer);
 
-        // --- 2. SOL PANEL (UÇUŞ BİLGİLERİ - GÖRSEL BURAYA EKLENDİ) ---
         VBox leftBox = createLeftInfoPane();
         BorderPane.setAlignment(leftBox, Pos.TOP_CENTER);
         BorderPane.setMargin(leftBox, new Insets(10, 10, 10, 0));
         layout.setLeft(leftBox);
-
-        // --- 3. SAĞ PANEL (RENK LEJANTI) ---
+        
         VBox rightBox = createRightLegendPane();
         BorderPane.setAlignment(rightBox, Pos.TOP_CENTER);
         BorderPane.setMargin(rightBox, new Insets(10, 0, 10, 10));
@@ -316,12 +314,11 @@ public class SeatSelectionView {
                     "Lütfen tekrar deneyiniz.");
         }
     }
-    
-    // --- GÜNCELLENEN KISIM BURASI (GÖRSEL EKLENDİ) ---
+
     private VBox createLeftInfoPane() {
-        VBox box = new VBox(8); // Satırlar arası boşluk
+        VBox box = new VBox(8);
         box.setPadding(new Insets(15));
-        box.setPrefWidth(220); // Genişliği artırdık (Resim sığsın diye)
+        box.setPrefWidth(220);
         box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
 
         Label lblHeader = new Label("Uçuş Detayları");
@@ -329,25 +326,20 @@ public class SeatSelectionView {
         lblHeader.setStyle("-fx-text-fill: #2980b9;");
         lblHeader.setUnderline(true);
 
-        // --- HAZERFEN GÖRSELİ EKLEME BAŞLANGIÇ ---
         String imageUrl = "https://i.postimg.cc/VNfGzgc3/HAZERFEN_AIRLINES_(1).png";
-        Image logoImage = new Image(imageUrl, true); // true = Arka planda yükle
+        Image logoImage = new Image(imageUrl, true);
         ImageView imageView = new ImageView(logoImage);
-        imageView.setFitWidth(180); // Sol panele sığacak genişlik
-        imageView.setPreserveRatio(true); // En/Boy oranını koru
-        // --- HAZERFEN GÖRSELİ EKLEME BİTİŞ ---
+        imageView.setFitWidth(180);
+        imageView.setPreserveRatio(true);
 
         Label lblNum = new Label("Sefer No: " + flight.getFlightNum());
         lblNum.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         
-        // Şehirler
         Label lblDep = new Label("Kalkış: " + flight.getRoute().getDepartureCity());
         Label lblArr = new Label("Varış: " + flight.getRoute().getArrivalCity());
         
-        // Tarih
         Label lblDate = new Label("Tarih: " + flight.getFormattedDate());
         
-        // Saat Hesaplaması (Varış Saati)
         String depTime = flight.getHour();
         java.time.LocalDateTime arrDate = flight.getDate().plusMinutes(flight.getDuration());
         String arrTime = arrDate.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
@@ -355,15 +347,14 @@ public class SeatSelectionView {
         Label lblTimeDep = new Label("Kalkış Saati: " + depTime);
         Label lblTimeArr = new Label("Varış Saati: " + arrTime);
         
-        // Stil Ayarları (Okunabilirlik için)
         lblDep.setStyle("-fx-text-fill: #555;");
         lblArr.setStyle("-fx-text-fill: #555;");
-        lblTimeDep.setStyle("-fx-font-weight: bold; -fx-text-fill: #27ae60;"); // Yeşil
-        lblTimeArr.setStyle("-fx-font-weight: bold; -fx-text-fill: #e74c3c;"); // Kırmızı
+        lblTimeDep.setStyle("-fx-font-weight: bold; -fx-text-fill: #27ae60;");
+        lblTimeArr.setStyle("-fx-font-weight: bold; -fx-text-fill: #e74c3c;");
 
         box.getChildren().addAll(
             lblHeader, 
-            imageView, // Görseli başlığın altına ekledik
+            imageView,
             lblNum, 
             new Separator(), 
             lblDep, 
