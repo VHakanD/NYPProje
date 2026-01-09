@@ -43,6 +43,8 @@ public class MainApp extends Application{
     private void initManagers() {
     	flightManager = new FlightManager();
     	staffManager = new StaffManager();
+    	staffManager.createBaseAdmins();
+    	
         passengerList = new ArrayList<>(); 
         fileHandler.loadPassengers();;
         

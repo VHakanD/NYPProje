@@ -87,5 +87,34 @@ public class StaffManager {
         }
         return foundStaff;
     }
+    
+    public void createBaseAdmins() {
+        Staff baseAdmin1 = new Staff("VHakanD", "1234", "Hakan Vehbi", "Demir", "05339874522", "Admin");
+        
+        Staff baseAdmin2 = new Staff("zeyneppkts", "5678", "Zeynep", "Pektas", "05532897633", "Admin");
+        
+        Staff baseAdmin3 = new Staff("admin", "admin1", "base", "admin", "05554443355", "Admin");
+
+        addStaffIfNotExist(baseAdmin1);
+        addStaffIfNotExist(baseAdmin2);
+        addStaffIfNotExist(baseAdmin3);
+    }
+
+    private void addStaffIfNotExist(Staff newStaff) {
+        boolean exists = false;
+        
+        for (Staff s : staffList) {
+            if (s.getUsername().equals(newStaff.getUsername())) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists) {
+            staffList.add(newStaff);
+            fileHandler.saveStaff(); 
+            System.out.println("Base Yönetici oluşturuldu: " + newStaff.getUsername());
+        }
+    }
 
 }
