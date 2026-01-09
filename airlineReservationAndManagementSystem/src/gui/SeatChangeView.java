@@ -54,8 +54,10 @@ public class SeatChangeView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
         
-        VBox topBox = new VBox(10);
-        topBox.setAlignment(Pos.CENTER);
+        /*StackPane topContainer = new StackPane();
+        
+        VBox titleBox= new VBox(10);
+        titleBox.setAlignment(Pos.CENTER);
 
         Label lblHeader = new Label("Koltuk Değişimi: " + flight.getFlightNum());
         lblHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
@@ -63,8 +65,35 @@ public class SeatChangeView {
         Label lblCurrent = new Label("Mevcut Koltuğunuz: " + currentReservation.getSeat().getSeatNum());
         lblCurrent.setStyle("-fx-font-size: 14px; -fx-text-fill: #e67e22; -fx-font-weight: bold;"); // Turuncu
         
-        topBox.getChildren().addAll(lblHeader, lblCurrent);
+        titleBox.getChildren().addAll(lblHeader, lblCurrent);
+        
+        VBox legendBox = createLegendBox();
+        legendBox.setMaxWidth(Region.USE_PREF_SIZE);
+        
+        topContainer.getChildren().addAll(titleBox, legendBox);
+        StackPane.setAlignment(titleBox, Pos.CENTER);      // Başlık Ortada
+        StackPane.setAlignment(legendBox, Pos.CENTER_RIGHT);
+        
+        layout.setTop(topContainer);*/
+        
+        Label lblHeader = new Label("Koltuk Değişimi");
+        lblHeader.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        
+        StackPane topBox = new StackPane(lblHeader);
+        topBox.setPadding(new Insets(0, 0, 15, 0));
         layout.setTop(topBox);
+
+        // --- 2. SOL PANEL (UÇUŞ BİLGİSİ) ---
+        VBox leftBox = createLeftInfoPane();
+        BorderPane.setAlignment(leftBox, Pos.TOP_CENTER);
+        BorderPane.setMargin(leftBox, new Insets(10, 10, 10, 0));
+        layout.setLeft(leftBox);
+        
+        // --- 3. SAĞ PANEL (LEJANT) ---
+        VBox rightBox = createRightLegendPane();
+        BorderPane.setAlignment(rightBox, Pos.TOP_CENTER);
+        BorderPane.setMargin(rightBox, new Insets(10, 0, 10, 10));
+        layout.setRight(rightBox);
 
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
@@ -90,11 +119,13 @@ public class SeatChangeView {
         
         ToggleGroup seatGroup = new ToggleGroup();
         
+        Label lblAisleHeader = new Label("KORİDOR");
+        lblAisleHeader.setStyle("-fx-font-size: 10px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;");
+        GridPane.setHalignment(lblAisleHeader, javafx.geometry.HPos.CENTER);
+        GridPane.setMargin(lblAisleHeader, new Insets(0, 0, 10, 0));
+        grid.add(lblAisleHeader, 5, 0);
+       
         for (int row = 1; row <= totalRows; row++) {
-            Label lblRow = new Label(String.valueOf(row));
-            lblRow.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
-            grid.add(lblRow, 0, row - 1);
-
             for (int c = 0; c < cols.length; c++) {
                 char colChar = cols[c];
                 String seatNum = row + String.valueOf(colChar);
@@ -201,9 +232,17 @@ public class SeatChangeView {
         Image stewardessImage = new Image("https://cdn-icons-png.flaticon.com/512/2534/2534690.png", 60, 150, true, true);
         ImageView stewardessView = new ImageView(stewardessImage);
         stewardessView.setOpacity(0.85);
+        stewardessView.setMouseTransparent(true);
+
+        // 3. StackPane ile üst üste bindir
+        StackPane centerStack = new StackPane();
         StackPane.setAlignment(stewardessView, Pos.CENTER);
+        centerStack.getChildren().addAll(scroll, stewardessView);
+
+        // 4. Layout'un ortasına ekle
+        layout.setCenter(centerStack);
         
-        rootOverlay.getChildren().addAll(layout, stewardessView);
+        rootOverlay.getChildren().addAll(layout);
 
         return rootOverlay;
     }
@@ -289,6 +328,93 @@ public class SeatChangeView {
         double newPrice = calculator.calculateTicketPrice(tempNewRes);
         
         return newPrice - oldPrice;
+    }
+    
+    private VBox createLeftInfoPane() {
+    	VBox box = new VBox(8); // Satırlar arası boşluk
+        box.setPadding(new Insets(15));
+        box.setPrefWidth(200); // Genişliği biraz artırdık
+        box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+
+        Label lblHeader = new Label("Uçuş Detayları");
+        lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        lblHeader.setStyle("-fx-text-fill: #2980b9;");
+        lblHeader.setUnderline(true);
+
+        Label lblNum = new Label("Sefer No: " + flight.getFlightNum());
+        lblNum.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        
+        // Şehirler
+        Label lblDep = new Label("Kalkış: " + flight.getRoute().getDepartureCity());
+        Label lblArr = new Label("Varış: " + flight.getRoute().getArrivalCity());
+        
+        // Tarih
+        Label lblDate = new Label("Tarih: " + flight.getFormattedDate());
+        
+        // Saat Hesaplaması (Varış Saati)
+        String depTime = flight.getHour();
+        java.time.LocalDateTime arrDate = flight.getDate().plusMinutes(flight.getDuration());
+        String arrTime = arrDate.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+        
+        Label lblTimeDep = new Label("Kalkış Saati: " + depTime);
+        Label lblTimeArr = new Label("Varış Saati: " + arrTime);
+        
+        // Stil Ayarları (Okunabilirlik için)
+        lblDep.setStyle("-fx-text-fill: #555;");
+        lblArr.setStyle("-fx-text-fill: #555;");
+        lblTimeDep.setStyle("-fx-font-weight: bold; -fx-text-fill: #27ae60;"); // Yeşil
+        lblTimeArr.setStyle("-fx-font-weight: bold; -fx-text-fill: #e74c3c;"); // Kırmızı
+
+        box.getChildren().addAll(
+            lblHeader, 
+            lblNum, 
+            new Separator(), 
+            lblDep, 
+            lblArr, 
+            new Separator(),
+            lblDate, 
+            lblTimeDep, 
+            lblTimeArr
+        );
+        return box;
+    }
+
+    private VBox createRightLegendPane() {
+        VBox box = new VBox(8);
+        box.setPadding(new Insets(15));
+        box.setPrefWidth(160);
+        box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+
+        Label lblHeader = new Label("Renk Kodları");
+        lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        lblHeader.setStyle("-fx-text-fill: #2980b9;");
+        lblHeader.setUnderline(true);
+
+        box.getChildren().addAll(
+            lblHeader,
+            new Separator(),
+            createLegendItem("#2ecc71", "Ekonomi"),
+            createLegendItem("#9b59b6", "Business"),
+            createLegendItem("#e67e22", "Siz (Mevcut)"), // Burası farklı
+            createLegendItem("#e74c3c", "Dolu"),
+            createLegendItem("#000000", "Sehpa")
+        );
+        return box;
+    }
+    
+    private HBox createLegendItem(String colorHex, String text) {
+        Rectangle rect = new Rectangle(12, 12, Color.web(colorHex));
+        rect.setArcWidth(3);
+        rect.setArcHeight(3);
+        rect.setStroke(Color.GRAY);
+        
+        Label lbl = new Label(text);
+        lbl.setFont(Font.font("Arial", 10));
+        lbl.setTextFill(Color.web("#333"));
+        
+        HBox item = new HBox(6, rect, lbl);
+        item.setAlignment(Pos.CENTER_LEFT);
+        return item;
     }
     
     private void closeWindow() {

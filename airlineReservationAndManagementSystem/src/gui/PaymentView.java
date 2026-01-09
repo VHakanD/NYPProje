@@ -208,7 +208,8 @@ public class PaymentView {
                     
                     showAlert("Ödeme Başarılı", 
                             "İşleminiz tamamlandı.\nPNR: " + targetRes.getReservationCode() + 
-                            "\nToplam Tutar: " + String.format("%.2f ₺", amountPaid));
+                            "\nToplam Tutar: " + String.format("%.2f ₺", amountPaid) +
+                            "BİZİ TERCİH ETTİĞİNİZ İÇİN TEŞEKKÜR EDERİZ");
                     closeAllWindows();
                 }
             } else {
