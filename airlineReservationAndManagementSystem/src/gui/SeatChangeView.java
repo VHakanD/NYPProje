@@ -331,9 +331,9 @@ public class SeatChangeView {
     }
     
     private VBox createLeftInfoPane() {
-    	VBox box = new VBox(8); // Satırlar arası boşluk
+        VBox box = new VBox(8);
         box.setPadding(new Insets(15));
-        box.setPrefWidth(200); // Genişliği biraz artırdık
+        box.setPrefWidth(220);
         box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
 
         Label lblHeader = new Label("Uçuş Detayları");
@@ -341,17 +341,20 @@ public class SeatChangeView {
         lblHeader.setStyle("-fx-text-fill: #2980b9;");
         lblHeader.setUnderline(true);
 
+        String imageUrl = "https://i.postimg.cc/VNfGzgc3/HAZERFEN_AIRLINES_(1).png";
+        Image logoImage = new Image(imageUrl, true);
+        ImageView imageView = new ImageView(logoImage);
+        imageView.setFitWidth(180);
+        imageView.setPreserveRatio(true);
+
         Label lblNum = new Label("Sefer No: " + flight.getFlightNum());
         lblNum.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         
-        // Şehirler
         Label lblDep = new Label("Kalkış: " + flight.getRoute().getDepartureCity());
         Label lblArr = new Label("Varış: " + flight.getRoute().getArrivalCity());
         
-        // Tarih
         Label lblDate = new Label("Tarih: " + flight.getFormattedDate());
         
-        // Saat Hesaplaması (Varış Saati)
         String depTime = flight.getHour();
         java.time.LocalDateTime arrDate = flight.getDate().plusMinutes(flight.getDuration());
         String arrTime = arrDate.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
@@ -359,14 +362,14 @@ public class SeatChangeView {
         Label lblTimeDep = new Label("Kalkış Saati: " + depTime);
         Label lblTimeArr = new Label("Varış Saati: " + arrTime);
         
-        // Stil Ayarları (Okunabilirlik için)
         lblDep.setStyle("-fx-text-fill: #555;");
         lblArr.setStyle("-fx-text-fill: #555;");
-        lblTimeDep.setStyle("-fx-font-weight: bold; -fx-text-fill: #27ae60;"); // Yeşil
-        lblTimeArr.setStyle("-fx-font-weight: bold; -fx-text-fill: #e74c3c;"); // Kırmızı
+        lblTimeDep.setStyle("-fx-font-weight: bold; -fx-text-fill: #27ae60;");
+        lblTimeArr.setStyle("-fx-font-weight: bold; -fx-text-fill: #e74c3c;");
 
         box.getChildren().addAll(
             lblHeader, 
+            imageView,
             lblNum, 
             new Separator(), 
             lblDep, 
@@ -384,18 +387,26 @@ public class SeatChangeView {
         box.setPadding(new Insets(15));
         box.setPrefWidth(160);
         box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        box.setAlignment(Pos.TOP_CENTER);
 
-        Label lblHeader = new Label("Renk Kodları");
+        String imageUrl = "https://cdn-icons-png.flaticon.com/512/3127/3127363.png";
+        Image ticketImage = new Image(imageUrl, true);
+        ImageView imageView = new ImageView(ticketImage);
+        imageView.setFitWidth(100);
+        imageView.setPreserveRatio(true);
+
+        Label lblHeader = new Label("Koltuk Durumu");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         lblHeader.setStyle("-fx-text-fill: #2980b9;");
         lblHeader.setUnderline(true);
 
         box.getChildren().addAll(
+            imageView,
             lblHeader,
             new Separator(),
             createLegendItem("#2ecc71", "Ekonomi"),
             createLegendItem("#9b59b6", "Business"),
-            createLegendItem("#e67e22", "Siz (Mevcut)"), // Burası farklı
+            createLegendItem("#e67e22", "Siz (Mevcut)"),
             createLegendItem("#e74c3c", "Dolu"),
             createLegendItem("#000000", "Sehpa")
         );
