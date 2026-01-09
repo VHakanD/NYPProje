@@ -115,7 +115,7 @@ public class SeatChangeView {
                         btnSeat.setDisable(true); 
                     } 
                     else if (isMySeat) {
-                        btnSeat.setText("BEN");
+                        btnSeat.setText("SİZ");
                         btnSeat.setStyle("-fx-base: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;");
                         btnSeat.setDisable(true); 
                     }
