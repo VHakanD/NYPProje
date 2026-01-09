@@ -41,15 +41,15 @@ public class Passenger implements Person{
     }
 	
     public String getName() {
-		return null;
+		return name;
 	}
 
 	public String getSurname() {
-		return null;
+		return surname;
 	}
 
 	public String getContactInfo() {
-		return null;
+		return contactInfo;
 	}
 	
     public String toFileFormat() {
