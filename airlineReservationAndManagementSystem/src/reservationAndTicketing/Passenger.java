@@ -2,24 +2,30 @@ package reservationAndTicketing;
 
 import flightManagement.Person;
 
-public class Passenger extends Person{
-	//passengerID, name, surname, contactInfo
+public class Passenger implements Person{
 	private String passengerID;
 	private String username;
     private String password;
-	
+    private String name;
+    private String surname;
+    private String contactInfo;
+    
     public Passenger(String passengerID, String name, String surname, String contactInfo, String username, String password) {
-        super(name, surname, contactInfo);
         this.passengerID = passengerID;
         this.username = username;
         this.password = password;
+        this.name = name;
+        this.surname = surname;
+        this.contactInfo = contactInfo;
     }
     
     public Passenger(String passengerID, String name, String surname, String contactInfo) {
-        super(name, surname, contactInfo);
         this.passengerID = passengerID;
         this.username = "";
         this.password = "";
+        this.name = name;
+        this.surname = surname;
+        this.contactInfo = contactInfo;
     }
 
 	public String getPassengerID() {
@@ -33,6 +39,18 @@ public class Passenger extends Person{
     public String getPassword() {
         return password;
     }
+	
+    public String getName() {
+		return null;
+	}
+
+	public String getSurname() {
+		return null;
+	}
+
+	public String getContactInfo() {
+		return null;
+	}
 	
     public String toFileFormat() {
         return passengerID + "," + getName() + "," + getSurname() + "," + getContactInfo() + "," + username + "," + password;
@@ -50,7 +68,7 @@ public class Passenger extends Person{
     }
 	
 	public boolean isValidNumber() {
-		if(super.getContactInfo().length() == 11 && super.getContactInfo().contains("05")) {
+		if(contactInfo.length() == 11 && contactInfo.contains("05")) {
 			return true;
 		}
 		return false;
@@ -60,4 +78,5 @@ public class Passenger extends Person{
 		String info = "YolcuID: " + this.passengerID + super.toString();
 		return info;
 	}
+
 }

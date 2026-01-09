@@ -1,15 +1,20 @@
 package flightManagement;
 
-public class Staff extends Person{
+public class Staff implements Person{
 	private String role;
 	private String username;
     private String password;
-
+    private String name;
+    private String surname;
+    private String contactInfo;
+    
     public Staff(String username, String password, String name, String surname, String contactInfo, String role) {
-        super(name, surname, contactInfo);
         this.username = username;
         this.password = password;
         this.role = role;
+        this.name = name;
+        this.surname = surname;
+        this.contactInfo = contactInfo;
     }
 	
     public String toFileFormat() {
@@ -43,5 +48,20 @@ public class Staff extends Person{
     public String toString() {
         return super.toString() + " [Rol: " + role + "]";
     }
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String getSurname() {
+		return surname;
+	}
+
+	@Override
+	public String getContactInfo() {
+		return contactInfo;
+	}
 
 }
