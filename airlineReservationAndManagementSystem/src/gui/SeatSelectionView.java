@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SeatSelectionView {
-	
-	private MainApp mainApp;
+    
+    private MainApp mainApp;
     private Flight flight;
     private ReservationManager reservationManager;
     private String selectedSeatNum = null; 
@@ -54,35 +54,16 @@ public class SeatSelectionView {
         BorderPane layout = new BorderPane();
         layout.setPadding(new Insets(20));
         
-        /*StackPane topContainer = new StackPane();
-
-        VBox titleBox = new VBox(5);
-        titleBox.setAlignment(Pos.CENTER);
-        Label lblTitle = new Label("Koltuk Seçimi: " + flight.getFlightNum());
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        Label lblRoute = new Label(flight.getRoute().toString() + " | " + flight.getFormattedDate());
-        titleBox.getChildren().addAll(lblTitle, lblRoute);
-        
-        VBox legendBox = createLegendBox();
-        legendBox.setMaxWidth(Region.USE_PREF_SIZE);
-        
-        topContainer.getChildren().addAll(titleBox, legendBox);
-        StackPane.setAlignment(titleBox, Pos.CENTER);
-        StackPane.setAlignment(legendBox, Pos.CENTER_RIGHT);
-        
-        layout.setTop(topContainer);*/
-        
         Label lblTitle = new Label("Koltuk Seçimi");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
         lblTitle.setStyle("-fx-text-fill: #2c3e50;");
         
         StackPane topContainer = new StackPane(lblTitle);
-        topContainer.setPadding(new Insets(0, 0, 15, 0)); // Altına biraz boşluk
+        topContainer.setPadding(new Insets(0, 0, 15, 0));
         layout.setTop(topContainer);
 
-        // --- 2. SOL PANEL (UÇUŞ BİLGİLERİ) ---
+        // --- 2. SOL PANEL (UÇUŞ BİLGİLERİ - GÖRSEL BURAYA EKLENDİ) ---
         VBox leftBox = createLeftInfoPane();
-        // Hizalama ayarları: Kutunun en tepede durmaması için ortalayabiliriz
         BorderPane.setAlignment(leftBox, Pos.TOP_CENTER);
         BorderPane.setMargin(leftBox, new Insets(10, 10, 10, 0));
         layout.setLeft(leftBox);
@@ -95,17 +76,16 @@ public class SeatSelectionView {
 
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(20));
-        gridPane.setHgap(8); // Koltuklar arası boşluk
+        gridPane.setHgap(8);
         gridPane.setVgap(8);
         gridPane.setAlignment(Pos.TOP_CENTER);
         
-        //ColumnConstraints colNormal = new ColumnConstraints();
         ColumnConstraints colAisle = new ColumnConstraints(); 
         colAisle.setMinWidth(50);
         
         gridPane.getColumnConstraints().addAll(
-            new ColumnConstraints(), new ColumnConstraints(), // 0, 1
-            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(), // 2, 3, 4
+            new ColumnConstraints(), new ColumnConstraints(),
+            new ColumnConstraints(), new ColumnConstraints(), new ColumnConstraints(),
             colAisle
         );
         
@@ -315,7 +295,7 @@ public class SeatSelectionView {
         Optional<Map<String, Object>> result = dialog.showAndWait();
 
         if (result.isPresent()) {
-        	Map<String, Object> data = result.get();
+            Map<String, Object> data = result.get();
             Passenger flyerPassenger = (Passenger) data.get("passenger");
             int baggageKg = (int) data.get("baggage");
             
@@ -331,22 +311,31 @@ public class SeatSelectionView {
             paymentStage.show();
             
         } else {
-        	showAlert(Alert.AlertType.INFORMATION, "İşlem İptal Edildi", 
+            showAlert(Alert.AlertType.INFORMATION, "İşlem İptal Edildi", 
                     "Yolcu bilgileri eksik girildiği veya işlem iptal edildiği için ödeme adımına geçilemedi.\n\n" +
                     "Lütfen tekrar deneyiniz.");
         }
     }
     
+    // --- GÜNCELLENEN KISIM BURASI (GÖRSEL EKLENDİ) ---
     private VBox createLeftInfoPane() {
-    	VBox box = new VBox(8); // Satırlar arası boşluk
+        VBox box = new VBox(8); // Satırlar arası boşluk
         box.setPadding(new Insets(15));
-        box.setPrefWidth(200); // Genişliği biraz artırdık
+        box.setPrefWidth(220); // Genişliği artırdık (Resim sığsın diye)
         box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
 
         Label lblHeader = new Label("Uçuş Detayları");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         lblHeader.setStyle("-fx-text-fill: #2980b9;");
         lblHeader.setUnderline(true);
+
+        // --- HAZERFEN GÖRSELİ EKLEME BAŞLANGIÇ ---
+        String imageUrl = "https://i.postimg.cc/VNfGzgc3/HAZERFEN_AIRLINES_(1).png";
+        Image logoImage = new Image(imageUrl, true); // true = Arka planda yükle
+        ImageView imageView = new ImageView(logoImage);
+        imageView.setFitWidth(180); // Sol panele sığacak genişlik
+        imageView.setPreserveRatio(true); // En/Boy oranını koru
+        // --- HAZERFEN GÖRSELİ EKLEME BİTİŞ ---
 
         Label lblNum = new Label("Sefer No: " + flight.getFlightNum());
         lblNum.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -374,6 +363,7 @@ public class SeatSelectionView {
 
         box.getChildren().addAll(
             lblHeader, 
+            imageView, // Görseli başlığın altına ekledik
             lblNum, 
             new Separator(), 
             lblDep, 
@@ -391,6 +381,13 @@ public class SeatSelectionView {
         box.setPadding(new Insets(15));
         box.setPrefWidth(160);
         box.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        box.setAlignment(Pos.TOP_CENTER);
+
+        String imageUrl = "https://cdn-icons-png.flaticon.com/512/3127/3127363.png";
+        Image ticketImage = new Image(imageUrl, true);
+        ImageView imageView = new ImageView(ticketImage);
+        imageView.setFitWidth(100);
+        imageView.setPreserveRatio(true);
 
         Label lblHeader = new Label("Koltuk Durumu");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -398,6 +395,7 @@ public class SeatSelectionView {
         lblHeader.setUnderline(true);
 
         box.getChildren().addAll(
+            imageView,
             lblHeader,
             new Separator(),
             createLegendItem("#2ecc71", "Ekonomi"),
