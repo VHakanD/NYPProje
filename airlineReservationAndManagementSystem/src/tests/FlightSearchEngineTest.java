@@ -24,11 +24,11 @@ public class FlightSearchEngineTest {
     void testRemoveExpiredFlights() {
         Route route = new Route("Ankara", "Izmir", 600);
         
-        // 1. Geçmiş Uçuş
+        // Geçmiş Uçuş
         Flight pastFlight = new Flight("OLD01", route, LocalDateTime.now().minusDays(1), 60);
         pastFlight.setPlane(new Plane("P1", "Test", 100)); // Hata vermemesi için uçak ekle
         
-        // 2. Gelecek Uçuş
+        // Gelecek Uçuş
         Flight futureFlight = new Flight("NEW01", route, LocalDateTime.now().plusDays(1), 60);
         futureFlight.setPlane(new Plane("P2", "Test", 100));
         

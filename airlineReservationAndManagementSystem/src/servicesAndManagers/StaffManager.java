@@ -112,7 +112,7 @@ public class StaffManager {
 
         if (!exists) {
             staffList.add(newStaff);
-            fileHandler.saveStaff(); 
+            fileHandler.saveStaff();
             System.out.println("Base Yönetici oluşturuldu: " + newStaff.getUsername());
         }
     }

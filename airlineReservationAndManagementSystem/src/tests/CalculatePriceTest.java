@@ -35,22 +35,22 @@ public class CalculatePriceTest {
 	@Test
 	public void setUpTest()
     {
-		// 1. Economy Rezervasyonu (Manuel Oluşturma)
+		// Economy Rezervasyonu
         Seat ecoSeat = new Seat("1A", Seat.SeatType.ECONOMY);
         Reservation resEco = new Reservation("R1", flight, passenger, ecoSeat);
         
-        // 2. Business Rezervasyonu (Manuel Oluşturma)
+        // Business Rezervasyonu
         Seat busSeat = new Seat("1B", Seat.SeatType.BUSINESS);
         Reservation resBusiness = new Reservation("R2", flight, passenger, busSeat);
         
-        // 3. Fiyatları Hesapla
+        // Fiyatları Hesapla
         double ecoPrice = calculator.calculateTicketPrice(resEco);
         double busPrice = calculator.calculateTicketPrice(resBusiness);
         
         System.out.println("Economy Fiyat: " + ecoPrice);
         System.out.println("Business Fiyat: " + busPrice);
 
-        // 4. Doğrulama: Business fiyatı Economy'den büyük olmalı
+        // Doğrulama: Business fiyatı Economy'den büyük olmalı
         assertTrue(busPrice > ecoPrice, "Hata: Business bilet, Economy'den daha pahalı olmalıdır!");
     }
 	
