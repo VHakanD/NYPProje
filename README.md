@@ -25,29 +25,29 @@ In this project, every operation is seperated to it's category:
 ### 1-Admin and Passenger Panels
 * **Admin Panel:**
   * **Dashboard:** A central hub for managing Flights, Staff, and System Reports.
-  * **Flight Management:** Add, update, delete flights with automatic validation (e.g., preventing past dates).
+  * **Flight Management:** Add, update, delete flights with automatic validation ( e.g., preventing past dates ).
   * **Staff Management:** Manage airline personnel with role-based access control.
   * **Reports:** Generate asynchronous occupancy reports without freezing the UI.
 
 * **Passenger Panel:**
   * **Flight Search:** Real-time filtering by city, date, or flight number.
   * **Visual Seat Selection:** Simple but standart seat map distinguishing Economy, Business, and Occupied seats.
-  * **Reservation Management:** Add reservation(*Under the passenger's name, for themselves and others*), view active tickets, cancel reservations (valid until 24h before flight), and **change seats** (*paying the price difference if upgrading, but if you downgrade there is no refund by choice* :] ).
+  * **Reservation Management:** Add reservation( *Under the passenger's name, for themselves and others* ), view active tickets, cancel reservations (valid until 24h before flight), and **change seats** ( *paying the price difference if upgrading, but if you downgrade there is no refund by choice* :] ).
 
 ### 2. Pricing Engine
 Ticket prices are calculated dynamically based on:
   * **Base Distance:** Kilometers between cities.
   * **Seat Class:** Business class is 1.5x the price of Economy.
-  * **Dynamic Factors:** "Last Minute" flights (<3 days left) incur a 1.5x surcharge.
+  * **Dynamic Factors:** "Last Minute" flights ( <3 days left ) incur a 1.5x surcharge.
 
 ### 3. Concurrency & Multithreading Simulation
 A dedicated simulation screen demonstrates thread safety:
-  * **Unsafe Mode:** Simulates 90 threads trying to book seats without synchronization, visualizing race conditions (double bookings).
+  * **Unsafe Mode:** Simulates 90 threads trying to book seats without synchronization, visualizing race conditions ( double bookings ).
   * **Safe Mode:** Uses `synchronized` blocks to ensure data integrity, resulting in zero errors.
 
 ### Prerequisites
   * **Java Development Kit (JDK):** Version 17 or higher.
-  * **JavaFX SDK:** Ensure your IDE (IntelliJ/Eclipse) is configured to load JavaFX modules.
+  * **JavaFX SDK:** Ensure your IDE ( IntelliJ/Eclipse ) is configured to load JavaFX modules.
 
 ### Installation
 1.  Clone the repository:
