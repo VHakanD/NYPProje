@@ -19,7 +19,7 @@ The aim of this project is to demonstrate the principles of object-oriented prog
 
 The system has been built without a traditional database as required by the rules; instead, it uses a special File I/O architecture to make data persistent across sessions using .txt files.
 
-##Features and Functionality
+## Features and Functionality ##
 We explained what our project does, now we will tell you how it works:
 ### 1-Admin and Passenger Panels
 * **Admin Panel:**
