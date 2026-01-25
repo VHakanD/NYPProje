@@ -2,7 +2,9 @@
 
 ## Badges
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)# Hazerfen Airlines Reservation System
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+
+# Hazerfen Airlines Reservation System
 
 **Course:** BLM2012 - Object Oriented Programming (Fall 2025-2026)  
 **Language:** Java (JavaFX)  
