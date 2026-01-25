@@ -21,6 +21,7 @@ The system has been built without a traditional database as required by the rule
 
 ## Features and Functionality ##
 We explained what our project does, now we will tell you how it works:
+In this project, every operation is seperated to it's category:
 ### 1-Admin and Passenger Panels
 * **Admin Panel:**
   * **Dashboard:** A central hub for managing Flights, Staff, and System Reports.
@@ -31,7 +32,7 @@ We explained what our project does, now we will tell you how it works:
 * **Passenger Panel:**
   * **Flight Search:** Real-time filtering by city, date, or flight number.
   * **Visual Seat Selection:** Simple but standart seat map distinguishing Economy, Business, and Occupied seats.
-  * **Reservation Management:** View active tickets, cancel reservations (valid until 24h before flight), and **change seats** (paying the price difference if upgrading, but if you downgrade there is no refund by choice :] ).
+  * **Reservation Management:** Add reservation(Under the passenger's name, for themselves and others), view active tickets, cancel reservations (valid until 24h before flight), and **change seats** (paying the price difference if upgrading, but if you downgrade there is no refund by choice :] ).
 
 ### 2. Pricing Engine
 Ticket prices are calculated dynamically based on:
