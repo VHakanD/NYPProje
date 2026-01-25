@@ -31,7 +31,7 @@ We explained what our project does, now we will tell you how it works:
 * **Passenger Panel:**
   * **Flight Search:** Real-time filtering by city, date, or flight number.
   * **Visual Seat Selection:** Simple but standart seat map distinguishing Economy, Business, and Occupied seats.
-  * **Reservation Management:** View active tickets, cancel reservations (valid until 24h before flight), and **change seats** (paying the price difference if upgrading, but if you dowmgrade there is no refund by choice :] ).
+  * **Reservation Management:** View active tickets, cancel reservations (valid until 24h before flight), and **change seats** (paying the price difference if upgrading, but if you downgrade there is no refund by choice :] ).
 
 ### 2. Pricing Engine
 Ticket prices are calculated dynamically based on:
