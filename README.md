@@ -8,8 +8,8 @@
 **Language:** Java (JavaFX)  
 **Architecture:** File-Based Data Storage
 **Authors:** By Zeynep & Hakan
-- [@Hakan](https://www.github.com/VHakanD)
-- [@Zeynep](https://github.com/zeyneppkts)
+  - [@Hakan](https://www.github.com/VHakanD)
+  - [@Zeynep](https://github.com/zeyneppkts)
 
 
 ## Project Overview
