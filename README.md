@@ -56,7 +56,7 @@ A dedicated simulation screen demonstrates thread safety:
 2.  Open the project in your IDE.
 3.  **Run:** Execute the `gui.MainApp` class to launch the application.
 
-## 🔐 Default Credentials
+## Default Credentials
 For testing purposes, the system is pre-loaded with the following Admin accounts:
 
 | Username | Password | Role |
