@@ -1,5 +1,5 @@
 VHakanD,1234,Hakan Vehbi,Demir,05442224523,Admin
-zeyneppkts,5678,Zeynep,Pektas,0551978266,Admin
+zeyneppkts,5678,Zeynep,Pektas,05548794522,Admin
 ahmetyilmaz,1111,Ahmet,Yilmaz,05553334455,Personel
 aysedmr,2222,Ayse,Demir,05554445566,Personel
 mehmetozt,3333,Mehmet,Ozturk,05556667788,Pilot
