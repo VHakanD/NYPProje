@@ -1,5 +1,5 @@
 <div align="center">
-![Logo](https://github.com/VHakanD/NYPProje/blob/main/HAZERFEN%20AIRLINES.png)
+  <img src="https://github.com/VHakanD/NYPProje/blob/main/HAZERFEN%20AIRLINES.png" alt="Logo">
 </div>
 ## Badges
 
